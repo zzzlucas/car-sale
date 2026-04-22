@@ -1,66 +1,87 @@
 <template>
-  <section class="bg-primary px-margin-page pb-10 pt-stack-lg text-white">
-    <div class="flex items-center gap-4">
-      <div class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/40 bg-white/15 text-2xl">李</div>
-      <div class="flex-1">
-        <h1 class="text-2xl font-semibold">游客模式</h1>
-        <p class="mt-1 text-sm text-white/75">当前先用示例订单跑通流程，后续可切换手机号登录。</p>
-      </div>
-    </div>
-  </section>
+  <main class="min-h-screen bg-background pb-24 pt-safe">
+    <section class="relative overflow-hidden bg-primary px-margin-page pb-10 pt-stack-lg text-on-primary">
+      <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+      <div class="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-white/5 blur-xl" />
 
-  <section class="-mt-6 space-y-stack-lg px-margin-page">
-    <div class="grid grid-cols-3 gap-3 rounded-3xl border border-surface-variant bg-white p-inset-card shadow-soft">
-      <div class="text-center">
-        <p class="text-3xl font-semibold text-primary">{{ orders.length }}</p>
-        <p class="mt-1 text-xs text-on-surface-variant">我的预约</p>
+      <div class="relative z-10 flex items-center gap-4">
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-primary-fixed bg-surface-container-highest">
+          <span class="material-symbols-outlined icon-fill text-4xl text-on-surface-variant">person</span>
+        </div>
+        <div class="flex-1">
+          <h1 class="text-headline-md font-semibold">李先生</h1>
+          <p class="mt-1 text-body-md text-on-primary-container">138****5678</p>
+        </div>
+        <button class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-colors active:bg-white/20">
+          <span class="material-symbols-outlined text-xl">settings</span>
+        </button>
       </div>
-      <div class="text-center">
-        <p class="text-3xl font-semibold text-primary">{{ activeCount }}</p>
-        <p class="mt-1 text-xs text-on-surface-variant">处理中</p>
-      </div>
-      <div class="text-center">
-        <p class="text-3xl font-semibold text-primary">{{ completedCount }}</p>
-        <p class="mt-1 text-xs text-on-surface-variant">已完成</p>
-      </div>
-    </div>
+    </section>
 
-    <section class="space-y-3">
-      <h2 class="text-lg font-semibold text-on-surface">我的预约</h2>
-      <RouterLink
-        v-for="item in orders"
-        :key="item.id"
-        :to="`/customer/progress/${item.id}`"
-        class="block rounded-3xl border border-surface-variant bg-white p-inset-card shadow-soft"
-      >
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{{ item.orderNo }}</p>
-            <h3 class="mt-2 text-lg font-semibold text-on-surface">{{ item.brandModel }}</h3>
-            <p class="mt-1 text-sm text-on-surface-variant">{{ item.plateNumber }}</p>
+    <div class="-mt-6 px-margin-page">
+      <section class="rounded-xl border border-surface-variant bg-surface-container-lowest p-inset-card shadow-soft">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 text-center">
+            <p class="text-display-lg text-primary">{{ orders.length }}</p>
+            <p class="mt-1 text-label-md text-on-surface-variant">我的预约</p>
           </div>
-          <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-            {{ item.currentStatusLabel }}
-          </span>
+          <div class="mx-2 h-10 w-px bg-surface-variant" />
+          <div class="flex-1 text-center">
+            <p class="text-display-lg text-primary">{{ activeCount }}</p>
+            <p class="mt-1 text-label-md text-on-surface-variant">处理中</p>
+          </div>
+          <div class="mx-2 h-10 w-px bg-surface-variant" />
+          <div class="flex-1 text-center">
+            <p class="text-display-lg text-primary">{{ completedCount }}</p>
+            <p class="mt-1 text-label-md text-on-surface-variant">已完成</p>
+          </div>
         </div>
-      </RouterLink>
+      </section>
+    </div>
+
+    <section class="mt-stack-lg flex-1 px-margin-page">
+      <h2 class="mb-stack-sm text-headline-sm text-on-surface">服务中心</h2>
+      <div class="overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest shadow-subtle">
+        <RouterLink
+          v-for="(item, index) in serviceItems"
+          :key="item.to"
+          :to="item.to"
+          class="group relative flex items-center px-inset-card py-4 transition-colors active:bg-surface-container-low"
+        >
+          <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary-container/10">
+            <span class="material-symbols-outlined text-lg text-primary" :class="item.fill ? 'icon-fill' : ''">{{ item.icon }}</span>
+          </div>
+          <span class="flex-1 text-body-lg text-on-surface">{{ item.label }}</span>
+          <span class="material-symbols-outlined text-sm text-on-surface-variant transition-transform group-active:translate-x-1">chevron_right</span>
+          <div v-if="index < serviceItems.length - 1" class="absolute bottom-0 left-14 right-4 h-px bg-surface-variant" />
+        </RouterLink>
+      </div>
+
+      <h2 class="mb-stack-sm mt-stack-lg text-headline-sm text-on-surface">帮助与支持</h2>
+      <div class="overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest shadow-subtle">
+        <RouterLink
+          v-for="(item, index) in supportItems"
+          :key="item.to"
+          :to="item.to"
+          class="group relative flex items-center px-inset-card py-4 transition-colors active:bg-surface-container-low"
+        >
+          <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-surface-container">
+            <span class="material-symbols-outlined text-lg text-on-surface-variant">{{ item.icon }}</span>
+          </div>
+          <span class="flex-1 text-body-lg text-on-surface">{{ item.label }}</span>
+          <span class="material-symbols-outlined text-sm text-on-surface-variant transition-transform group-active:translate-x-1">chevron_right</span>
+          <div v-if="index < supportItems.length - 1" class="absolute bottom-0 left-14 right-4 h-px bg-surface-variant" />
+        </RouterLink>
+      </div>
     </section>
 
-    <section class="overflow-hidden rounded-3xl border border-surface-variant bg-white shadow-soft">
-      <RouterLink
-        v-for="entry in entries"
-        :key="entry.to"
-        :to="entry.to"
-        class="flex items-center justify-between border-b border-surface-variant px-inset-card py-4 last:border-b-0"
-      >
-        <div>
-          <p class="font-medium text-on-surface">{{ entry.label }}</p>
-          <p class="mt-1 text-sm text-on-surface-variant">{{ entry.desc }}</p>
-        </div>
-        <span class="text-on-surface-variant">›</span>
-      </RouterLink>
-    </section>
-  </section>
+    <div class="mt-auto flex items-center justify-center pb-8 pt-stack-lg">
+      <div class="flex items-center gap-1.5 opacity-60">
+        <span class="material-symbols-outlined icon-fill text-sm text-primary">shield</span>
+        <span class="text-label-sm uppercase tracking-widest text-on-surface-variant">国家认证报废机动车回收拆解企业</span>
+      </div>
+    </div>
+  </main>
 
   <MobileBottomNav />
 </template>
@@ -78,10 +99,15 @@ const orders = ref<ScrapOrderSummary[]>([]);
 const activeCount = computed(() => orders.value.filter((item) => item.currentStatus !== "completed").length);
 const completedCount = computed(() => orders.value.filter((item) => item.currentStatus === "completed").length);
 
-const entries = [
-  { to: "/customer/guide", label: "报废流程说明", desc: "先了解所需材料与办理步骤" },
-  { to: "/customer/support", label: "联系客服", desc: "估价、拖车与证明办理都可咨询" },
-  { to: "/customer/progress/order-demo-001", label: "查看示例进度", desc: "快速体验订单时间线" },
+const serviceItems = [
+  { to: "/customer/me", label: "我的预约", icon: "calendar_month", fill: true },
+  { to: "/customer/progress/order-demo-001", label: "报废进度", icon: "pending_actions", fill: true },
+  { to: "/customer/support", label: "地址管理", icon: "location_on", fill: true },
+];
+
+const supportItems = [
+  { to: "/customer/guide", label: "常见问题", icon: "help" },
+  { to: "/customer/support", label: "联系客服", icon: "support_agent" },
 ];
 
 onMounted(async () => {
