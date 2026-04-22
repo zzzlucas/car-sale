@@ -1,0 +1,14 @@
+{
+  "name": "car-platform",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:mobile": "pnpm --filter @car/mobile dev",
+    "build:mobile": "pnpm --filter @car/mobile build",
+    "typecheck:mobile": "pnpm --filter @car/mobile typecheck",
+    "dev:backend": "pnpm --filter @car/backend dev",
+    "build:backend": "pnpm --filter @car/backend build",
+    "typecheck:backend": "pnpm --filter @car/backend typecheck",
+    "typecheck:shared-types": "pnpm --filter @car/shared-types typecheck"
+  }
+}
