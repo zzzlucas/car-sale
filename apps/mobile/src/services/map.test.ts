@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { searchAddressSuggestions } from "./map";
+import { reverseGeocodeLocation, searchAddressSuggestions } from "./map";
 
 describe("map service", () => {
   afterEach(() => {
@@ -44,5 +44,27 @@ describe("map service", () => {
       name: "科技园",
       longitude: 113.9501,
     });
+  });
+
+  it("calls the backend reverse geocode endpoint for current location", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: {
+          formattedAddress: "广东省广州市天河区天园街道天河公园",
+          latitude: 23.128003,
+          longitude: 113.366739,
+        },
+      }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await reverseGeocodeLocation(113.366739, 23.128003);
+
+    expect(String(fetchMock.mock.calls[0][0])).toContain(
+      "/app/map/regeo?longitude=113.366739&latitude=23.128003",
+    );
+    expect(result?.formattedAddress).toContain("天河公园");
   });
 });

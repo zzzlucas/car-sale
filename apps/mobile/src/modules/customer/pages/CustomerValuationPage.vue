@@ -251,7 +251,7 @@
               <div class="flex items-center justify-between gap-3">
                 <div>
                   <p class="text-body-md font-semibold text-on-surface">搜索地址建议</p>
-                  <p class="mt-1 text-label-md text-on-surface-variant">命中后自动回填经纬度</p>
+                  <p class="mt-1 text-label-md text-on-surface-variant">命中后自动回填位置</p>
                 </div>
                 <button
                   type="button"
@@ -301,7 +301,7 @@
                 class="flex h-12 items-center justify-center rounded-xl border border-surface-variant px-4 text-label-md text-on-surface-variant"
                 @click="clearLocation"
               >
-                清空坐标
+                清空位置
               </button>
             </div>
 
@@ -310,16 +310,11 @@
             >
               <p class="font-medium text-on-surface">地图方案先走轻量闭环</p>
               <p class="mt-1">
-                当前版本优先走高德地址搜索与坐标回填，后续再根据效果补完整地图选点。
+                当前版本优先走高德地址搜索与位置回填，后续再根据效果补完整地图选点。
               </p>
-              <div v-if="form.pickupLatitude && form.pickupLongitude" class="mt-3 flex flex-wrap gap-2">
-                <span class="rounded-full bg-white px-3 py-1 text-primary">
-                  纬度 {{ form.pickupLatitude }}
-                </span>
-                <span class="rounded-full bg-white px-3 py-1 text-primary">
-                  经度 {{ form.pickupLongitude }}
-                </span>
-              </div>
+              <p v-if="form.pickupLatitude && form.pickupLongitude" class="mt-3">
+                已记录当前位置，系统会据此安排上门服务。
+              </p>
             </div>
           </section>
 
@@ -419,7 +414,7 @@ import { useRouter } from "vue-router";
 
 import type { MapAddressSuggestion, ValuationOrderPayload } from "@car/shared-types";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
-import { searchAddressSuggestions } from "@/services/map";
+import { reverseGeocodeLocation, searchAddressSuggestions } from "@/services/map";
 import { submitValuationOrder } from "@/services/orders";
 import { uploadVehiclePhoto } from "@/services/upload";
 import { createInitialValuationForm, validateValuationForm } from "./customerValuationForm";
@@ -525,7 +520,7 @@ function applyAddressSuggestion(item: MapAddressSuggestion) {
   form.pickupLatitude = item.latitude;
   form.pickupLongitude = item.longitude;
   addressSuggestions.value = [];
-  message.value = "已回填地址与坐标，可继续补充信息或直接提交。";
+  message.value = "已回填地址与当前位置，可继续补充信息或直接提交。";
 }
 
 function removePhoto(photoId: string) {
@@ -589,9 +584,25 @@ async function fillCurrentLocation() {
       position => {
         form.pickupLatitude = Number(position.coords.latitude.toFixed(6));
         form.pickupLongitude = Number(position.coords.longitude.toFixed(6));
-        message.value = "已记录当前位置坐标，请补充详细地址。";
-        locationLoading.value = false;
-        resolve();
+        void (async () => {
+          try {
+            const result = await reverseGeocodeLocation(form.pickupLongitude!, form.pickupLatitude!);
+            if (result?.formattedAddress) {
+              form.pickupAddress = result.formattedAddress;
+              message.value = "已回填当前位置的中文地址，请补充门牌号等细节。";
+            } else {
+              message.value = "已获取当前位置，请补充中文地址或继续搜索地址建议。";
+            }
+          } catch (error) {
+            message.value =
+              error instanceof Error
+                ? `已获取当前位置，但中文地址解析失败：${error.message}`
+                : "已获取当前位置，但中文地址解析失败，请手动补充地址。";
+          } finally {
+            locationLoading.value = false;
+            resolve();
+          }
+        })();
       },
       () => {
         message.value = "定位失败，请手动填写地址。";
@@ -609,7 +620,7 @@ async function fillCurrentLocation() {
 function clearLocation() {
   form.pickupLatitude = null;
   form.pickupLongitude = null;
-  message.value = "已清空定位坐标。";
+  message.value = "已清空当前位置。";
 }
 
 async function handleSubmit() {

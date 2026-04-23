@@ -26,6 +26,21 @@ describe("CustomerValuationPage form coverage", () => {
   it("includes address search affordances for the amap key-pool flow", () => {
     expect(source).toContain("搜索地址建议");
     expect(source).toContain("推荐地址");
-    expect(source).toContain("命中后自动回填经纬度");
+    expect(source).toContain("命中后自动回填位置");
+  });
+
+  it("does not expose raw latitude and longitude values directly to end users anymore", () => {
+    expect(source).toContain("已记录当前位置，系统会据此安排上门服务。");
+    expect(source).not.toContain("纬度 {{ form.pickupLatitude }}");
+    expect(source).not.toContain("经度 {{ form.pickupLongitude }}");
+  });
+
+  it("explains that current location should be resolved to a chinese address first", () => {
+    expect(source).toContain("已获取当前位置，请补充中文地址或继续搜索地址建议。");
+  });
+
+  it("keeps coordinate wording away from customer-facing copy", () => {
+    expect(source).not.toContain("坐标");
+    expect(source).not.toContain("经纬度");
   });
 });

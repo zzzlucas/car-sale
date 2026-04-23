@@ -15,4 +15,13 @@ export class AppMapController extends BaseController {
   async addressSuggestions(@Query('keywords') keywords: string) {
     return this.ok(await this.appMapService.searchAddressSuggestions(keywords));
   }
+
+  @CoolTag(TagTypes.IGNORE_TOKEN)
+  @Get('/map/regeo', { summary: '根据经纬度解析中文地址' })
+  async reverseGeocode(
+    @Query('longitude') longitude: number,
+    @Query('latitude') latitude: number
+  ) {
+    return this.ok(await this.appMapService.reverseGeocode(Number(longitude), Number(latitude)));
+  }
 }

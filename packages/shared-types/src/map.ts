@@ -5,3 +5,9 @@ export interface MapAddressSuggestion {
   latitude: number;
   longitude: number;
 }
+
+export interface MapReverseGeocodeResult {
+  formattedAddress: string;
+  latitude: number;
+  longitude: number;
+}

@@ -1,4 +1,9 @@
 import { AppMapService, resolveAmapWebServiceConfig } from './map';
+import axios from 'axios';
+
+jest.mock('axios');
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 function createService(
   keys = 'key-a,key-b',
@@ -42,6 +47,15 @@ describe('resolveAmapWebServiceConfig', () => {
     expect(config.enabled).toBe(true);
     expect(config.keys).toEqual(['key-a', 'key-b', 'key-c']);
     expect(config.timeoutMs).toBe(3200);
+  });
+
+  it('supports the proxy base url for seller-provided amap chains', () => {
+    const config = resolveAmapWebServiceConfig({
+      AMAP_WEB_SERVICE_KEYS: 'key-a',
+      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+    } as NodeJS.ProcessEnv);
+
+    expect(config.proxyBaseUrl).toBe('https://amap.bangban.cc/_AMapService');
   });
 });
 
@@ -90,5 +104,75 @@ describe('AppMapService', () => {
       }),
     ]);
     expect(result[0].formattedAddress).toContain('科技南十二路');
+  });
+
+  it('returns a clear mismatch message when the key cannot be used for web service requests', async () => {
+    const { service } = createService('key-a', [
+      {
+        status: '0',
+        info: 'USERKEY_PLAT_NOMATCH',
+        infocode: '10009',
+      },
+    ]);
+
+    await expect(service.searchAddressSuggestions('科技园')).rejects.toThrow(
+      '当前高德 Key 不支持后端 Web 服务调用'
+    );
+  });
+
+  it('resolves a chinese address from reverse geocode output', async () => {
+    const { service } = createService('key-a', [
+      {
+        status: '1',
+        info: 'OK',
+        infocode: '10000',
+        regeocode: {
+          formatted_address: '广东省广州市天河区天园街道天河公园',
+        },
+      },
+    ]);
+
+    await expect(service.reverseGeocode(113.366739, 23.128003)).resolves.toEqual({
+      formattedAddress: '广东省广州市天河区天园街道天河公园',
+      latitude: 23.128003,
+      longitude: 113.366739,
+    });
+  });
+
+  it('builds the seller proxy request shape when a proxy base url is configured', async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: 'jsonp_test({"status":"1","info":"OK","infocode":"10000","pois":[]})',
+    } as any);
+
+    const service = new AppMapService() as any;
+    service.env = {
+      AMAP_WEB_SERVICE_KEYS: 'key-a',
+      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+      AMAP_WEB_SERVICE_PROXY_APPNAME: 'https%3A%2F%2Famap.bangban.cc%2Fdt.html',
+    } as NodeJS.ProcessEnv;
+
+    await service.requestAmap(
+      '/v3/place/text',
+      {
+        key: 'key-a',
+        keywords: '科技园',
+        offset: '5',
+      },
+      2500
+    );
+
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    const [url, options] = mockedAxios.get.mock.calls[0];
+    expect(url).toBe('https://amap.bangban.cc/_AMapService/v3/place/text');
+    expect(options?.params).toMatchObject({
+      platform: 'JS',
+      s: 'rsv3',
+      key: 'key-a',
+      keywords: '科技园',
+      offset: '5',
+    });
+    expect(options?.headers).toMatchObject({
+      'X-Requested-With': 'com.bangban.cc',
+    });
   });
 });

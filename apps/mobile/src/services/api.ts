@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || "http://127.0.0.1:8001";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || "").replace(/\/+$/, "");
 
 interface ApiEnvelope<T> {
   code?: number;
@@ -40,6 +40,15 @@ async function parseResponse<T>(response: Response): Promise<T> {
   }
 
   const payload = (await response.json()) as ApiEnvelope<T> | T;
+
+  if (payload && typeof payload === "object" && "code" in payload) {
+    const envelope = payload as ApiEnvelope<T>;
+    if (typeof envelope.code === "number" && envelope.code !== 1000) {
+      throw new Error(envelope.message || `Request failed: ${envelope.code}`);
+    }
+
+    return envelope.data as T;
+  }
 
   if (payload && typeof payload === "object" && "data" in payload) {
     return (payload as ApiEnvelope<T>).data as T;
