@@ -16,6 +16,7 @@
 - 想看客户主链路：`product/customer-journey.md`
 - 想看后台与移动运营分工：`product/admin-roles-and-workflows.md`
 - 想看当前需求决策：`requirements/project.md`
+- 想看暂不立刻推进的小需求、优化想法和技术债候选：`backlog.md`
 - 想看开发约定：`development/workflow.md`
 - 想看接口口径：`development/api-conventions.md`
 - 想看 `cloud2026` 与远端 MySQL 约定：`deployment/cloud2026.md`
@@ -32,6 +33,7 @@
 - `testing/`：记录当前阶段的最小验证基线
 - `deployment/`：维护 `car` 自己的环境、对象存储、部署与回滚入口
 - `superpowers/`：设计与实现计划文档
+- `backlog.md`：记录暂不立刻推进的小需求、优化想法和技术债候选
 
 ## 当前阅读提醒
 - 当前真实落地基线已经包含 `apps/mobile`、`apps/admin-web`、`apps/backend`、`packages/shared-types`。
