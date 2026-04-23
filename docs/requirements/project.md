@@ -6,6 +6,16 @@
 
 ## 当前活跃需求
 
+### [REQ-PRJ-20260424-14] `car` 图片抠图批处理默认收口为 `openclaw + CPU-only rembg + Tailscale`
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `car` 项目的图片抠图批处理默认落在 `openclaw`，采用用户级 Python 安装的 CPU-only `rembg`
+  - 默认访问方式走 `Tailscale` 虚拟局域网，不新增裸公网入口，也不把这条链路切到 DDNS / FRP
+  - 运行目录统一为 `/mnt/ssd_data/car-tools/rembg`，默认通过 `http://<openclaw-tailscale-ip>:17000/api/remove` 调用
+  - 默认模型先使用 `u2net`；若后续要试其他模型，优先走“本机下载模型再 `scp` 到远端”的方式，避免在 `openclaw` 上长时间卡 GitHub 下载
+- 原因：当前项目确实需要一条可复用的抠图批处理能力，但这条链路又不值得单独开公网、上 GPU 或引入更重的部署编排。把能力收口到 `openclaw + Tailscale + CPU-only rembg` 后，投入最小、回滚简单，也更符合当前启动期“先把素材处理闭环跑起来”的节奏。
+
 ### [REQ-PRJ-20260423-12] `car` 后端正式运行方式收口为 `cloud2026 + pm2 + env-driven prod config`
 - 状态：`accepted`
 - 优先级：`P1`
