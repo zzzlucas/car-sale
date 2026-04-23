@@ -3,11 +3,13 @@
 当前仓库还在启动期，这里的文档主要回答三件事：
 
 - 这个项目准备怎么建
-- 当前已经落地的移动端、后端和共享层各自负责什么
+- 当前已经落地的移动端、后台前端、后端和共享层各自负责什么
 - 后续协作时哪些约定要保持一致
 
 ## 推荐阅读顺序
 - 想先看项目协作边界：`../AGENTS.md`
+- 想看工作区共享基座怎么与项目协作：`E:\web_work_-1\_workspace-base\docs\how-projects-use-workspace-base.md`
+- 想看共享运维事实和共享脚本入口：`E:\web_work_-1\_workspace-base\ops\README.md`
 - 想看整体结构：`architecture/overview.md`
 - 想看目录骨架：`architecture/monorepo-layout.md`
 - 想看前端路线：`architecture/frontend-strategy.md`
@@ -29,5 +31,6 @@
 - `superpowers/`：设计与实现计划文档
 
 ## 当前阅读提醒
-- 当前中央文档以“现状 + 未来预留”来描述仓库：现状重点是 `apps/mobile`、`apps/backend`、`packages/shared-types`，未来再补 `apps/admin-web` 等扩展。
-- 当前阶段默认先服务 `apps/mobile` 的 H5 开发与联调，再根据业务稳定度决定是否把客户侧迁到 `uni-app`。
+- 当前真实落地基线已经包含 `apps/mobile`、`apps/admin-web`、`apps/backend`、`packages/shared-types`。
+- 当前阶段默认优先保证 `apps/mobile` 与 `apps/admin-web` 都能直接联到同一个 backend 闭环，再根据业务稳定度决定是否把客户侧迁到 `uni-app`。
+- 工作区级共享运维、共享模板和跨项目协作边界已经收口到 `E:\web_work_-1\_workspace-base\`，本仓 docs 继续只维护 `car` 自己的业务、开发和部署文档。

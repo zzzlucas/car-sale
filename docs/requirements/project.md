@@ -6,11 +6,11 @@
 
 ## 当前活跃需求
 
-### [REQ-PRJ-20260422-01] 当前先以 `mobile + backend + shared-types` 收口的 `monorepo`
+### [REQ-PRJ-20260422-01] 当前以 `mobile + admin-web + backend + shared-types` 作为真实落地基线
 - 状态：`accepted`
 - 优先级：`P0`
-- 决策：当前仓库先以 `apps/mobile`、`apps/backend`、`packages/shared-types` 作为真实落地基线；`apps/admin-web`、`packages/api-sdk`、`packages/shared-utils` 保留为后续扩展，而不是一开始就补齐空壳
-- 原因：当前最需要的是移动端客户主链路、移动执行补充流程和后端协议同步跑通；先把真实运行骨架收口，会比维护多套未落地目录更省认知负担
+- 决策：当前仓库以 `apps/mobile`、`apps/admin-web`、`apps/backend`、`packages/shared-types` 作为真实落地基线；`packages/api-sdk`、`packages/shared-utils` 继续保留为后续扩展
+- 原因：客户 H5 主链路与后台订单处理链路都已经进入真实联调阶段，`admin-web` 不再只是预留目录，而是承担 PC 侧登录、订单查询、详情查看和状态流转的实际入口
 
 ### [REQ-PRJ-20260422-02] `apps/mobile` 客户侧先 H5，后评估 `uni-app`
 - 状态：`accepted`
@@ -66,6 +66,25 @@
   - 工作区存在外部改动时，默认只精确暂存并提交本轮可归因文件或 hunk，不使用会放大范围的提交方式
   - 仅在高风险链路、提交范围无法清晰归因、或外部改动与本轮变更严重交织时，才先确认提交策略
 - 原因：这样能让两个项目的协作体验保持一致，减少代理在不同仓库之间切换时的判断分叉，也能降低把无关脏改动误混进提交的风险
+
+### [REQ-PRJ-20260423-07] `apps/admin-web` 先落地轻量后台壳子，不额外引入完整后台框架迁移
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `apps/admin-web` 当前采用轻量 `Vue 3 + Vite + TypeScript` 应用，直接对接 `apps/backend` 现有 cool-admin 登录、权限和订单接口
+  - 首期只承载后台登录、业务菜单、报废预约单列表、详情查看和状态流转
+  - 暂不在本轮扩展系统管理、角色管理、配置中心等额外后台模块
+- 原因：用户当前最需要的是先看到后台和 H5 的真实闭环，而不是再引入一套更重的后台脚手架改造成本；先让 PC 处理台可用，再按实际业务扩页更稳妥
+
+### [REQ-PRJ-20260423-08] `car` 的根 `AGENTS.md` 显式接入 `_workspace-base`
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `car` 的公共 AGENTS 基线来源统一指向 `E:\web_work_-1\_workspace-base\agents\AGENTS-baseline.md`
+  - 根 `AGENTS.md` 继续只维护 `car` 的项目专属差异、当前阶段边界和必要补充，不再暗含自己是一份独立完整模板
+  - 涉及共享服务器事实、共享脚本、共享网络边界与跨项目运维规则时，优先参考 `E:\web_work_-1\_workspace-base\ops`
+  - 项目仓库仍负责 `car` 自己的业务代码、部署记录、回滚线索与项目专属文档
+- 原因：工作区已经把共享运维和共享模板收口到 `_workspace-base`，如果项目根 `AGENTS.md` 不显式接入，AI 在 `car` 里仍然容易只围着本仓自转，不知道什么时候该去看共享基座。显式声明后更有利于后续部署、COS、云资源和协作规则复用，也能减少项目边界跑偏。
 
 ## 当前核心数据对象
 

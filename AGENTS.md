@@ -12,6 +12,12 @@
 - Docs entry: `docs/README.md`
 - Package manager target: `pnpm`
 
+## Workspace Base Integration
+- 公共 AGENTS 基线来源：`E:\web_work_-1\_workspace-base\agents\AGENTS-baseline.md`
+- 本文件只维护 `car` 的项目专属差异、当前阶段边界和对公共基线的必要补充，不再把自己当成一份脱离工作区共享层的独立通用模板。
+- 需要共享服务器事实、共享脚本、共享网络边界或跨项目运维规则时，优先看 `E:\web_work_-1\_workspace-base\ops\README.md`。
+- 需要判断共享层和项目层怎么分工时，优先看 `E:\web_work_-1\_workspace-base\docs\how-projects-use-workspace-base.md`。
+
 ## Communication
 - 默认使用中文。
 - 先给结论，再补关键原因。
