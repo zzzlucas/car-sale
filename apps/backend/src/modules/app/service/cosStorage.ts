@@ -13,6 +13,25 @@ import COS = require('cos-nodejs-sdk-v5');
 const COS_POINTER_PREFIX = 'cos://';
 const DEFAULT_UPLOAD_PREFIX = 'car-platform-dev/';
 const DEFAULT_SIGN_EXPIRES = 900;
+const DEFAULT_IMAGE_EXTENSION = '.jpg';
+const COS_BUCKET_APP_ID_SUFFIX_PATTERN = /-\d{5,}$/;
+const IMAGE_EXTENSION_CONTENT_TYPE_MAP: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.heic': 'image/heic',
+  '.heif': 'image/heif',
+};
+const IMAGE_CONTENT_TYPE_EXTENSION_MAP: Record<string, string> = {
+  'image/jpeg': DEFAULT_IMAGE_EXTENSION,
+  'image/jpg': DEFAULT_IMAGE_EXTENSION,
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/heic': '.heic',
+  'image/heif': '.heif',
+};
+const SUPPORTED_IMAGE_FORMAT_LABEL = 'jpg、jpeg、png、webp、heic、heif';
 
 interface ResolvedCosStorageConfig {
   enabled: boolean;
@@ -52,26 +71,81 @@ function sanitizePathSegment(value: string, fallback: string) {
 function normalizeExtension(fileName: string) {
   const extension = path.extname(path.basename(fileName || '')).toLowerCase();
   if (!extension || extension.length > 10) {
-    return '.jpg';
+    return '';
   }
   return extension;
 }
 
-function buildValuationPhotoKey(uploadPrefix: string, visitorKey: string, fileName: string) {
+function normalizeBucketName(bucket: string, appId?: string) {
+  if (!bucket) {
+    return '';
+  }
+
+  if (COS_BUCKET_APP_ID_SUFFIX_PATTERN.test(bucket)) {
+    return bucket;
+  }
+
+  return appId ? `${bucket}-${appId}` : bucket;
+}
+
+function normalizeImageContentType(contentType?: string) {
+  const normalized = (contentType || '').split(';')[0].trim().toLowerCase();
+  if (!normalized) {
+    return '';
+  }
+
+  return normalized === 'image/jpg' ? 'image/jpeg' : normalized;
+}
+
+function resolveAllowedImageUpload(fileName: string, contentType?: string) {
+  const extension = normalizeExtension(fileName);
+  const normalizedContentType = normalizeImageContentType(contentType);
+  const hasExplicitExtension = Boolean(extension);
+
+  if (hasExplicitExtension && !IMAGE_EXTENSION_CONTENT_TYPE_MAP[extension]) {
+    throw new CoolCommException(`仅支持上传图片，当前仅允许 ${SUPPORTED_IMAGE_FORMAT_LABEL} 格式`);
+  }
+
+  if (normalizedContentType && !IMAGE_CONTENT_TYPE_EXTENSION_MAP[normalizedContentType]) {
+    throw new CoolCommException(`仅支持上传图片，当前仅允许 ${SUPPORTED_IMAGE_FORMAT_LABEL} 格式`);
+  }
+
+  if (!hasExplicitExtension && !normalizedContentType) {
+    throw new CoolCommException(`仅支持上传图片，当前仅允许 ${SUPPORTED_IMAGE_FORMAT_LABEL} 格式`);
+  }
+
+  const resolvedExtension =
+    extension || IMAGE_CONTENT_TYPE_EXTENSION_MAP[normalizedContentType] || DEFAULT_IMAGE_EXTENSION;
+  const resolvedContentType =
+    normalizedContentType || IMAGE_EXTENSION_CONTENT_TYPE_MAP[resolvedExtension];
+
+  if (normalizedContentType) {
+    const expectedContentType = IMAGE_EXTENSION_CONTENT_TYPE_MAP[resolvedExtension];
+    if (expectedContentType && normalizedContentType !== expectedContentType) {
+      throw new CoolCommException('图片类型与文件后缀不匹配，请重新选择图片后再试');
+    }
+  }
+
+  return {
+    extension: resolvedExtension,
+    contentType: resolvedContentType,
+  };
+}
+
+function buildValuationPhotoKey(uploadPrefix: string, visitorKey: string, extension: string) {
   const now = new Date();
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const safeVisitorKey = sanitizePathSegment(visitorKey, 'visitor');
-  const extension = normalizeExtension(fileName);
 
   return normalizeCosKey(
     `${uploadPrefix}visitors/${safeVisitorKey}/valuation-orders/${year}/${month}/${uuid()}${extension}`
   );
 }
 
-function createSignedHeaders(contentType?: string) {
+function createSignedHeaders(contentType: string) {
   return {
-    'Content-Type': contentType?.trim() || 'application/octet-stream',
+    'Content-Type': contentType,
   };
 }
 
@@ -79,13 +153,16 @@ export function resolveCosStorageConfig(
   env: NodeJS.ProcessEnv = process.env
 ): ResolvedCosStorageConfig {
   const region = env.COS_REGION?.trim() || '';
-  const bucket = env.COS_BUCKET?.trim() || '';
+  const rawBucket = env.COS_BUCKET?.trim() || '';
+  const appId = env.COS_APP_ID?.trim() || '';
+  const bucket = normalizeBucketName(rawBucket, appId);
   const secretId = env.COS_SECRET_ID?.trim() || '';
   const secretKey = env.COS_SECRET_KEY?.trim() || '';
 
   const missingKeys = [
     !region ? 'COS_REGION' : null,
-    !bucket ? 'COS_BUCKET' : null,
+    !rawBucket ? 'COS_BUCKET' : null,
+    rawBucket && !COS_BUCKET_APP_ID_SUFFIX_PATTERN.test(rawBucket) && !appId ? 'COS_APP_ID' : null,
     !secretId ? 'COS_SECRET_ID' : null,
     !secretKey ? 'COS_SECRET_KEY' : null,
   ].filter(Boolean) as string[];
@@ -130,8 +207,9 @@ export class AppCosStorageService {
     }
 
     const config = this.getRequiredConfig();
-    const key = buildValuationPhotoKey(config.uploadPrefix, visitorKey, fileName);
-    const headers = createSignedHeaders(contentType);
+    const imageUpload = resolveAllowedImageUpload(fileName, contentType);
+    const key = buildValuationPhotoKey(config.uploadPrefix, visitorKey, imageUpload.extension);
+    const headers = createSignedHeaders(imageUpload.contentType);
 
     return {
       uploadUrl: this.getClient(config).getObjectUrl({

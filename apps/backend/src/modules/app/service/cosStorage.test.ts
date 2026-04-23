@@ -18,6 +18,20 @@ describe('AppCosStorageService', () => {
     expect(config.uploadPrefix).toBe('car-platform-dev/');
   });
 
+  it('supports documented bucket + appId configuration when COS_BUCKET omits the appId suffix', () => {
+    const config = resolveCosStorageConfig({
+      COS_REGION: 'ap-shanghai',
+      COS_BUCKET: 'car-platform',
+      COS_APP_ID: '1250000000',
+      COS_SECRET_ID: 'AKIDexample',
+      COS_SECRET_KEY: 'secret-example',
+    } as NodeJS.ProcessEnv);
+
+    expect(config.enabled).toBe(true);
+    expect(config.bucket).toBe('car-platform-1250000000');
+    expect(config.missingKeys).toEqual([]);
+  });
+
   it('builds a direct-upload ticket and object pointer under the configured prefix', () => {
     const service = new AppCosStorageService();
     service.env = {
@@ -42,6 +56,45 @@ describe('AppCosStorageService', () => {
     expect(ticket.headers).toEqual({
       'Content-Type': 'image/png',
     });
+  });
+
+  it('derives an allowed image content type when the client omits it', () => {
+    const service = new AppCosStorageService();
+    service.env = {
+      COS_REGION: 'ap-shanghai',
+      COS_BUCKET: 'car-platform',
+      COS_APP_ID: '1250000000',
+      COS_SECRET_ID: 'AKIDexample',
+      COS_SECRET_KEY: 'secret-example',
+    } as NodeJS.ProcessEnv;
+
+    const ticket = service.createValuationPhotoUploadTicket({
+      visitorKey: 'visitor-a',
+      fileName: 'car.jpeg',
+    });
+
+    expect(ticket.headers).toEqual({
+      'Content-Type': 'image/jpeg',
+    });
+    expect(ticket.uploadUrl).toContain('car-platform-1250000000.cos.ap-shanghai.myqcloud.com');
+  });
+
+  it('rejects non-image upload tickets before signing', () => {
+    const service = new AppCosStorageService();
+    service.env = {
+      COS_REGION: 'ap-shanghai',
+      COS_BUCKET: 'car-platform-1250000000',
+      COS_SECRET_ID: 'AKIDexample',
+      COS_SECRET_KEY: 'secret-example',
+    } as NodeJS.ProcessEnv;
+
+    expect(() =>
+      service.createValuationPhotoUploadTicket({
+        visitorKey: 'visitor-a',
+        fileName: 'malware.exe',
+        contentType: 'application/octet-stream',
+      })
+    ).toThrow('仅支持上传图片');
   });
 
   it('parses and rebuilds cos pointers consistently', () => {

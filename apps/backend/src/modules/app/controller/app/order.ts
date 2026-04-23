@@ -29,7 +29,7 @@ export class AppOrderController extends BaseController {
   }
 
   @CoolTag(TagTypes.IGNORE_TOKEN)
-  @Post('/valuation-orders/photos', { summary: '上传预约车辆照片' })
+  @Post('/valuation-orders/photos', { summary: '旧版上传入口（已停用）' })
   async uploadPhoto() {
     return this.ok(
       await this.appOrderService.uploadPhoto(this.ctx.files?.[0], this.ctx.origin)

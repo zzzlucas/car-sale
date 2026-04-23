@@ -53,6 +53,7 @@
 - 决策：
   - `car` 项目可复用现有腾讯云账号或同一个 COS bucket，但文档只记录变量名和接入约定，不记录真实密钥
   - 若与其他项目共用 bucket，必须使用 `car-platform-*` 这类独立前缀，例如 `car-platform-dev/`、`car-platform-preprod/`、`car-platform-prod/`
+  - `COS_BUCKET` 允许写桶名称本体并配套 `COS_APP_ID`，也兼容直接写带 `-AppId` 后缀的完整 bucket 名称
   - 项目文档里只保留 `COS_REGION`、`COS_BUCKET`、`COS_APP_ID`、`COS_UPLOAD_PREFIX` 等配置项名称，`COS_SECRET_ID`、`COS_SECRET_KEY` 只通过本地环境变量或安全工具分发
 - 原因：这样能在不增加接入阻力的前提下，避免对象路径与 `koa-rent` 等项目混淆，也避免把真实敏感信息泄漏到仓库文档
 

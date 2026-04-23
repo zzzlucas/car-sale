@@ -2,11 +2,8 @@ import { Inject, Provide } from '@midwayjs/core';
 import { BaseService } from '@cool-midway/core';
 import { CoolCommException } from '@cool-midway/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
-import * as fs from 'fs';
 import * as moment from 'moment';
-import * as path from 'path';
 import { Repository } from 'typeorm';
-import { v1 as uuid } from 'uuid';
 
 import type {
   ScrapOrderDetail,
@@ -18,7 +15,6 @@ import type {
   ValuationPhotoUploadTicketResult,
   ValuationOrderSubmitResult,
 } from '@car/shared-types';
-import { pUploadPath } from '../../../comm/path';
 import { AppValuationOrderEntity } from '../entity/valuationOrder';
 import { AppCosStorageService } from './cosStorage';
 
@@ -97,23 +93,14 @@ export class AppOrderService extends BaseService {
     });
   }
 
-  async uploadPhoto(file: any, origin: string) {
+  async uploadPhoto(file: any, _origin: string) {
     if (!file) {
       throw new CoolCommException('上传文件为空');
     }
 
-    const uploadRoot = pUploadPath();
-    const dateDir = moment().format('YYYYMMDD');
-    const extension = path.extname(path.basename(file.filename || ''));
-    const finalName = `${uuid()}${extension || '.jpg'}`;
-    const relativePath = path.join(dateDir, finalName);
-    const targetPath = path.join(uploadRoot, relativePath);
-
-    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.copyFileSync(file.data, targetPath);
-
-    const normalizedPath = relativePath.split(path.sep).join('/');
-    return `${origin}/upload/${normalizedPath}`;
+    throw new CoolCommException(
+      '车辆图片上传已切换为腾讯云 COS 直传，请改用 /app/valuation-orders/photos/upload-ticket'
+    );
   }
 
   private async findOwnedOrder(id: string): Promise<AppValuationOrderEntity> {
