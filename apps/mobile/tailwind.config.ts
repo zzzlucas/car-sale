@@ -30,6 +30,7 @@ export default {
         "surface-variant": "#e1e3e4",
         outline: "#6f7979",
         "outline-variant": "#bec9c8",
+        error: "#ba1a1a",
         "on-surface": "#191c1d",
         "on-surface-variant": "#3f4948",
         "surface-tint": "#096969",

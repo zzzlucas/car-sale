@@ -1,133 +1,158 @@
 <template>
-  <header class="glass-panel fixed left-0 right-0 top-0 z-30 h-16">
-    <div class="mx-auto flex h-full w-full max-w-md items-center justify-between px-margin-page">
-      <div class="flex items-center gap-3 text-primary">
-        <span class="material-symbols-outlined">arrow_back</span>
-        <span class="text-lg font-semibold tracking-wide">Vehicle Recycling</span>
-      </div>
-      <span class="material-symbols-outlined text-primary">more_horiz</span>
-    </div>
-  </header>
+  <main class="min-h-screen bg-background pb-mobile-bottom-nav">
+    <section class="mesh-bg relative overflow-hidden px-margin-page pb-10 pt-[calc(env(safe-area-inset-top)+20px)]">
+      <div class="absolute -left-10 top-12 h-32 w-32 rounded-full bg-primary-fixed/30 blur-3xl" />
+      <div class="absolute -right-12 top-20 h-36 w-36 rounded-full bg-secondary-container/15 blur-3xl" />
 
-  <main class="pb-24 pt-16">
-    <section class="mesh-bg relative overflow-hidden rounded-b-[2.5rem] px-6 pb-16 pt-12 shadow-sm">
-      <div class="relative z-10 flex flex-col items-center text-center">
-        <div class="relative mb-8">
-          <div class="absolute inset-0 rounded-full bg-secondary-container blur-2xl opacity-20" />
-          <div class="relative z-10 flex h-20 w-20 items-center justify-center rounded-[1.25rem] bg-primary text-[#FBF8F1] shadow-premium">
-            <span class="material-symbols-outlined icon-fill text-4xl">recycling</span>
+      <div class="relative mx-auto max-w-md">
+        <div class="mb-5 flex items-center justify-between">
+          <div class="inline-flex items-center gap-2 rounded-full border border-surface-variant/70 bg-white/80 px-3 py-2 text-label-md text-primary shadow-subtle backdrop-blur-sm">
+            <span class="material-symbols-outlined icon-fill text-[18px]">recycling</span>
+            车辆报废回收
           </div>
-        </div>
-
-        <h1 class="mb-4 text-3xl font-bold tracking-tight text-primary">专业 · 合法 · 省心</h1>
-        <p class="mb-10 max-w-[300px] text-base font-light leading-relaxed text-outline">
-          官方认证车辆报废回收服务，极速办理注销证明，资金安全有保障。
-        </p>
-
-        <RouterLink
-          to="/customer/valuation"
-          class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-primary text-lg font-medium text-on-primary shadow-premium transition-all active:scale-[0.98]"
-        >
-          <span class="material-symbols-outlined icon-fill text-secondary-container">directions_car</span>
-          立即估价 / 预约回收
-        </RouterLink>
-
-        <div class="mt-8 flex w-full items-center justify-center gap-8 border-t border-outline/10 pt-6">
-          <div v-for="item in trustItems" :key="item.label" class="flex flex-col items-center gap-1.5">
-            <span class="material-symbols-outlined text-lg text-secondary">{{ item.icon }}</span>
-            <span class="text-xs font-medium tracking-wide text-outline">{{ item.label }}</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="mt-16 px-6">
-      <div class="mb-8 flex items-center gap-3">
-        <div class="h-px flex-1 bg-primary/20" />
-        <h2 class="text-xl font-semibold tracking-wide text-primary">核心优势</h2>
-        <div class="h-px flex-1 bg-primary/20" />
-      </div>
-
-      <div class="grid grid-cols-1 gap-6">
-        <template v-for="(item, index) in advantages" :key="item.title">
-          <article class="group flex items-start gap-5">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#edf0f1] bg-white text-primary shadow-sm transition-colors group-hover:border-secondary-container/40">
-              <span class="material-symbols-outlined text-2xl">{{ item.icon }}</span>
-            </div>
-            <div>
-              <h3 class="mb-1 text-base font-semibold text-on-surface">{{ item.title }}</h3>
-              <p class="text-sm font-light leading-relaxed text-outline">{{ item.description }}</p>
-            </div>
-          </article>
-          <div v-if="index < advantages.length - 1" class="h-px w-full bg-gradient-to-r from-transparent via-[#edf0f1] to-transparent" />
-        </template>
-      </div>
-    </section>
-
-    <section class="mt-20 px-6">
-      <div class="mb-10 flex items-center justify-between">
-        <h2 class="text-xl font-semibold tracking-wide text-primary">服务流程</h2>
-        <RouterLink to="/customer/guide" class="flex items-center text-sm font-medium text-secondary">
-          详细指南
-          <span class="material-symbols-outlined ml-1 text-base">arrow_forward</span>
-        </RouterLink>
-      </div>
-
-      <div class="relative border-l border-[#edf0f1] pb-4 pl-6">
-        <article v-for="(step, index) in flowSteps" :key="step.title" class="relative mb-10 last:mb-0">
-          <div
-            class="absolute -left-[35px] top-0 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ring-4 ring-[#fafafa]"
-            :class="index === 0 ? 'bg-primary text-white' : 'border border-surface-variant bg-white text-primary'"
+          <RouterLink
+            to="/customer/support"
+            class="inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-2 text-label-md text-on-surface shadow-subtle backdrop-blur-sm"
           >
-            {{ index + 1 }}
+            <span class="material-symbols-outlined text-[16px]">support_agent</span>
+            联系客服
+          </RouterLink>
+        </div>
+
+        <section class="relative overflow-hidden rounded-[28px] bg-primary px-6 py-7 text-on-primary shadow-premium">
+          <div class="absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+          <div class="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-primary-fixed/20 blur-2xl" />
+
+          <div class="relative z-10">
+            <p class="text-label-sm uppercase tracking-[0.24em] text-on-primary-container">正规回收服务</p>
+            <h1 class="mt-4 text-[34px] font-semibold leading-[1.15] tracking-tight">专业 · 合法 · 省心</h1>
+            <p class="mt-4 max-w-[280px] text-body-md text-on-primary-container/95">
+              官方认证报废车回收服务，免费拖车、代办注销、节点可查，让你少跑腿也少踩坑。
+            </p>
+
+            <RouterLink
+              to="/customer/valuation"
+              class="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-headline-sm text-primary shadow-soft"
+            >
+              <span class="material-symbols-outlined icon-fill text-[20px]">currency_exchange</span>
+              立即估价 / 预约回收
+            </RouterLink>
+
+            <div class="mt-6 grid grid-cols-3 gap-2">
+              <div
+                v-for="item in trustBadges"
+                :key="item.label"
+                class="rounded-2xl border border-white/10 bg-white/8 px-3 py-3 text-center backdrop-blur-sm"
+              >
+                <span class="material-symbols-outlined text-[18px] text-on-primary">{{ item.icon }}</span>
+                <p class="mt-2 text-[11px] leading-4 text-on-primary-container">{{ item.label }}</p>
+              </div>
+            </div>
           </div>
-          <h3 class="-mt-1 mb-1 text-base font-semibold text-on-surface">{{ step.title }}</h3>
-          <p class="text-sm font-light text-outline">{{ step.description }}</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="px-margin-page py-stack-lg">
+      <div class="mb-stack-md flex items-end justify-between gap-4">
+        <div>
+          <p class="text-label-sm uppercase tracking-[0.18em] text-primary/70">为什么选我们</p>
+          <h2 class="mt-2 text-headline-md text-on-surface">核心服务优势</h2>
+        </div>
+        <RouterLink to="/customer/guide" class="text-label-md font-medium text-primary">服务说明</RouterLink>
+      </div>
+
+      <div class="overflow-hidden rounded-[28px] border border-surface-variant/70 bg-surface-container-lowest shadow-soft">
+        <article
+          v-for="item in advantages"
+          :key="item.title"
+          class="flex items-start gap-4 border-b border-surface-variant/70 px-5 py-5 last:border-b-0"
+        >
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+          </div>
+          <div>
+            <h3 class="text-body-lg font-medium text-on-surface">{{ item.title }}</h3>
+            <p class="mt-1 text-body-md text-on-surface-variant">{{ item.desc }}</p>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="mt-20 px-6">
-      <h2 class="mb-6 text-xl font-semibold tracking-wide text-primary">常见问题</h2>
-      <div class="space-y-4">
-        <details
-          v-for="item in faqs"
-          :key="item.id"
-          class="group rounded-2xl border border-[#edf0f1] bg-white p-5 shadow-sm transition-colors open:border-primary/20"
-        >
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-medium text-on-surface">
-            <span>{{ item.question }}</span>
-            <span class="material-symbols-outlined text-outline transition-transform group-open:rotate-45">add</span>
-          </summary>
-          <p class="pt-3 text-sm leading-6 text-outline">{{ item.answer }}</p>
-        </details>
+    <section class="px-margin-page py-stack-sm">
+      <div class="mb-stack-md flex items-end justify-between gap-4">
+        <div>
+          <p class="text-label-sm uppercase tracking-[0.18em] text-primary/70">办理流程</p>
+          <h2 class="mt-2 text-headline-md text-on-surface">四步完成报废</h2>
+        </div>
+        <RouterLink to="/customer/guide" class="text-label-md font-medium text-primary">查看详情</RouterLink>
       </div>
 
-      <div class="mt-8 flex justify-center">
-        <RouterLink
-          to="/customer/support"
-          class="flex items-center gap-2 rounded-xl border border-[#e1e3e4] bg-[#fafafa] px-6 py-3 text-sm font-medium text-on-surface transition-colors hover:bg-white"
-        >
-          <span class="material-symbols-outlined text-[18px]">headset_mic</span>
-          联系专属客服
-        </RouterLink>
-      </div>
-    </section>
-
-    <section class="mb-8 mt-20 border-t border-[#e7e8e9] px-6 pt-10">
-      <div class="flex flex-col items-center gap-6">
-        <div class="flex w-full items-center justify-center gap-8">
-          <div v-for="item in footerBadges" :key="item.label" class="flex flex-col items-center gap-2 opacity-70">
-            <span class="material-symbols-outlined text-[22px] text-[#2a2e32]">{{ item.icon }}</span>
-            <span class="text-xs tracking-wider text-outline">{{ item.label }}</span>
+      <div class="rounded-[28px] border border-surface-variant/70 bg-surface-container-lowest p-5 shadow-soft">
+        <div class="relative">
+          <div class="absolute bottom-5 left-4 top-5 w-px bg-surface-variant" />
+          <div class="relative flex flex-col gap-6">
+            <article v-for="(step, index) in flowSteps" :key="step.title" class="flex items-start gap-4">
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-label-sm text-on-primary ring-4 ring-surface-container-lowest">
+                {{ index + 1 }}
+              </div>
+              <div class="pt-0.5">
+                <h3 class="text-body-lg font-medium text-on-surface">{{ step.title }}</h3>
+                <p class="mt-1 text-body-md text-on-surface-variant">{{ step.desc }}</p>
+              </div>
+            </article>
           </div>
         </div>
-        <p class="text-xs font-light text-[#9ca3af]">本平台严格遵守《报废机动车回收管理办法》</p>
       </div>
     </section>
-  </main>
 
-  <MobileBottomNav />
+    <section class="px-margin-page py-stack-lg">
+      <div class="mb-stack-md">
+        <p class="text-label-sm uppercase tracking-[0.18em] text-primary/70">常见问题</p>
+        <h2 class="mt-2 text-headline-md text-on-surface">先把高频疑问说清楚</h2>
+      </div>
+
+      <div class="space-y-3">
+        <article
+          v-for="item in faqItems"
+          :key="item.question"
+          class="rounded-3xl border border-surface-variant/70 bg-surface-container-lowest px-5 py-4 shadow-subtle"
+        >
+          <h3 class="text-body-lg font-medium text-on-surface">{{ item.question }}</h3>
+          <p class="mt-2 text-body-md text-on-surface-variant">{{ item.answer }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="px-margin-page pb-10 pt-2">
+      <div class="rounded-[28px] border border-primary/10 bg-primary px-5 py-6 text-on-primary shadow-premium">
+        <p class="text-label-sm uppercase tracking-[0.18em] text-on-primary-container">准备开始</p>
+        <h2 class="mt-2 text-headline-md">资料不全也能先问价</h2>
+        <p class="mt-2 text-body-md text-on-primary-container/95">
+          先提交基础信息拿到初步评估，后续再由专员协助补齐资料和安排拖车。
+        </p>
+
+        <div class="mt-5 grid grid-cols-2 gap-3">
+          <RouterLink
+            to="/customer/valuation"
+            class="flex h-12 items-center justify-center rounded-2xl bg-white text-label-md font-medium text-primary"
+          >
+            去估价
+          </RouterLink>
+          <RouterLink
+            to="/customer/support"
+            class="flex h-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-label-md font-medium text-on-primary"
+          >
+            联系客服
+          </RouterLink>
+        </div>
+      </div>
+
+      <p class="mt-5 text-center text-[11px] text-on-surface-variant">平台遵循报废机动车回收管理相关规范，服务流程可追踪、可查询。</p>
+    </section>
+
+    <MobileBottomNav />
+  </main>
 </template>
 
 <script setup lang="ts">
@@ -138,35 +163,33 @@ import type { FaqItem } from "@car/shared-types";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getFaqs } from "@/services/content";
 
-const faqs = ref<FaqItem[]>([]);
-
-const trustItems = [
-  { icon: "verified_user", label: "官方认证" },
-  { icon: "currency_yuan", label: "透明报价" },
-  { icon: "local_shipping", label: "上门拖车" },
+const trustBadges = [
+  { icon: "gavel", label: "合法合规" },
+  { icon: "local_shipping", label: "免费拖车" },
+  { icon: "query_stats", label: "进度可查" },
 ];
 
 const advantages = [
-  { icon: "gavel", title: "合法合规", description: "正规拆解，出具官方《报废汽车回收证明》" },
-  { icon: "payments", title: "价格透明", description: "系统精准估值，无隐形扣费，极速打款" },
-  { icon: "location_on", title: "上门服务", description: "免费上门验车拖车，足不出户办妥" },
-  { icon: "support_agent", title: "专人代办", description: "全程 1 对 1 管家服务，代办注销手续" },
+  { icon: "verified_user", title: "正规资质回收", desc: "按规范拆解并出具所需证明，流程合法可追溯。" },
+  { icon: "payments", title: "报价透明清楚", desc: "先给初步估价，再按车况核验，不靠模糊话术压价。" },
+  { icon: "directions_car", title: "上门拖车省事", desc: "确认意向后安排上门验车与拖车，减少往返奔波。" },
+  { icon: "support_agent", title: "专员全程跟进", desc: "从提交到注销打款都有专人衔接，节点变化及时同步。" },
 ];
 
 const flowSteps = [
-  { title: "线上估价，提交申请", description: "填写车辆信息获取初步报价，确认后提交回收申请。" },
-  { title: "上门验车，免费拖车", description: "专员上门核验车况与手续，现场确认后免费拖车。" },
-  { title: "进场拆解，出具证明", description: "车辆进入合规拆解厂，合规拆解并出具回收证明。" },
-  { title: "办理注销，结算打款", description: "代办车管所注销手续，完成后极速将尾款打入账户。" },
+  { title: "线上估价", desc: "提交车辆基础信息，先拿到初步预估和办理建议。" },
+  { title: "上门验车", desc: "确认回收意向后，安排专业人员上门核验和拖车。" },
+  { title: "合规拆解", desc: "车辆进入正规回收拆解流程，资料与节点同步更新。" },
+  { title: "注销结算", desc: "手续办结后完成打款，进度与结果都能回看查询。" },
 ];
 
-const footerBadges = [
-  { icon: "shield", label: "公安部备案" },
-  { icon: "article", label: "资质齐全" },
-  { icon: "history", label: "进度可查" },
-];
+const faqItems = ref<FaqItem[]>([
+  { question: "车辆不在本地，还能报废吗？", answer: "多数情况可以先评估可操作性，再由专员沟通异地拖运和资料要求。" },
+  { question: "没有把资料准备齐，还能先提交吗？", answer: "可以，首页先引导估价，缺失资料会在后续沟通里补齐，不影响先问价。" },
+  { question: "多久能看到办理进度？", answer: "提交后即可进入进度链路，关键节点会持续更新，避免一直靠电话追问。" },
+].map((item, index) => ({ id: `home-faq-${index + 1}`, ...item })));
 
 onMounted(async () => {
-  faqs.value = await getFaqs();
+  faqItems.value = await getFaqs();
 });
 </script>

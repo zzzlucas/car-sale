@@ -6,8 +6,10 @@ import {
   CoolUrlTag,
   TagTypes,
 } from '@cool-midway/core';
-
-import type { ValuationOrderPayload } from '@car/shared-types';
+import type {
+  ValuationOrderPayload,
+  ValuationPhotoUploadTicketPayload,
+} from '@car/shared-types';
 import { AppOrderService } from '../../service/order';
 
 @Provide()
@@ -17,10 +19,27 @@ export class AppOrderController extends BaseController {
   @Inject()
   appOrderService: AppOrderService;
 
+  @Inject()
+  ctx;
+
   @CoolTag(TagTypes.IGNORE_TOKEN)
   @Post('/valuation-orders', { summary: '提交车辆估价与预约' })
   async create(@Body() body: ValuationOrderPayload) {
     return this.ok(await this.appOrderService.submit(body));
+  }
+
+  @CoolTag(TagTypes.IGNORE_TOKEN)
+  @Post('/valuation-orders/photos', { summary: '上传预约车辆照片' })
+  async uploadPhoto() {
+    return this.ok(
+      await this.appOrderService.uploadPhoto(this.ctx.files?.[0], this.ctx.origin)
+    );
+  }
+
+  @CoolTag(TagTypes.IGNORE_TOKEN)
+  @Post('/valuation-orders/photos/upload-ticket', { summary: '获取车辆照片直传 COS 票据' })
+  async createUploadTicket(@Body() body: ValuationPhotoUploadTicketPayload) {
+    return this.ok(this.appOrderService.createPhotoUploadTicket(body));
   }
 
   @CoolTag(TagTypes.IGNORE_TOKEN)

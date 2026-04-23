@@ -1,191 +1,537 @@
 <template>
-  <main class="min-h-screen bg-background pb-10">
-    <header class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-[#ececec] bg-white px-4">
-      <RouterLink to="/customer" class="flex h-10 w-10 items-center justify-center text-outline">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </RouterLink>
-      <h1 class="text-lg font-semibold text-on-surface">车辆估价评估</h1>
-      <span class="w-10" />
+  <main class="min-h-screen bg-background pb-mobile-bottom-nav">
+    <header class="sticky top-0 z-20 border-b border-surface-variant bg-white">
+      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-4">
+        <button
+          class="flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
+          @click="goBack"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-semibold text-primary">车辆估价评估</h1>
+        <div class="w-10" />
+      </div>
     </header>
 
-    <section class="px-margin-page py-stack-lg">
-      <div class="mb-8 flex items-center justify-between px-1">
-        <div class="flex flex-col items-center gap-2">
-          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">1</div>
-          <span class="text-label-md font-semibold text-primary">基本信息</span>
-        </div>
-        <div class="mx-3 h-[2px] flex-1 bg-surface-variant" />
-        <div class="flex flex-col items-center gap-2">
-          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest text-sm font-semibold text-outline">2</div>
-          <span class="text-label-md text-outline">车辆照片</span>
-        </div>
-        <div class="mx-3 h-[2px] flex-1 bg-surface-variant" />
-        <div class="flex flex-col items-center gap-2">
-          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest text-sm font-semibold text-outline">3</div>
-          <span class="text-label-md text-outline">评估结果</span>
-        </div>
-      </div>
-
-      <div class="mb-6">
-        <h2 class="text-[2rem] font-semibold leading-tight text-on-surface">填写车辆基本信息</h2>
-        <p class="mt-2 text-body-lg text-on-surface-variant">
-          提供准确的车辆信息有助于获取更精准的回收估价。
-        </p>
-      </div>
-
-      <form class="space-y-stack-md rounded-3xl border border-surface-variant bg-white p-inset-card shadow-soft" @submit.prevent="handleSubmit">
-        <div>
-          <label class="mb-3 block text-body-md font-medium text-on-surface">车辆类型 <span class="text-[#ba1a1a]">*</span></label>
-          <div class="grid grid-cols-2 gap-3">
-            <button
-              v-for="item in vehicleTypes"
-              :key="item.value"
-              type="button"
-              class="flex h-14 items-center justify-center gap-2 rounded-xl border text-body-md font-medium transition-colors"
-              :class="form.vehicleType === item.value ? 'border-primary bg-primary/5 text-primary' : 'border-surface-variant text-on-surface-variant'"
-              @click="form.vehicleType = item.value"
+    <section class="mx-auto max-w-md px-margin-page py-stack-lg">
+      <div class="mb-8 flex items-center justify-between">
+        <div v-for="(item, index) in steps" :key="item.label" class="flex flex-1 flex-col items-center">
+          <div class="flex w-full items-center">
+            <div
+              class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold"
+              :class="index === 0 ? 'bg-primary text-white' : 'bg-surface-container-highest text-outline'"
             >
-              <span class="material-symbols-outlined text-lg" :class="form.vehicleType === item.value ? 'icon-fill' : ''">{{ item.icon }}</span>
-              {{ item.label }}
-            </button>
+              {{ index + 1 }}
+            </div>
+            <div v-if="index < steps.length - 1" class="mx-2 h-[2px] flex-1 bg-surface-variant" />
           </div>
+          <span
+            class="mt-2 text-label-md"
+            :class="index === 0 ? 'font-semibold text-primary' : 'text-outline'"
+          >
+            {{ item.label }}
+          </span>
+        </div>
+      </div>
+
+      <form
+        class="rounded-2xl border border-surface-variant bg-white p-inset-card shadow-subtle"
+        @submit.prevent="handleSubmit"
+      >
+        <div class="mb-stack-lg flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">directions_car</span>
+          <h2 class="text-headline-sm text-on-surface">请填写预约信息</h2>
         </div>
 
-        <div>
-          <label class="mb-2 block text-body-md font-medium text-on-surface">车辆品牌与型号 <span class="text-[#ba1a1a]">*</span></label>
-          <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
-            <span class="material-symbols-outlined mr-3 text-on-surface-variant">directions_car</span>
-            <input
-              v-model="form.brandModel"
-              type="text"
-              placeholder="例如：大众 帕萨特"
-              class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
-            />
-          </div>
-        </div>
+        <div class="space-y-stack-lg">
+          <section class="space-y-stack-md">
+            <div class="flex items-center justify-between">
+              <h3 class="text-body-lg font-semibold text-on-surface">车辆信息</h3>
+              <span class="rounded-full bg-surface-container px-3 py-1 text-label-sm text-on-surface-variant">
+                1/4
+              </span>
+            </div>
 
-        <div class="border-b border-surface-variant pb-stack-md">
-          <div class="mb-2 flex items-center justify-between">
-            <label class="text-body-md font-medium text-on-surface">是否保留原车牌号 <span class="text-[#ba1a1a]">*</span></label>
-            <span class="material-symbols-outlined icon-fill text-sm text-primary">info</span>
-          </div>
-          <div class="flex flex-wrap gap-5 pt-1 text-body-md text-on-surface">
-            <label class="flex items-center gap-2">
-              <input v-model="plateRetentionValue" type="radio" class="h-4 w-4 accent-primary" value="yes" />
-              是，申请保留
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">
+                车辆类型
+                <span class="text-error">*</span>
+              </label>
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  v-for="item in vehicleTypes"
+                  :key="item.value"
+                  type="button"
+                  class="flex h-20 flex-col items-center justify-center gap-2 rounded-xl border text-label-md font-medium transition-colors"
+                  :class="
+                    form.vehicleType === item.value
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-surface-variant text-on-surface-variant'
+                  "
+                  @click="form.vehicleType = item.value"
+                >
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                  {{ item.label }}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">
+                品牌型号
+                <span class="text-error">*</span>
+              </label>
+              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+                <input
+                  v-model="form.brandModel"
+                  type="text"
+                  placeholder="例如：丰田 凯美瑞 2.0G"
+                  class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                />
+                <span class="material-symbols-outlined text-outline">search</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">车牌号</label>
+              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+                <input
+                  v-model="form.plateNumber"
+                  type="text"
+                  placeholder="例如：粤A12345"
+                  class="w-full border-none bg-transparent p-0 text-body-md uppercase text-on-surface outline-none placeholder:text-outline"
+                />
+                <span class="material-symbols-outlined text-outline">badge</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">轮毂材质</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  v-for="item in wheelMaterials"
+                  :key="item.value"
+                  type="button"
+                  class="flex h-12 items-center justify-center rounded-xl border text-label-md font-medium transition-colors"
+                  :class="
+                    form.wheelMaterial === item.value
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-surface-variant text-on-surface-variant'
+                  "
+                  @click="form.wheelMaterial = item.value"
+                >
+                  {{ item.label }}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">整备质量（吨）</label>
+              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+                <input
+                  :value="form.weightTons ?? ''"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="例如：1.56"
+                  class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                  @input="handleWeightInput"
+                />
+                <span class="text-label-md text-outline">t</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">
+                是否保留原车牌
+                <span class="text-error">*</span>
+              </label>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  class="flex h-14 items-center justify-center gap-2 rounded-xl border text-body-md font-medium transition-colors"
+                  :class="
+                    form.plateRetention
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-surface-variant text-on-surface-variant'
+                  "
+                  @click="form.plateRetention = true"
+                >
+                  <span class="material-symbols-outlined">radio_button_checked</span>
+                  保留
+                </button>
+                <button
+                  type="button"
+                  class="flex h-14 items-center justify-center gap-2 rounded-xl border text-body-md font-medium transition-colors"
+                  :class="
+                    !form.plateRetention
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-surface-variant text-on-surface-variant'
+                  "
+                  @click="form.plateRetention = false"
+                >
+                  <span class="material-symbols-outlined">radio_button_unchecked</span>
+                  不保留
+                </button>
+              </div>
+              <p class="mt-3 rounded-lg bg-surface-container px-3 py-2 text-label-md text-on-surface-variant">
+                保留车牌需原车主名下使用满 1 年，并在报废注销后 2 年内向车管所申请。
+              </p>
+            </div>
+          </section>
+
+          <section class="space-y-stack-md border-t border-surface-variant pt-stack-md">
+            <div class="flex items-center justify-between">
+              <h3 class="text-body-lg font-semibold text-on-surface">联系人信息</h3>
+              <span class="rounded-full bg-surface-container px-3 py-1 text-label-sm text-on-surface-variant">
+                2/4
+              </span>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">
+                联系姓名
+                <span class="text-error">*</span>
+              </label>
+              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+                <input
+                  v-model="form.contactName"
+                  type="text"
+                  placeholder="请输入联系人姓名"
+                  class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                />
+                <span class="material-symbols-outlined text-outline">person</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">
+                联系电话
+                <span class="text-error">*</span>
+              </label>
+              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+                <input
+                  v-model="form.contactPhone"
+                  type="tel"
+                  inputmode="numeric"
+                  maxlength="11"
+                  placeholder="请输入 11 位手机号"
+                  class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                />
+                <span class="material-symbols-outlined text-outline">call</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-stack-md border-t border-surface-variant pt-stack-md">
+            <div class="flex items-center justify-between">
+              <h3 class="text-body-lg font-semibold text-on-surface">上门地址</h3>
+              <span class="rounded-full bg-surface-container px-3 py-1 text-label-sm text-on-surface-variant">
+                3/4
+              </span>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-body-md font-medium text-on-surface">
+                取车地址
+                <span class="text-error">*</span>
+              </label>
+              <div class="rounded-xl border border-surface-variant px-4 py-3">
+                <textarea
+                  v-model="form.pickupAddress"
+                  rows="3"
+                  placeholder="请输入详细地址，方便拖车联系与上门"
+                  class="w-full resize-none border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                />
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                type="button"
+                class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-primary text-label-md font-semibold text-primary"
+                :disabled="locationLoading"
+                @click="fillCurrentLocation"
+              >
+                <span class="material-symbols-outlined text-[18px]">my_location</span>
+                {{ locationLoading ? "定位中..." : "读取当前位置" }}
+              </button>
+              <button
+                type="button"
+                class="flex h-12 items-center justify-center rounded-xl border border-surface-variant px-4 text-label-md text-on-surface-variant"
+                @click="clearLocation"
+              >
+                清空坐标
+              </button>
+            </div>
+
+            <div
+              class="rounded-xl border border-dashed border-surface-variant bg-surface-container-low px-4 py-3 text-label-md text-on-surface-variant"
+            >
+              <p class="font-medium text-on-surface">地图方案先走轻量闭环</p>
+              <p class="mt-1">
+                当前版本先记录详细地址与经纬度，微信小程序版再替换成正式地图选点。
+              </p>
+              <div v-if="form.pickupLatitude && form.pickupLongitude" class="mt-3 flex flex-wrap gap-2">
+                <span class="rounded-full bg-white px-3 py-1 text-primary">
+                  纬度 {{ form.pickupLatitude }}
+                </span>
+                <span class="rounded-full bg-white px-3 py-1 text-primary">
+                  经度 {{ form.pickupLongitude }}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-stack-md border-t border-surface-variant pt-stack-md">
+            <div class="flex items-center justify-between">
+              <h3 class="text-body-lg font-semibold text-on-surface">车辆照片</h3>
+              <span class="rounded-full bg-surface-container px-3 py-1 text-label-sm text-on-surface-variant">
+                4/4
+              </span>
+            </div>
+
+            <label
+              class="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-primary/40 bg-primary/5 px-5 py-6 text-center transition-colors"
+            >
+              <span class="material-symbols-outlined text-[28px] text-primary">add_photo_alternate</span>
+              <span class="mt-3 text-body-md font-medium text-on-surface">
+                {{ uploading ? "上传中..." : "上传车辆照片" }}
+              </span>
+              <span class="mt-2 text-label-md text-on-surface-variant">
+                至少 1 张，建议上传前后左右与车况细节
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                class="hidden"
+                :disabled="uploading"
+                @change="handlePhotoChange"
+              />
             </label>
-            <label class="flex items-center gap-2">
-              <input v-model="plateRetentionValue" type="radio" class="h-4 w-4 accent-primary" value="no" />
-              否，直接注销
-            </label>
-          </div>
-        </div>
 
-        <div>
-          <label class="mb-2 block text-body-md font-medium text-on-surface">车辆整备质量（吨）</label>
-          <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
-            <span class="material-symbols-outlined mr-3 text-on-surface-variant">scale</span>
-            <input
-              v-model="weightInput"
-              type="number"
-              step="0.1"
-              placeholder="请查看行驶证"
-              class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
-            />
-            <span class="text-body-md text-outline">t</span>
-          </div>
-          <p class="mt-2 text-label-md text-outline">仅货车等特殊车辆必填，小型轿车可不填。</p>
-        </div>
-
-        <div class="grid gap-3 border-t border-surface-variant pt-stack-md">
-          <div>
-            <label class="mb-2 block text-body-md font-medium text-on-surface">联系人姓名 <span class="text-[#ba1a1a]">*</span></label>
-            <input
-              v-model="form.contactName"
-              type="text"
-              placeholder="请输入联系人姓名"
-              class="h-14 w-full rounded-xl border border-surface-variant px-4 text-body-md outline-none placeholder:text-outline focus:border-primary"
-            />
-          </div>
-          <div>
-            <label class="mb-2 block text-body-md font-medium text-on-surface">联系电话 <span class="text-[#ba1a1a]">*</span></label>
-            <input
-              v-model="form.contactPhone"
-              type="tel"
-              placeholder="请输入联系电话"
-              class="h-14 w-full rounded-xl border border-surface-variant px-4 text-body-md outline-none placeholder:text-outline focus:border-primary"
-            />
-          </div>
+            <div
+              v-if="photoPreviews.length"
+              class="grid grid-cols-2 gap-3 rounded-2xl border border-surface-variant bg-surface-container-low p-3"
+            >
+              <article
+                v-for="item in photoPreviews"
+                :key="item.id"
+                class="overflow-hidden rounded-xl border border-surface-variant bg-white"
+              >
+                <img :src="item.previewUrl" :alt="item.name" class="h-28 w-full object-cover" />
+                <div class="flex items-center justify-between gap-3 p-3">
+                  <span class="line-clamp-1 text-label-md text-on-surface">{{ item.name }}</span>
+                  <button
+                    type="button"
+                    class="rounded-full bg-surface-container px-2 py-1 text-label-sm text-on-surface-variant"
+                    @click="removePhoto(item.id)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </article>
+            </div>
+          </section>
         </div>
       </form>
 
-      <div class="mt-6 rounded-xl border border-primary-fixed-dim bg-primary-fixed/20 px-4 py-3 text-center text-body-md text-on-primary-fixed-variant">
-        <span class="material-symbols-outlined icon-fill mr-1 align-[-2px] text-sm text-primary">shield</span>
-        信息加密传输，仅用于车辆估价计算
-      </div>
-
-      <p v-if="message" class="mt-4 rounded-xl bg-surface-container px-4 py-3 text-body-md text-on-surface-variant">{{ message }}</p>
+      <p
+        v-if="message"
+        class="mt-4 rounded-xl bg-surface-container px-4 py-3 text-body-md text-on-surface-variant"
+      >
+        {{ message }}
+      </p>
 
       <div class="mt-8 grid grid-cols-2 gap-3">
-        <RouterLink
-          to="/customer"
-          class="flex h-14 items-center justify-center rounded-2xl bg-surface-container-highest text-headline-sm font-semibold text-on-surface-variant"
-        >
-          取消
-        </RouterLink>
         <button
-          type="submit"
-          form="none"
-          class="flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-headline-sm font-semibold text-on-primary disabled:opacity-60"
-          :disabled="submitting"
+          type="button"
+          class="flex h-14 items-center justify-center rounded-xl border border-surface-variant bg-white text-headline-sm text-on-surface"
+          :disabled="submitting || uploading"
+          @click="resetForm"
+        >
+          重置表单
+        </button>
+        <button
+          type="button"
+          class="flex h-14 items-center justify-center rounded-xl bg-primary text-headline-sm text-on-primary shadow-sm disabled:opacity-60"
+          :disabled="submitting || uploading || locationLoading"
           @click="handleSubmit"
         >
-          {{ submitting ? "提交中" : "下一步" }}
-          <span class="material-symbols-outlined">arrow_forward</span>
+          {{ submitting ? "提交中..." : "提交预约" }}
         </button>
       </div>
+
+      <div class="mt-6 flex items-center justify-center gap-2 text-label-md text-primary">
+        <span class="material-symbols-outlined text-sm">lock</span>
+        信息已实施端到端加密传输，保障您的隐私安全
+      </div>
     </section>
+
+    <MobileBottomNav />
   </main>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { onBeforeUnmount, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 
 import type { ValuationOrderPayload } from "@car/shared-types";
+import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { submitValuationOrder } from "@/services/orders";
+import { uploadVehiclePhoto } from "@/services/upload";
+import { createInitialValuationForm, validateValuationForm } from "./customerValuationForm";
+
+type PhotoPreview = {
+  id: string;
+  name: string;
+  previewUrl: string;
+};
 
 const router = useRouter();
 const submitting = ref(false);
+const uploading = ref(false);
+const locationLoading = ref(false);
 const message = ref("");
-const weightInput = ref<string>("");
+const photoPreviews = ref<PhotoPreview[]>([]);
 
-const form = reactive<ValuationOrderPayload>({
-  vehicleType: "car",
-  brandModel: "",
-  plateRetention: false,
-  weightTons: null,
-  contactName: "",
-  contactPhone: "",
-});
+const steps = [
+  { label: "车辆信息" },
+  { label: "上门地址" },
+  { label: "提交预约" },
+];
 
 const vehicleTypes = [
   { value: "car", label: "小型轿车", icon: "directions_car" },
-  { value: "truck", label: "货车/客车", icon: "local_shipping" },
+  { value: "truck", label: "货车", icon: "local_shipping" },
+  { value: "motorcycle", label: "摩托车", icon: "two_wheeler" },
 ] as const;
 
-const plateRetentionValue = computed({
-  get: () => (form.plateRetention ? "yes" : "no"),
-  set: (value: string) => {
-    form.plateRetention = value === "yes";
-  },
-});
+const wheelMaterials = [
+  { value: "steel", label: "钢轮毂" },
+  { value: "aluminum", label: "铝合金" },
+  { value: "other", label: "其他" },
+] as const;
+
+const form = reactive<ValuationOrderPayload>(createInitialValuationForm());
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+  router.push("/customer");
+}
+
+function clearPhotoPreviews() {
+  for (const item of photoPreviews.value) {
+    if (item.previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+  }
+  photoPreviews.value = [];
+}
+
+function resetForm() {
+  Object.assign(form, createInitialValuationForm());
+  clearPhotoPreviews();
+  message.value = "表单已重置，可以重新填写。";
+}
+
+function handleWeightInput(event: Event) {
+  const value = (event.target as HTMLInputElement).value;
+  form.weightTons = value ? Number(value) : null;
+}
+
+function removePhoto(photoId: string) {
+  const index = photoPreviews.value.findIndex(item => item.id === photoId);
+  if (index < 0) {
+    return;
+  }
+
+  const [removed] = photoPreviews.value.splice(index, 1);
+  if (removed.previewUrl.startsWith("blob:")) {
+    URL.revokeObjectURL(removed.previewUrl);
+  }
+  form.vehiclePhotos.splice(index, 1);
+}
+
+async function handlePhotoChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = Array.from(input.files ?? []);
+  if (!files.length) {
+    return;
+  }
+
+  uploading.value = true;
+  message.value = "";
+
+  try {
+    for (const file of files) {
+      const uploadedUrl = await uploadVehiclePhoto(file);
+      const previewUrl =
+        typeof URL !== "undefined" && typeof URL.createObjectURL === "function"
+          ? URL.createObjectURL(file)
+          : uploadedUrl;
+
+      form.vehiclePhotos.push(uploadedUrl);
+      photoPreviews.value.push({
+        id: `${Date.now()}-${Math.random()}`,
+        name: file.name,
+        previewUrl,
+      });
+    }
+  } catch (error) {
+    message.value =
+      error instanceof Error ? `车辆照片上传失败：${error.message}` : "车辆照片上传失败，请稍后重试。";
+  } finally {
+    uploading.value = false;
+    input.value = "";
+  }
+}
+
+async function fillCurrentLocation() {
+  if (!("geolocation" in navigator)) {
+    message.value = "当前浏览器不支持定位，请手动填写地址。";
+    return;
+  }
+
+  locationLoading.value = true;
+  message.value = "";
+
+  await new Promise<void>(resolve => {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        form.pickupLatitude = Number(position.coords.latitude.toFixed(6));
+        form.pickupLongitude = Number(position.coords.longitude.toFixed(6));
+        message.value = "已记录当前位置坐标，请补充详细地址。";
+        locationLoading.value = false;
+        resolve();
+      },
+      () => {
+        message.value = "定位失败，请手动填写地址。";
+        locationLoading.value = false;
+        resolve();
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 8000,
+      },
+    );
+  });
+}
+
+function clearLocation() {
+  form.pickupLatitude = null;
+  form.pickupLongitude = null;
+  message.value = "已清空定位坐标。";
+}
 
 async function handleSubmit() {
-  form.weightTons = weightInput.value ? Number(weightInput.value) : null;
-
-  if (!form.brandModel || !form.contactName || !form.contactPhone) {
-    message.value = "请先补全品牌型号、联系人姓名和联系电话。";
+  const validationMessage = validateValuationForm(form);
+  if (validationMessage) {
+    message.value = validationMessage;
     return;
   }
 
@@ -194,10 +540,15 @@ async function handleSubmit() {
 
   try {
     const result = await submitValuationOrder(form);
-    message.value = `预约已提交，订单号 ${result.orderNo}。`;
     await router.push(`/customer/progress/${result.id}`);
+  } catch (error) {
+    message.value = error instanceof Error ? `提交失败：${error.message}` : "提交失败，请稍后重试。";
   } finally {
     submitting.value = false;
   }
 }
+
+onBeforeUnmount(() => {
+  clearPhotoPreviews();
+});
 </script>

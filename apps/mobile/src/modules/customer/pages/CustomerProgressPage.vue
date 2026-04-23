@@ -1,183 +1,261 @@
 <template>
   <main class="min-h-screen bg-surface pb-8">
-    <header class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-[#ececec] bg-[#f8faf9] px-5">
-      <RouterLink to="/customer/me" class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-outline transition-colors active:bg-surface-container">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </RouterLink>
-      <div class="flex-1 text-center">
-        <h1 class="text-base font-semibold tracking-tight text-primary">Vehicle Recycling</h1>
+    <header class="sticky top-0 z-20 border-b border-surface-variant bg-white">
+      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
+        <button
+          class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
+          @click="goBack"
+        >
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-semibold tracking-tight text-primary">车辆报废回收</h1>
+        <div class="w-10" />
       </div>
-      <div class="w-10" />
     </header>
 
-    <main class="mx-auto flex max-w-md flex-col gap-stack-lg px-margin-page pb-[80px] pt-[18px]">
-      <div class="flex flex-col gap-stack-sm">
-        <h2 class="text-headline-md text-on-surface">进度追踪</h2>
-        <div class="flex items-center gap-2">
-          <span class="rounded bg-surface-container-high px-2 py-1 text-label-md text-outline">订单号: {{ order?.orderNo || route.params.orderId }}</span>
-        </div>
-      </div>
+    <section class="mx-auto flex max-w-md flex-col gap-stack-lg px-margin-page pb-6 pt-stack-md">
+      <section
+        v-if="loading"
+        class="rounded-xl border border-surface-variant bg-white p-inset-card text-center text-body-md text-on-surface-variant shadow-subtle"
+      >
+        正在同步订单进度...
+      </section>
 
       <section
-        v-if="order"
-        class="relative overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest p-inset-card shadow-subtle"
+        v-else-if="errorMessage"
+        class="rounded-xl border border-error/20 bg-white p-inset-card text-center shadow-subtle"
       >
-        <div class="absolute left-0 top-0 h-1 w-full bg-primary" />
-
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <span class="text-label-md uppercase tracking-wider text-primary">当前状态</span>
-            <h3 class="text-headline-sm text-on-surface">{{ order.currentStatusLabel }}</h3>
-            <p class="mt-1 text-body-md text-on-surface-variant">{{ currentNote }}</p>
-          </div>
-          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
-            <span class="material-symbols-outlined icon-fill text-2xl">local_shipping</span>
-          </div>
-        </div>
-
-        <div class="relative mt-4 h-[120px] overflow-hidden rounded-lg border border-surface-variant bg-[linear-gradient(135deg,#e8f0f0_0%,#f7f7f7_45%,#e3eded_100%)]">
-          <div class="absolute inset-0 opacity-40 [background-image:linear-gradient(90deg,transparent_0%,transparent_48%,#cfd8d8_50%,transparent_52%,transparent_100%),linear-gradient(transparent_0%,transparent_48%,#d5dfdf_50%,transparent_52%,transparent_100%)] [background-size:48px_48px]" />
-          <div class="absolute left-6 top-5 h-1 w-24 rotate-[-10deg] bg-primary/60" />
-          <div class="absolute left-24 top-8 h-3 w-3 rounded-full bg-primary shadow-[0_0_0_6px_rgba(0,76,76,0.12)]" />
-
-          <div class="absolute bottom-2 left-2 right-2 flex items-center gap-3 rounded-md border border-surface-variant bg-white/90 p-2 backdrop-blur-sm">
-            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container">
-              <span class="material-symbols-outlined text-sm">person</span>
-            </div>
-            <div class="flex-1">
-              <p class="text-label-sm text-on-surface">王师傅（拖车专员）</p>
-              <p class="text-[10px] text-outline">京A·T9283</p>
-            </div>
-            <a :href="`tel:${supportPhone}`" class="flex h-8 w-8 items-center justify-center rounded-full border border-outline-variant bg-surface text-primary">
-              <span class="material-symbols-outlined icon-fill text-sm">call</span>
-            </a>
-          </div>
-        </div>
+        <p class="text-body-md text-on-surface">{{ errorMessage }}</p>
+        <button
+          type="button"
+          class="mt-4 rounded-full bg-primary px-4 py-2 text-label-md text-on-primary"
+          @click="loadOrder"
+        >
+          重新加载
+        </button>
       </section>
 
-      <section v-if="order" class="rounded-xl border border-surface-variant bg-surface-container-lowest p-inset-card shadow-subtle">
-        <h3 class="mb-6 text-label-md uppercase tracking-wider text-on-surface-variant">业务流转明细</h3>
-        <div class="relative pl-4">
-          <div class="absolute left-[23px] top-4 bottom-8 w-[2px] rounded-full bg-surface-container-high" />
-          <div class="absolute left-[23px] top-4 w-[2px] rounded-full bg-primary" :style="{ height: progressHeight }" />
+      <template v-else-if="order">
+        <section class="rounded-xl border border-surface-variant bg-white p-inset-card shadow-subtle">
+          <div class="mb-3 flex items-center justify-between border-b border-surface-variant pb-3">
+            <div>
+              <p class="text-label-md text-on-surface-variant">订单编号</p>
+              <p class="mt-1 text-body-lg font-medium text-on-surface">{{ order.orderNo }}</p>
+            </div>
+            <span class="rounded bg-surface-container-high px-3 py-1 text-label-md text-on-surface-variant">
+              {{ order.plateNumber || "待确认车牌" }}
+            </span>
+          </div>
+          <p class="mb-2 flex items-center gap-2 text-label-md text-primary">
+            <span class="material-symbols-outlined text-sm">fiber_manual_record</span>
+            当前进度
+          </p>
+          <h2 class="text-[2rem] font-semibold leading-tight text-on-surface">{{ order.currentStatusLabel }}</h2>
+          <p class="mt-3 text-body-md text-on-surface-variant">{{ currentNote }}</p>
+        </section>
 
-          <div
-            v-for="(item, index) in timelineItems"
-            :key="`${item.label}-${index}`"
-            class="relative flex gap-4 pb-6 last:pb-0"
-          >
-            <div
-              class="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-surface-container-lowest"
-              :class="nodeClass(item.state)"
+        <section class="rounded-xl border border-surface-variant bg-white p-inset-card shadow-subtle">
+          <div class="mb-4 flex items-center gap-2 border-b border-surface-variant pb-3">
+            <span class="material-symbols-outlined text-primary">timeline</span>
+            <h3 class="text-headline-sm text-on-surface">进度追踪</h3>
+          </div>
+
+          <div class="relative pl-7">
+            <div class="absolute bottom-5 left-[11px] top-3 w-[2px] bg-surface-container-high" />
+            <article
+              v-for="(item, index) in timelineItems"
+              :key="`${item.label}-${index}`"
+              class="relative pb-6 last:pb-0"
             >
-              <span v-if="item.state === 'done'" class="material-symbols-outlined icon-fill text-[14px] text-white">check</span>
-              <div v-else-if="item.state === 'current'" class="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            </div>
-            <div
-              class="flex flex-1 flex-col pt-1"
-              :class="item.state === 'current' ? 'rounded-lg border border-surface-variant bg-surface p-3 -mt-2 shadow-sm' : ''"
-            >
-              <span :class="item.state === 'pending' ? 'text-body-md text-outline' : item.state === 'current' ? 'text-body-lg font-medium text-primary' : 'text-body-md font-medium text-on-surface'">
-                {{ item.label }}
-              </span>
-              <span v-if="item.time" class="text-label-sm text-outline">{{ item.time }}</span>
-              <span v-if="item.note && item.state === 'current'" class="text-label-sm text-outline">{{ item.note }}</span>
-            </div>
-          </div>
-        </div>
-      </section>
+              <div
+                class="absolute -left-7 top-0 flex h-6 w-6 items-center justify-center rounded-full border-2"
+                :class="
+                  item.state === 'done'
+                    ? 'border-primary bg-primary text-white'
+                    : item.state === 'current'
+                      ? 'border-primary bg-white text-primary'
+                      : 'border-surface-variant bg-white text-transparent'
+                "
+              >
+                <span v-if="item.state === 'done'" class="material-symbols-outlined icon-fill text-[14px]">
+                  check
+                </span>
+                <span v-else-if="item.state === 'current'" class="material-symbols-outlined text-[14px]">
+                  radio_button_checked
+                </span>
+              </div>
 
-      <section v-if="order" class="rounded-xl border border-surface-variant bg-surface-container-lowest p-inset-card shadow-subtle">
-        <div class="flex items-center gap-2 border-b border-surface-variant pb-3">
-          <span class="material-symbols-outlined text-on-surface-variant">directions_car</span>
-          <h3 class="text-headline-sm text-on-surface">报废车辆信息</h3>
-        </div>
+              <div :class="item.state === 'current' ? 'rounded-lg border border-primary-fixed-dim bg-[#f2fbfd] p-4' : ''">
+                <p
+                  :class="
+                    item.state === 'current'
+                      ? 'text-headline-sm text-primary'
+                      : item.state === 'done'
+                        ? 'text-body-lg font-medium text-on-surface'
+                        : 'text-body-lg text-outline'
+                  "
+                >
+                  {{ item.label }}
+                </p>
+                <p v-if="item.time" class="mt-1 text-body-md text-on-surface-variant">{{ item.time }}</p>
+              </div>
+            </article>
+          </div>
+        </section>
 
-        <div class="grid grid-cols-2 gap-x-4 gap-y-5 pt-4">
-          <div class="flex flex-col gap-1">
-            <span class="text-label-sm uppercase text-outline">车牌号码</span>
-            <div class="inline-flex">
-              <span class="rounded border border-outline-variant/30 bg-surface-container-highest px-2 py-1 tracking-wider text-on-surface">{{ order.plateNumber }}</span>
-            </div>
+        <section class="rounded-xl border border-surface-variant bg-white p-inset-card shadow-subtle">
+          <div class="mb-4 flex items-center gap-2 border-b border-surface-variant pb-3">
+            <span class="material-symbols-outlined text-on-surface-variant">info</span>
+            <h3 class="text-headline-sm text-on-surface">预约信息</h3>
           </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-label-sm uppercase text-outline">车辆型号</span>
-            <span class="text-body-md font-medium text-on-surface">{{ order.brandModel }}</span>
-          </div>
-          <div class="col-span-2 flex flex-col gap-1">
-            <span class="text-label-sm uppercase text-outline">车架号 (VIN)</span>
-            <span class="break-all font-mono text-[14px] text-on-surface">{{ order.vin }}</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <span class="text-label-sm uppercase text-outline">所有人</span>
-            <span class="text-body-md text-on-surface">{{ order.ownerName }}</span>
-          </div>
-        </div>
-      </section>
 
-      <RouterLink
-        to="/customer/support"
-        class="flex h-12 items-center justify-center gap-2 rounded-lg border border-outline bg-white text-body-md font-medium text-on-surface-variant"
-      >
-        <span class="material-symbols-outlined text-[18px]">support_agent</span>
-        联系客服协助
-      </RouterLink>
-    </main>
+          <div class="grid grid-cols-[96px_1fr] gap-y-4 text-body-md">
+            <span class="text-on-surface-variant">联系人</span>
+            <span class="text-on-surface">{{ order.contactName }}</span>
+            <span class="text-on-surface-variant">联系电话</span>
+            <span class="text-on-surface">{{ order.contactPhone }}</span>
+            <span class="text-on-surface-variant">取车地址</span>
+            <span class="text-on-surface">{{ order.pickupAddress }}</span>
+            <span class="text-on-surface-variant">轮毂材质</span>
+            <span class="text-on-surface">{{ wheelMaterialLabel }}</span>
+            <span class="text-on-surface-variant">整备质量</span>
+            <span class="text-on-surface">{{ order.weightTons ? `${order.weightTons} 吨` : "待补充" }}</span>
+            <span class="text-on-surface-variant">原车牌</span>
+            <span class="text-on-surface">{{ order.plateRetention ? "保留" : "不保留" }}</span>
+          </div>
+
+          <div v-if="order.pickupLatitude && order.pickupLongitude" class="mt-4 flex flex-wrap gap-2">
+            <span class="rounded-full bg-surface-container px-3 py-1 text-label-md text-primary">
+              纬度 {{ order.pickupLatitude }}
+            </span>
+            <span class="rounded-full bg-surface-container px-3 py-1 text-label-md text-primary">
+              经度 {{ order.pickupLongitude }}
+            </span>
+          </div>
+        </section>
+
+        <section class="rounded-xl border border-surface-variant bg-white p-inset-card shadow-subtle">
+          <div class="mb-4 flex items-center gap-2 border-b border-surface-variant pb-3">
+            <span class="material-symbols-outlined text-on-surface-variant">directions_car</span>
+            <h3 class="text-headline-sm text-on-surface">车辆信息</h3>
+          </div>
+
+          <div class="grid grid-cols-[96px_1fr] gap-y-4 text-body-md">
+            <span class="text-on-surface-variant">车牌号码</span>
+            <span class="rounded bg-surface-container-high px-2 py-1 text-on-surface">{{ order.plateNumber || "待确认" }}</span>
+            <span class="text-on-surface-variant">品牌车型</span>
+            <span class="text-on-surface">{{ order.brandModel }}</span>
+            <span class="text-on-surface-variant">VIN 码</span>
+            <span class="break-all text-on-surface">{{ order.vin }}</span>
+          </div>
+        </section>
+
+        <section v-if="order.vehiclePhotos.length" class="rounded-xl border border-surface-variant bg-white p-inset-card shadow-subtle">
+          <div class="mb-4 flex items-center gap-2 border-b border-surface-variant pb-3">
+            <span class="material-symbols-outlined text-on-surface-variant">photo_library</span>
+            <h3 class="text-headline-sm text-on-surface">车辆照片</h3>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <img
+              v-for="(photo, index) in order.vehiclePhotos"
+              :key="`${photo}-${index}`"
+              :src="photo"
+              :alt="`车辆照片 ${index + 1}`"
+              class="h-28 w-full rounded-xl object-cover"
+            />
+          </div>
+        </section>
+
+        <RouterLink
+          to="/customer/support"
+          class="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-white text-headline-sm text-primary"
+        >
+          <span class="material-symbols-outlined text-[18px]">support_agent</span>
+          联系客服协助
+        </RouterLink>
+      </template>
+    </section>
   </main>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { computed, ref } from "vue";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import type { ScrapOrderDetail } from "@car/shared-types";
 import { getOrderProgress } from "@/services/orders";
 
 const route = useRoute();
+const router = useRouter();
 const order = ref<ScrapOrderDetail | null>(null);
-const supportPhone = "400-800-8899";
+const loading = ref(false);
+const errorMessage = ref("");
 
 const flowTemplate = [
   { status: "submitted", label: "已提交" },
   { status: "contacted", label: "联系中" },
   { status: "quoted", label: "估价完成" },
-  { status: "scheduled_pickup", label: "已安排上门/拖车" },
-  { status: "dismantling", label: "拆解中" },
-  { status: "deregistration_processing", label: "办理注销证明" },
+  { status: "scheduled_pickup", label: "已安排上门" },
+  { status: "picked_up", label: "待拆解" },
+  { status: "dismantling", label: "待注销" },
   { status: "completed", label: "已完成" },
 ] as const;
 
-const currentNote = computed(() => order.value?.timeline.find((item) => item.status === order.value?.currentStatus)?.note ?? "工作人员将持续同步当前处理进度。");
+const currentNote = computed(
+  () =>
+    order.value?.timeline.find(item => item.status === order.value?.currentStatus)?.note ??
+    "客服会尽快与您联系确认车辆与取车信息，请保持电话畅通。",
+);
 
 const timelineItems = computed(() => {
   if (!order.value) return [];
+  const currentIndex = flowTemplate.findIndex(item => item.status === order.value?.currentStatus);
 
-  const currentIndex = flowTemplate.findIndex((item) => item.status === order.value?.currentStatus);
   return flowTemplate.map((item, index) => {
-    const matched = order.value?.timeline.find((entry) => entry.status === item.status);
-    const state = index < currentIndex ? "done" : index === currentIndex ? "current" : "pending";
+    const matched = order.value?.timeline.find(entry => entry.status === item.status);
     return {
       ...item,
       time: matched?.time ?? "",
-      note: matched?.note ?? "",
-      state,
+      state: index < currentIndex ? "done" : index === currentIndex ? "current" : "pending",
     };
   });
 });
 
-const progressHeight = computed(() => {
-  const currentIndex = timelineItems.value.findIndex((item) => item.state === "current");
-  const segments = Math.max(currentIndex, 0);
-  return `${segments * 48 + 36}px`;
+const wheelMaterialLabel = computed(() => {
+  switch (order.value?.wheelMaterial) {
+    case "steel":
+      return "钢轮毂";
+    case "aluminum":
+      return "铝合金";
+    case "other":
+      return "其他";
+    default:
+      return order.value?.wheelMaterial || "待补充";
+  }
 });
 
-function nodeClass(state: string) {
-  if (state === "done") return "bg-primary";
-  if (state === "current") return "bg-primary-container outline outline-2 outline-primary";
-  return "bg-surface-container-high";
+function goBack() {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+  router.push("/customer/records");
 }
 
-onMounted(async () => {
-  order.value = await getOrderProgress(String(route.params.orderId));
-});
+async function loadOrder() {
+  loading.value = true;
+  errorMessage.value = "";
+
+  try {
+    order.value = await getOrderProgress(String(route.params.orderId));
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? `进度加载失败：${error.message}` : "进度加载失败，请稍后重试。";
+  } finally {
+    loading.value = false;
+  }
+}
+
+loadOrder();
 </script>

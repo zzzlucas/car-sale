@@ -1,16 +1,16 @@
 <template>
   <main class="min-h-screen bg-background pb-24">
-    <header class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-[#ececec] bg-[#f8faf9] px-5">
-      <RouterLink to="/customer" class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-outline transition-colors active:bg-surface-container">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </RouterLink>
-      <div class="flex-1 text-center">
-        <h1 class="text-base font-semibold tracking-tight text-primary">Vehicle Recycling</h1>
+    <header class="sticky top-0 z-20 border-b border-surface-variant bg-white">
+      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
+        <button class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container" @click="goBack">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-semibold text-primary">报废流程指南</h1>
+        <div class="w-10" />
       </div>
-      <div class="w-10" />
     </header>
 
-    <main class="mx-auto max-w-md space-y-stack-lg px-margin-page py-stack-lg">
+    <section class="mx-auto max-w-md space-y-stack-lg px-margin-page py-stack-lg">
       <section>
         <h2 class="mb-stack-sm text-display-lg text-primary">{{ guide?.title || "车辆报废流程指南" }}</h2>
         <p class="text-body-lg text-on-surface-variant">
@@ -99,7 +99,7 @@
           <div class="px-4 pb-4 text-body-md text-on-surface-variant">{{ item.answer }}</div>
         </details>
       </section>
-    </main>
+    </section>
 
     <div class="fixed bottom-20 left-margin-page right-margin-page z-20 max-w-md md:left-auto md:w-[300px]">
       <RouterLink
@@ -111,18 +111,16 @@
       </RouterLink>
     </div>
   </main>
-
-  <MobileBottomNav />
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 
 import type { FaqItem, ServiceGuideContent } from "@car/shared-types";
-import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getFaqs, getServiceGuide } from "@/services/content";
 
+const router = useRouter();
 const guide = ref<ServiceGuideContent | null>(null);
 const faqs = ref<FaqItem[]>([]);
 
@@ -133,6 +131,14 @@ const materials = [
 ];
 
 const guideSteps = computed(() => guide.value?.steps ?? []);
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+  router.push("/customer");
+}
 
 onMounted(async () => {
   const [guideData, faqData] = await Promise.all([getServiceGuide(), getFaqs()]);

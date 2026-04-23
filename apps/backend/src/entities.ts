@@ -22,6 +22,7 @@ import * as entity19 from './modules/base/entity/sys/menu';
 import * as entity20 from './modules/base/entity/sys/log';
 import * as entity21 from './modules/base/entity/sys/department';
 import * as entity22 from './modules/base/entity/sys/conf';
+import * as entity23 from './modules/app/entity/valuationOrder';
 export const entities = [
   ...Object.values(entity0),
   ...Object.values(entity1),
@@ -46,4 +47,5 @@ export const entities = [
   ...Object.values(entity20),
   ...Object.values(entity21),
   ...Object.values(entity22),
+  ...Object.values(entity23),
 ];
