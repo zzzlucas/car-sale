@@ -5,16 +5,16 @@
 推荐按角色和能力分组，而不是按前端项目名硬拆三份重复接口：
 
 - `/api/customer/*`
-  - 面向 `customer-h5`
+  - 面向 `apps/mobile` 里的 `customer` 分区
   - 例如预约提交、订单查询、FAQ、客服入口相关能力
 - `/api/operator/*`
-  - 面向 `admin-web` 与 `admin-h5`
+  - 面向 `apps/mobile` 里的 `operator` 分区，以及后续的 `apps/admin-web`
   - 例如订单处理、估价确认、调度安排、附件上传、状态推进
 - `/api/admin/*`
   - 面向系统配置和后台管理能力
   - 例如角色管理、基础配置、运营参数
 
-这意味着 `admin-web` 与 `admin-h5` 默认共享同一套操作端业务接口，只在表现层和能力开口上区分，不为“设备不同”强行分出两套后端模型。
+这意味着 `apps/mobile/operator` 与未来的 `apps/admin-web` 默认共享同一套操作端业务接口，只在表现层和能力开口上区分，不为“设备不同”强行分出两套后端模型。
 
 ## 返回结构建议
 

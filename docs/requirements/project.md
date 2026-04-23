@@ -6,16 +6,16 @@
 
 ## 当前活跃需求
 
-### [REQ-PRJ-20260422-01] 三端一后端 `monorepo`
+### [REQ-PRJ-20260422-01] 当前先以 `mobile + backend + shared-types` 收口的 `monorepo`
 - 状态：`accepted`
 - 优先级：`P0`
-- 决策：仓库按 `apps/customer-h5`、`apps/admin-web`、`apps/admin-h5`、`apps/backend` 组织，配合 `packages/shared-types`、`packages/api-sdk`、`packages/shared-utils`
-- 原因：三端共享同一套业务对象与状态语义，拆仓会增加同步成本
+- 决策：当前仓库先以 `apps/mobile`、`apps/backend`、`packages/shared-types` 作为真实落地基线；`apps/admin-web`、`packages/api-sdk`、`packages/shared-utils` 保留为后续扩展，而不是一开始就补齐空壳
+- 原因：当前最需要的是移动端客户主链路、移动执行补充流程和后端协议同步跑通；先把真实运行骨架收口，会比维护多套未落地目录更省认知负担
 
-### [REQ-PRJ-20260422-02] 客户端先 H5，后评估 `uni-app`
+### [REQ-PRJ-20260422-02] `apps/mobile` 客户侧先 H5，后评估 `uni-app`
 - 状态：`accepted`
 - 优先级：`P0`
-- 决策：`customer-h5` 首期先以 `Vue 3 + Vite + TypeScript` 做 H5，待业务模型稳定后再评估是否迁到 `uni-app`
+- 决策：`apps/mobile` 首期先以 `Vue 3 + Vite + TypeScript` 做 H5，并在其中承载客户侧主链路；待业务模型稳定后再评估是否把客户侧迁到 `uni-app`
 - 原因：项目启动期更需要快速联调和快速收敛业务边界，暂不引入跨端运行时约束
 
 ### [REQ-PRJ-20260422-03] `v1` 范围收口
@@ -46,6 +46,15 @@
   - `completed`
   - `cancelled`
 - 原因：进度展示、后台管理、移动执行和后续统计都依赖一致口径
+
+### [REQ-PRJ-20260423-05] 腾讯云 COS 采用独立前缀的项目级命名空间
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket，但文档只记录变量名和接入约定，不记录真实密钥
+  - 若与其他项目共用 bucket，必须使用 `car-platform-*` 这类独立前缀，例如 `car-platform-dev/`、`car-platform-preprod/`、`car-platform-prod/`
+  - 项目文档里只保留 `COS_REGION`、`COS_BUCKET`、`COS_APP_ID`、`COS_UPLOAD_PREFIX` 等配置项名称，`COS_SECRET_ID`、`COS_SECRET_KEY` 只通过本地环境变量或安全工具分发
+- 原因：这样能在不增加接入阻力的前提下，避免对象路径与 `koa-rent` 等项目混淆，也避免把真实敏感信息泄漏到仓库文档
 
 ## 当前核心数据对象
 

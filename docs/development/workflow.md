@@ -8,11 +8,11 @@
 
 1. 先固定产品主链路和状态语义
 2. 再搭后端对象、接口和共享类型
-3. 再接 `customer-h5`
-4. 再补 `admin-web`
-5. 最后补 `admin-h5` 的移动执行闭环
+3. 再接 `apps/mobile` 的客户侧主链路
+4. 再补 `apps/mobile` 的 `operator` 执行闭环
+5. 最后再评估是否补 `apps/admin-web`
 
-这样更容易让各端围绕同一套业务协议发展，而不是先各写各的页面再回头统一。
+这样更容易让当前真实存在的应用围绕同一套业务协议发展，而不是先写一堆未来端，再回头收主链路。
 
 ## 应用内闭环优先
 
@@ -47,14 +47,27 @@
 - 修改三端职责边界
 - 修改核心数据对象
 - 修改统一状态语义
-- 改变 `customer-h5` 与 `uni-app` 的路线判断
+- 改变 `apps/mobile` 客户侧与 `uni-app` 的路线判断
+- 新增、调整对象存储目录前缀或共享云资源命名空间
+
+## 当前可用命令
+
+当前根目录已经建立以下工作区脚本：
+
+- `pnpm dev:mobile`
+- `pnpm build:mobile`
+- `pnpm typecheck:mobile`
+- `pnpm dev:backend`
+- `pnpm build:backend`
+- `pnpm typecheck:backend`
+- `pnpm typecheck:shared-types`
+
+这些脚本已经可以直接作为开发和验证入口使用。
 
 ## 后续命令收口建议
 
-等工程初始化完成后，推荐把常用命令统一收口到工作区入口，例如：
+等 `apps/admin-web`、自动化测试和更多共享层进入稳定阶段后，再考虑统一收口为：
 
 - `pnpm dev`
 - `pnpm build`
 - `pnpm test`
-
-当前这些命令还属于目标约定，不应在未初始化前假装已经可用。

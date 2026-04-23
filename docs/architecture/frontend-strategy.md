@@ -4,9 +4,10 @@
 
 当前最推荐的路线是：
 
-- `customer-h5`：先用 `Vue 3 + Vite + TypeScript` 做 H5
-- `admin-web`：用 `Vue 3 + Vite + TypeScript` 做桌面后台
-- `admin-h5`：用 `Vue 3 + Vite + TypeScript` 做移动运营端
+- `apps/mobile`：先用 `Vue 3 + Vite + TypeScript` 做统一移动端应用
+- `apps/mobile/customer`：先以 H5 方式承载客户预约、进度、客服等主链路
+- `apps/mobile/operator`：承载移动执行、拍照上传、快捷状态推进等补充流程
+- `apps/admin-web`：作为后续桌面后台预留，不和首期移动闭环抢优先级
 
 ## 为什么先 H5，再评估 `uni-app`
 
@@ -19,12 +20,12 @@
 
 如果一开始就把客户端绑定到 `uni-app`，我们会更早被跨端差异、运行时限制和适配成本绑住。先用标准 Web 技术把业务模型、接口协议和页面流程打稳，会更利于前期迭代。
 
-## `customer-h5` 的未来演进
+## `apps/mobile` 客户侧的未来演进
 
 如果后续确认要正式上线微信小程序，优先评估以下两种方向：
 
 1. 保留当前 H5 版本作为开发和验证入口，再为小程序单独建设 `uni-app`
-2. 将 `customer-h5` 的稳定业务层迁移到 `uni-app` 客户端
+2. 将 `apps/mobile` 中客户侧稳定下来的业务层迁移到 `uni-app` 客户端
 
 无论走哪条路，前提都是先把以下内容稳定下来：
 
@@ -34,13 +35,13 @@
 - 登录态与权限边界
 - 页面主流程和字段口径
 
-## `admin-web` 与 `admin-h5` 的边界
+## `apps/admin-web` 与 `apps/mobile/operator` 的边界
 
 ### `admin-web`
 - 面向桌面端的列表、筛选、详情和配置场景
 - 适合长表单、复杂检索、多模块切换
 
-### `admin-h5`
+### `apps/mobile/operator`
 - 面向任务推进和现场执行
 - 适合电话联系、导航、拍照上传、快速改状态
 - 默认不是 `admin-web` 的完整镜像
@@ -54,4 +55,4 @@
 
 ## 设计参考
 
-客户端页面设计参考位于 `E:\web_work_-1\car\.temp\stitch_`。其中首页、估价页、进度页、我的、客服页已经能支撑 `customer-h5` 的 `v1` 信息结构讨论。
+客户端页面设计参考位于 `E:\web_work_-1\car\.temp\stitch_`。其中首页、估价页、进度页、我的、客服页已经能支撑 `apps/mobile` 客户侧 `v1` 的信息结构讨论。

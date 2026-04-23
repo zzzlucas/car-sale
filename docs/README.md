@@ -3,7 +3,7 @@
 当前仓库还在启动期，这里的文档主要回答三件事：
 
 - 这个项目准备怎么建
-- 三端一后端各自负责什么
+- 当前已经落地的移动端、后端和共享层各自负责什么
 - 后续协作时哪些约定要保持一致
 
 ## 推荐阅读顺序
@@ -17,6 +17,7 @@
 - 想看开发约定：`development/workflow.md`
 - 想看接口口径：`development/api-conventions.md`
 - 想看 `cloud2026` 与远端 MySQL 约定：`deployment/cloud2026.md`
+- 想看腾讯云 COS 接入约定：`deployment/tencent-cos.md`
 
 ## 目录说明
 - `architecture/`：解释为什么这样分端、这样分目录、这样选技术路线
@@ -28,5 +29,5 @@
 - `superpowers/`：设计与实现计划文档
 
 ## 当前阅读提醒
-- 当前很多文档描述的是“目标结构”和“推荐约定”，不是现状已经完成的工程。
-- 当前阶段默认先服务 H5 开发与联调，再根据业务稳定度决定是否把 `customer-h5` 迁到 `uni-app`。
+- 当前中央文档以“现状 + 未来预留”来描述仓库：现状重点是 `apps/mobile`、`apps/backend`、`packages/shared-types`，未来再补 `apps/admin-web` 等扩展。
+- 当前阶段默认先服务 `apps/mobile` 的 H5 开发与联调，再根据业务稳定度决定是否把客户侧迁到 `uni-app`。
