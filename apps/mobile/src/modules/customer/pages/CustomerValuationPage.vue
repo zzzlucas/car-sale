@@ -242,7 +242,47 @@
                   rows="3"
                   placeholder="请输入详细地址，方便拖车联系与上门"
                   class="w-full resize-none border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                  @input="handlePickupAddressInput"
                 />
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-surface-variant bg-surface-container-low px-4 py-3">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-body-md font-semibold text-on-surface">搜索地址建议</p>
+                  <p class="mt-1 text-label-md text-on-surface-variant">命中后自动回填经纬度</p>
+                </div>
+                <button
+                  type="button"
+                  class="flex h-10 items-center justify-center rounded-xl border border-primary px-4 text-label-md font-semibold text-primary disabled:opacity-50"
+                  :disabled="addressSuggestionLoading || !form.pickupAddress.trim()"
+                  @click="handlePickupAddressSearch"
+                >
+                  {{ addressSuggestionLoading ? "搜索中..." : "搜索地址建议" }}
+                </button>
+              </div>
+            </div>
+
+            <div
+              v-if="addressSuggestions.length"
+              class="rounded-2xl border border-surface-variant bg-white p-3 shadow-subtle"
+            >
+              <div class="mb-3 flex items-center justify-between">
+                <p class="text-body-md font-semibold text-on-surface">推荐地址</p>
+                <span class="text-label-md text-on-surface-variant">{{ addressSuggestions.length }} 条</span>
+              </div>
+              <div class="space-y-2">
+                <button
+                  v-for="item in addressSuggestions"
+                  :key="item.id"
+                  type="button"
+                  class="flex w-full flex-col items-start rounded-xl border border-surface-variant px-4 py-3 text-left transition-colors active:bg-surface-container"
+                  @click="applyAddressSuggestion(item)"
+                >
+                  <span class="text-body-md font-medium text-on-surface">{{ item.name }}</span>
+                  <span class="mt-1 text-label-md text-on-surface-variant">{{ item.formattedAddress }}</span>
+                </button>
               </div>
             </div>
 
@@ -270,7 +310,7 @@
             >
               <p class="font-medium text-on-surface">地图方案先走轻量闭环</p>
               <p class="mt-1">
-                当前版本先记录详细地址与经纬度，微信小程序版再替换成正式地图选点。
+                当前版本优先走高德地址搜索与坐标回填，后续再根据效果补完整地图选点。
               </p>
               <div v-if="form.pickupLatitude && form.pickupLongitude" class="mt-3 flex flex-wrap gap-2">
                 <span class="rounded-full bg-white px-3 py-1 text-primary">
@@ -377,8 +417,9 @@
 import { onBeforeUnmount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 
-import type { ValuationOrderPayload } from "@car/shared-types";
+import type { MapAddressSuggestion, ValuationOrderPayload } from "@car/shared-types";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
+import { searchAddressSuggestions } from "@/services/map";
 import { submitValuationOrder } from "@/services/orders";
 import { uploadVehiclePhoto } from "@/services/upload";
 import { createInitialValuationForm, validateValuationForm } from "./customerValuationForm";
@@ -393,8 +434,10 @@ const router = useRouter();
 const submitting = ref(false);
 const uploading = ref(false);
 const locationLoading = ref(false);
+const addressSuggestionLoading = ref(false);
 const message = ref("");
 const photoPreviews = ref<PhotoPreview[]>([]);
+const addressSuggestions = ref<MapAddressSuggestion[]>([]);
 
 const steps = [
   { label: "车辆信息" },
@@ -436,12 +479,53 @@ function clearPhotoPreviews() {
 function resetForm() {
   Object.assign(form, createInitialValuationForm());
   clearPhotoPreviews();
+  addressSuggestions.value = [];
   message.value = "表单已重置，可以重新填写。";
 }
 
 function handleWeightInput(event: Event) {
   const value = (event.target as HTMLInputElement).value;
   form.weightTons = value ? Number(value) : null;
+}
+
+function handlePickupAddressInput() {
+  if (addressSuggestions.value.length) {
+    addressSuggestions.value = [];
+  }
+}
+
+async function handlePickupAddressSearch() {
+  const keywords = form.pickupAddress.trim();
+  if (keywords.length < 2) {
+    addressSuggestions.value = [];
+    message.value = "请至少输入 2 个字后再搜索地址。";
+    return;
+  }
+
+  addressSuggestionLoading.value = true;
+  message.value = "";
+
+  try {
+    const suggestions = await searchAddressSuggestions(keywords);
+    addressSuggestions.value = suggestions;
+
+    if (!suggestions.length) {
+      message.value = "暂未命中地址，建议改搜小区、写字楼或道路名称。";
+    }
+  } catch (error) {
+    addressSuggestions.value = [];
+    message.value = error instanceof Error ? `地址搜索失败：${error.message}` : "地址搜索失败，请稍后重试。";
+  } finally {
+    addressSuggestionLoading.value = false;
+  }
+}
+
+function applyAddressSuggestion(item: MapAddressSuggestion) {
+  form.pickupAddress = item.formattedAddress;
+  form.pickupLatitude = item.latitude;
+  form.pickupLongitude = item.longitude;
+  addressSuggestions.value = [];
+  message.value = "已回填地址与坐标，可继续补充信息或直接提交。";
 }
 
 function removePhoto(photoId: string) {

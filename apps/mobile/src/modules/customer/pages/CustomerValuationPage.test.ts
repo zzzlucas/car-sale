@@ -22,4 +22,10 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("读取当前位置");
     expect(source).toContain("重置表单");
   });
+
+  it("includes address search affordances for the amap key-pool flow", () => {
+    expect(source).toContain("搜索地址建议");
+    expect(source).toContain("推荐地址");
+    expect(source).toContain("命中后自动回填经纬度");
+  });
 });

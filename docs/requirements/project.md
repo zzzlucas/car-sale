@@ -26,6 +26,16 @@
   - `h5-release.md` 需要明确 `apps/mobile/dist` 是唯一发布产物，且正式发布前必须显式设置 `VITE_API_BASE_URL`
 - 原因：当前仓库已经有 `cloud2026`、COS 和开发联调约定，但缺少“真正准备发布时先看哪页”的项目级入口，导致后续让 AI 协助部署时很容易误把本地模板或别的项目经验当成 `car` 的正式路径。补一层 `playbooks` 后，可以把共享层、项目层和当前阻塞项一次说清楚，开发体验会稳很多。
 
+### [REQ-PRJ-20260423-11] 客户侧地图能力先走 backend 代理 + 高德 Key 池，不在前端直出 Key
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `apps/mobile` 首期只落“地址搜索建议 + 经纬度回填”，不直接上完整嵌入地图页
+  - 客户侧地图请求统一走 `apps/backend` 代理接口，不在前端直出高德 Key
+  - 高德 Key 池通过 `AMAP_WEB_SERVICE_KEYS` 注入，并兼容单 Key 配置 `AMAP_WEB_SERVICE_KEY`
+  - backend 侧按池内顺序尝试 Key；遇到额度、鉴权或网络异常时切下一个 Key 兜底
+- 原因：当前项目还处于低成本验证阶段，优先保证预约页地址搜索能闭环，同时把 Key 暴露面和后续替换成本压到最低。
+
 ### [REQ-PRJ-20260422-01] 当前以 `mobile + admin-web + backend + shared-types` 作为真实落地基线
 - 状态：`accepted`
 - 优先级：`P0`
