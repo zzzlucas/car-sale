@@ -19,6 +19,8 @@ ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
 
 这里保留 SSH 信息只是为了远端运维与只读核验；本项目日常开发联调不依赖 SSH 隧道。
 
+如果需要共享服务器事实、SSH 别名、共享脚本或跨项目运维规则，优先继续看 `E:\web_work_-1\_workspace-base\ops\README.md` 与 `E:\web_work_-1\_workspace-base\ops\docs\operations\project-server-map.md`；本页只继续维护 `car` 自己的资源与数据库约定。
+
 ## 当前已确认的远端状态
 
 ### 当前监听端口
