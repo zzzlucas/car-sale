@@ -29,14 +29,6 @@ export class AppOrderController extends BaseController {
   }
 
   @CoolTag(TagTypes.IGNORE_TOKEN)
-  @Post('/valuation-orders/photos', { summary: '旧版上传入口（已停用）' })
-  async uploadPhoto() {
-    return this.ok(
-      await this.appOrderService.uploadPhoto(this.ctx.files?.[0], this.ctx.origin)
-    );
-  }
-
-  @CoolTag(TagTypes.IGNORE_TOKEN)
   @Post('/valuation-orders/photos/upload-ticket', { summary: '获取车辆照片直传 COS 票据' })
   async createUploadTicket(@Body() body: ValuationPhotoUploadTicketPayload) {
     return this.ok(this.appOrderService.createPhotoUploadTicket(body));

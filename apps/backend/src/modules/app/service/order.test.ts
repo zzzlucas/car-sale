@@ -198,18 +198,4 @@ describe('AppOrderService', () => {
     });
     expect(detail.timeline).toHaveLength(1);
   });
-
-  it('rejects the legacy local photo upload path to keep COS storage unified', async () => {
-    const { service } = createService();
-
-    await expect(
-      service.uploadPhoto(
-        {
-          filename: 'legacy.jpg',
-          data: 'C:/temp/legacy.jpg',
-        },
-        'https://example.com'
-      )
-    ).rejects.toThrow('车辆图片上传已切换为腾讯云 COS 直传');
-  });
 });

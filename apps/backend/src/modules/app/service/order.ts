@@ -93,16 +93,6 @@ export class AppOrderService extends BaseService {
     });
   }
 
-  async uploadPhoto(file: any, _origin: string) {
-    if (!file) {
-      throw new CoolCommException('上传文件为空');
-    }
-
-    throw new CoolCommException(
-      '车辆图片上传已切换为腾讯云 COS 直传，请改用 /app/valuation-orders/photos/upload-ticket'
-    );
-  }
-
   private async findOwnedOrder(id: string): Promise<AppValuationOrderEntity> {
     const orderId = Number(id);
     if (!Number.isInteger(orderId) || orderId <= 0) {
