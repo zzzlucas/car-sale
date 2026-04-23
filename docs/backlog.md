@@ -9,23 +9,24 @@
 - 这里不是当前迭代计划，也不是必须立刻执行的任务清单。
 - 已经拍板的重要需求和长期决策继续写入 `docs/requirements/project.md`，并在 `docs/requirements/index.md` 建索引。
 - 部署步骤、回滚线索和远端操作继续写入 `docs/deployment/` 或 `docs/deployment/playbooks/`，不要混进普通 backlog。
+- 一旦某项已进入当前交付主线，默认把它升格成对应的 `docs/plans/*.md`、需求文档或项目级 playbook，不继续只留在 backlog。
 
-## 当前优先候选
+## 条件成熟后可优先考虑
 
 - [ ] 补齐 `apps/admin-web` 的发布步骤
-  - 触发：后台前端已经进入真实落地阶段，但部署文档里还缺发布手册。
+  - 触发：当 `apps/admin-web` 的真实部署路径和构建产物稳定后，部署文档里还需要补完整发布手册。
   - 价值：后续让 AI 或自己发布后台时，不需要重新猜构建产物、远端目录和回滚点。
-  - 建议：等后台壳子和构建入口稳定后，补到 `docs/deployment/playbooks/`。
+  - 建议：等后台壳子、部署目录和构建入口稳定后，再补到 `docs/deployment/playbooks/`。
 
 - [ ] 补齐域名切流、反向代理与 HTTPS 执行记录
-  - 触发：当前已有域名规划，但真实域名和 DNS 尚未最终切流。
+  - 触发：当前已有域名规划，但真实域名、DNS 和 Nginx/证书配置还没进入最终切流阶段。
   - 价值：减少后续配置 Nginx、证书和 DNS 时的误操作。
-  - 建议：真实操作前先写最小 runbook，执行后再补实际记录和回滚线索。
+  - 建议：等真实切流准备开始时，先写最小 runbook，执行后再补实际记录和回滚线索。
 
-- [ ] 为后端部署继续脚本化
-  - 触发：`cloud2026 + pm2 + env-driven prod config` 已经收口，但还不是一键部署。
-  - 价值：减少手工同步、构建、重启和验证的重复操作。
-  - 建议：先围绕 `pnpm build:backend`、`pm2:start`、`pm2:restart` 做薄脚本，不急着引入更重部署平台。
+- [ ] 当 `preprod/prod` 首次真实部署跑通后，把部署流程收口为项目根脚本入口
+  - 触发：`cloud2026 + pm2 + env-driven prod config` 已经收口，但具体环境的一键部署入口还没沉淀。
+  - 价值：减少手工同步、构建、重启和验证的重复操作，也更符合当前工作区的部署协作规则。
+  - 建议：优先收口为项目根 `package.json` 的 `deploy:preprod`、`deploy:prod` 之类命令，再同步项目部署文档。
 
 ## 后续按需评估
 
