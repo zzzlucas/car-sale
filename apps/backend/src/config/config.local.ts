@@ -1,6 +1,9 @@
 import { CoolConfig } from '@cool-midway/core';
 import { MidwayConfig } from '@midwayjs/core';
 import { TenantSubscriber } from '../modules/base/db/tenant';
+import { loadBackendLocalEnv } from './localEnv';
+
+loadBackendLocalEnv();
 
 /**
  * 本地开发 npm run dev 读取的配置文件

@@ -28,6 +28,14 @@ $env:DB_PASSWORD='<开发库密码>'
 pnpm dev:backend
 ```
 
+也可以在仓库根目录放一个未纳入版本控制的 `.env.local`，例如：
+
+```dotenv
+DB_PASSWORD=<开发库密码>
+```
+
+当前 `apps/backend` 本地配置会自动读取仓库根目录与 `apps/backend` 目录下的 `.env` / `.env.local`；如果同时设置了进程环境变量，则以进程环境变量为准。
+
 ### 客户侧手工冒烟
 - 打开 `/customer`，确认首页可见且“立即估价 / 预约回收”可点击
 - 进入 `/customer/valuation`，填写最小表单并提交

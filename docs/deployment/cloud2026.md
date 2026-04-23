@@ -123,7 +123,7 @@ ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
 - Database：`car_platform`
 - Username：`car_platform`
 
-密码不写入仓库文档，保留在本地开发环境变量中。
+密码不写入仓库文档，保留在本地开发环境变量或本地 `.env.local` 中。
 
 PowerShell 下本地启动后端的最小示例：
 
@@ -132,7 +132,20 @@ $env:DB_PASSWORD='<开发库密码>'
 pnpm dev:backend
 ```
 
-如果使用 IDE 运行配置，也只需要额外注入 `DB_PASSWORD`，其余库地址默认值已经指向 `cloud2026:3306`。
+当前 `apps/backend` 在本地开发时会自动尝试读取以下未纳入版本控制的环境文件：
+
+- 仓库根目录：`.env`
+- 仓库根目录：`.env.local`
+- `apps/backend/.env`
+- `apps/backend/.env.local`
+
+推荐只在仓库根目录放一个 `.env.local`，至少写入：
+
+```dotenv
+DB_PASSWORD=<开发库密码>
+```
+
+如果使用 IDE 运行配置，也仍然可以直接注入 `DB_PASSWORD`；显式注入的进程环境变量优先级高于 `.env` 文件。
 
 ## 对本项目代码的影响
 
