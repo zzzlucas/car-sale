@@ -51,4 +51,16 @@ describe('backend local config env loading', () => {
 
     expect(password).toBe('from-process-env');
   });
+
+  it('fails fast with a clear error when DB_PASSWORD is still missing', () => {
+    delete process.env.DB_PASSWORD;
+
+    expect(() => {
+      jest.isolateModules(() => {
+        require('./config.local');
+      });
+    }).toThrow(
+      '缺少本地开发数据库密码 DB_PASSWORD，请在仓库根目录或 apps/backend 下创建 .env.local'
+    );
+  });
 });

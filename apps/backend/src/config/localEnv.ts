@@ -69,3 +69,18 @@ export function loadBackendLocalEnv(env: NodeJS.ProcessEnv = process.env) {
     }
   }
 }
+
+export function requireBackendLocalEnv(
+  key: string,
+  env: NodeJS.ProcessEnv = process.env
+) {
+  const value = env[key]?.trim();
+
+  if (value) {
+    return value;
+  }
+
+  throw new Error(
+    `缺少本地开发数据库密码 ${key}，请在仓库根目录或 apps/backend 下创建 .env.local，并填写真实值`
+  );
+}

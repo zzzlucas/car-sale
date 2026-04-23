@@ -1,9 +1,10 @@
 import { CoolConfig } from '@cool-midway/core';
 import { MidwayConfig } from '@midwayjs/core';
 import { TenantSubscriber } from '../modules/base/db/tenant';
-import { loadBackendLocalEnv } from './localEnv';
+import { loadBackendLocalEnv, requireBackendLocalEnv } from './localEnv';
 
 loadBackendLocalEnv();
+const dbPassword = requireBackendLocalEnv('DB_PASSWORD');
 
 /**
  * 本地开发 npm run dev 读取的配置文件
@@ -17,7 +18,7 @@ export default {
         host: process.env.DB_HOST || '124.222.31.238',
         port: Number(process.env.DB_PORT || 3306),
         username: process.env.DB_USERNAME || 'car_platform',
-        password: process.env.DB_PASSWORD || '',
+        password: dbPassword,
         database: process.env.DB_NAME || 'car_platform',
         // 自动建表 注意：线上部署的时候不要使用，有可能导致数据丢失
         synchronize: true,
