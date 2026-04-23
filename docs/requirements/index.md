@@ -6,6 +6,7 @@
 `- [REQ-ID] | title | scope:project | priority:P0/P1/P2 | status:* | tags:a,b,c | updated:YYYY-MM-DD`
 
 ## Active
+- [REQ-PRJ-20260423-10] | 域名规划采用“共享 DNS 边界 + 项目级 domain planning”两层分工 | scope:project | priority:P1 | status:accepted | tags:domain,dns,deployment,docs,workspace-base | updated:2026-04-23
 - [REQ-PRJ-20260423-09] | `docs/deployment/` 增加项目级 playbooks 层，收口部署、回滚与当前阻塞项 | scope:project | priority:P1 | status:accepted | tags:deployment,ops,docs,runbook,workspace-base | updated:2026-04-23
 - [REQ-PRJ-20260422-01] | 当前以 `mobile + admin-web + backend + shared-types` 作为真实落地基线 | scope:project | priority:P0 | status:accepted | tags:monorepo,architecture,frontend,backend,docs | updated:2026-04-23
 - [REQ-PRJ-20260422-02] | `apps/mobile` 客户侧首期先用 H5，后续再评估 `uni-app` | scope:project | priority:P0 | status:accepted | tags:mobile,h5,uni-app,frontend,strategy | updated:2026-04-23

@@ -28,6 +28,7 @@
 - 想直接看项目级部署/回滚手册：`playbooks/README.md`
 - 想看 `cloud2026` 后端部署前检查：`playbooks/cloud2026-backend-deploy.md`
 - 想看 H5 构建与发布口径：`playbooks/h5-release.md`
+- 想看域名规划和未来 DNS 切换入口：`playbooks/domain-planning.md`
 - 想看通用回滚与备份约定：`playbooks/rollback.md`
 
 ## 当前约定
@@ -42,7 +43,7 @@
 
 - `apps/admin-web` 的发布步骤
 - 后续小程序构建与发布记录
-- 域名、反向代理与 HTTPS 接入说明
+- 域名切流、反向代理与 HTTPS 的正式执行记录
 
 其中：
 

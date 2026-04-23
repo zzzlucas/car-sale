@@ -19,6 +19,8 @@
   - [cloud2026-backend-deploy.md](/e:/web_work_-1/car/docs/deployment/playbooks/cloud2026-backend-deploy.md)
 - H5 构建与发布前检查：
   - [h5-release.md](/e:/web_work_-1/car/docs/deployment/playbooks/h5-release.md)
+- 域名规划与未来 DNS 切换入口：
+  - [domain-planning.md](/e:/web_work_-1/car/docs/deployment/playbooks/domain-planning.md)
 - 通用回滚与备份约定：
   - [rollback.md](/e:/web_work_-1/car/docs/deployment/playbooks/rollback.md)
 
@@ -26,4 +28,5 @@
 
 - 这里优先写“下一次还会照着做的标准步骤”，不要把一次性事故排查写成长期手册。
 - 如果后续补了一键部署脚本，这里应改成“脚本优先”的手册，不要继续平行维护纯手工版。
+- 如果域名正式定稿并准备上线，再在这里继续补 `domain-cutover.md`，不要把“规划”和“切流会话”混写。
 - 如果某次远端写操作产生了新的目录约定、备份位置或回滚线索，应在同轮同步更新这里和对应会话记录。
