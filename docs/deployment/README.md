@@ -19,6 +19,7 @@
 - 本地开发直连远端 `MySQL 3306` 的约定
 - 腾讯云 COS 的变量约定、目录前缀和文档落位方式
 - 项目级部署 `playbooks` 入口与当前回滚口径
+- 后端正式运行方式已收口为 `cloud2026 + pm2 + env-driven prod config`
 
 ## 推荐阅读
 
@@ -38,6 +39,8 @@
 - 本地联调默认直接连接 `cloud2026:3306`
 - 后端本地配置默认以 `cloud2026` 的开发库为目标，不再默认走 SSH 隧道
 - SSH 登录只保留给远端运维、查看 `1Panel` 状态或服务器巡检，不作为本项目日常联调前置步骤
+- 后端正式运行方式默认收口为：`/srv/apps/car-platform/app` 工作区目录 + `apps/backend/.env.production.local` + `pm2`
+- `apps/backend/docker-compose.yml` 继续只视为本地开发模板，不作为 `cloud2026` 业务进程正式入口
 
 ## 后续还要补充的内容
 

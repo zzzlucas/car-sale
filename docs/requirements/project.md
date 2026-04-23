@@ -6,6 +6,17 @@
 
 ## 当前活跃需求
 
+### [REQ-PRJ-20260423-12] `car` 后端正式运行方式收口为 `cloud2026 + pm2 + env-driven prod config`
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `car` 后端在 `cloud2026` 的正式运行方式默认收口为 `pm2` 单进程，不再把本地 `docker-compose.yml` 当成云上业务进程入口
+  - 远端工作区目录统一为 `/srv/apps/car-platform/app`，备份目录统一为 `/srv/apps/car-platform/backups`
+  - 生产配置由 `apps/backend/src/config/config.prod.ts` 通过进程环境变量或 `apps/backend/.env.production.local` 读取，不再保留模板默认数据库口径
+  - `pm2` 服务名统一为 `car-platform-backend`
+  - `NODE_ENV` 统一使用 `prod`，不继续混用 `production`
+- 原因：当前项目最容易踩坑的地方，不是“不会部署”，而是运行方式、目录结构和生产配置入口还没统一。一旦 `config.prod.ts` 继续保留模板默认值、`pm2` 继续沿用 `cool-admin` 服务名、远端目录继续按单个 backend 裸目录理解，后面每次上云都会反复猜。先把这几件事收口，开发体验和后续 AI 协作都会稳很多。
+
 ### [REQ-PRJ-20260423-10] 域名规划采用“共享 DNS 边界 + 项目级 domain planning”两层分工
 - 状态：`accepted`
 - 优先级：`P1`

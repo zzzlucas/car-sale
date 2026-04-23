@@ -22,6 +22,7 @@
 - 想看腾讯云 COS 接入约定：`deployment/tencent-cos.md`
 - 想看项目级部署与回滚手册：`deployment/playbooks/README.md`
 - 想看 `car` 的域名规划：`deployment/playbooks/domain-planning.md`
+- 想看 `car` 后端在 `cloud2026` 的正式运行方式：`deployment/playbooks/cloud2026-backend-deploy.md`
 
 ## 目录说明
 - `architecture/`：解释为什么这样分端、这样分目录、这样选技术路线

@@ -1,7 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const ENV_FILE_NAMES = ['.env', '.env.local'] as const;
+const LOCAL_ENV_FILE_NAMES = ['.env', '.env.local'] as const;
+const PRODUCTION_ENV_FILE_NAMES = [
+  '.env.production',
+  '.env.production.local',
+] as const;
 
 function parseEnvValue(rawValue: string) {
   const value = rawValue.trim();
@@ -43,7 +47,10 @@ export function parseEnvFile(content: string) {
   return parsed;
 }
 
-export function loadBackendLocalEnv(env: NodeJS.ProcessEnv = process.env) {
+function loadBackendEnvFiles(
+  fileNames: readonly string[],
+  env: NodeJS.ProcessEnv = process.env
+) {
   const appRoot = path.resolve(__dirname, '../..');
   const workspaceRoot = path.resolve(appRoot, '..', '..');
   const protectedKeys = new Set(
@@ -51,8 +58,8 @@ export function loadBackendLocalEnv(env: NodeJS.ProcessEnv = process.env) {
   );
 
   const envFiles = [
-    ...ENV_FILE_NAMES.map(fileName => path.join(workspaceRoot, fileName)),
-    ...ENV_FILE_NAMES.map(fileName => path.join(appRoot, fileName)),
+    ...fileNames.map(fileName => path.join(workspaceRoot, fileName)),
+    ...fileNames.map(fileName => path.join(appRoot, fileName)),
   ];
 
   for (const envFile of envFiles) {
@@ -70,6 +77,16 @@ export function loadBackendLocalEnv(env: NodeJS.ProcessEnv = process.env) {
   }
 }
 
+export function loadBackendLocalEnv(env: NodeJS.ProcessEnv = process.env) {
+  loadBackendEnvFiles(LOCAL_ENV_FILE_NAMES, env);
+}
+
+export function loadBackendProductionEnv(
+  env: NodeJS.ProcessEnv = process.env
+) {
+  loadBackendEnvFiles(PRODUCTION_ENV_FILE_NAMES, env);
+}
+
 export function requireBackendLocalEnv(
   key: string,
   env: NodeJS.ProcessEnv = process.env
@@ -82,5 +99,20 @@ export function requireBackendLocalEnv(
 
   throw new Error(
     `缺少本地开发数据库密码 ${key}，请在仓库根目录或 apps/backend 下创建 .env.local，并填写真实值`
+  );
+}
+
+export function requireBackendProductionEnv(
+  key: string,
+  env: NodeJS.ProcessEnv = process.env
+) {
+  const value = env[key]?.trim();
+
+  if (value) {
+    return value;
+  }
+
+  throw new Error(
+    `缺少生产数据库密码 ${key}，请通过进程环境变量或 apps/backend/.env.production.local 提供真实值`
   );
 }

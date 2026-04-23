@@ -6,6 +6,7 @@
 `- [REQ-ID] | title | scope:project | priority:P0/P1/P2 | status:* | tags:a,b,c | updated:YYYY-MM-DD`
 
 ## Active
+- [REQ-PRJ-20260423-12] | `car` 后端正式运行方式收口为 `cloud2026 + pm2 + env-driven prod config` | scope:project | priority:P1 | status:accepted | tags:deployment,backend,pm2,config,cloud2026 | updated:2026-04-23
 - [REQ-PRJ-20260423-11] | 客户侧地图能力先走 backend 代理 + 高德 Key 池，不在前端直出 Key | scope:project | priority:P1 | status:accepted | tags:map,amap,key-pool,backend,mobile | updated:2026-04-23
 - [REQ-PRJ-20260423-10] | 域名规划采用“共享 DNS 边界 + 项目级 domain planning”两层分工 | scope:project | priority:P1 | status:accepted | tags:domain,dns,deployment,docs,workspace-base | updated:2026-04-23
 - [REQ-PRJ-20260423-09] | `docs/deployment/` 增加项目级 playbooks 层，收口部署、回滚与当前阻塞项 | scope:project | priority:P1 | status:accepted | tags:deployment,ops,docs,runbook,workspace-base | updated:2026-04-23
