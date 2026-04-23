@@ -20,6 +20,7 @@
 - 想看接口口径：`development/api-conventions.md`
 - 想看 `cloud2026` 与远端 MySQL 约定：`deployment/cloud2026.md`
 - 想看腾讯云 COS 接入约定：`deployment/tencent-cos.md`
+- 想看项目级部署与回滚手册：`deployment/playbooks/README.md`
 
 ## 目录说明
 - `architecture/`：解释为什么这样分端、这样分目录、这样选技术路线
@@ -27,10 +28,11 @@
 - `requirements/`：记录当前项目的活跃需求与重要决策
 - `development/`：记录开发协作约定、接口与共享边界
 - `testing/`：记录当前阶段的最小验证基线
-- `deployment/`：为后续环境与部署文档预留统一入口
+- `deployment/`：维护 `car` 自己的环境、对象存储、部署与回滚入口
 - `superpowers/`：设计与实现计划文档
 
 ## 当前阅读提醒
 - 当前真实落地基线已经包含 `apps/mobile`、`apps/admin-web`、`apps/backend`、`packages/shared-types`。
 - 当前阶段默认优先保证 `apps/mobile` 与 `apps/admin-web` 都能直接联到同一个 backend 闭环，再根据业务稳定度决定是否把客户侧迁到 `uni-app`。
 - 工作区级共享运维、共享模板和跨项目协作边界已经收口到 `E:\web_work_-1\_workspace-base\`，本仓 docs 继续只维护 `car` 自己的业务、开发和部署文档。
+- `deployment/playbooks/` 现在就是项目级部署入口；以后让 AI 帮你发 `car`，默认先从这里找，而不是去翻别的项目会话记录。

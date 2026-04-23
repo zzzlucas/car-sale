@@ -6,6 +6,16 @@
 
 ## 当前活跃需求
 
+### [REQ-PRJ-20260423-09] `docs/deployment/` 增加项目级 playbooks 层，收口部署、回滚与当前阻塞项
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `car` 的 `docs/deployment/` 下新增 `playbooks/` 目录，作为项目级部署和回滚手册入口
+  - 共享主机事实、共享脚本与跨项目运维规则继续看 `E:\web_work_-1\_workspace-base\ops`
+  - `cloud2026-backend-deploy.md` 需要明确写出当前真正可执行的步骤，以及 `config.prod.ts`、本地模板 `docker-compose.yml` 还不能直接当正式部署基线的风险
+  - `h5-release.md` 需要明确 `apps/mobile/dist` 是唯一发布产物，且正式发布前必须显式设置 `VITE_API_BASE_URL`
+- 原因：当前仓库已经有 `cloud2026`、COS 和开发联调约定，但缺少“真正准备发布时先看哪页”的项目级入口，导致后续让 AI 协助部署时很容易误把本地模板或别的项目经验当成 `car` 的正式路径。补一层 `playbooks` 后，可以把共享层、项目层和当前阻塞项一次说清楚，开发体验会稳很多。
+
 ### [REQ-PRJ-20260422-01] 当前以 `mobile + admin-web + backend + shared-types` 作为真实落地基线
 - 状态：`accepted`
 - 优先级：`P0`

@@ -18,12 +18,17 @@
 - 本项目在 `cloud2026` 上使用 `1Panel` 数据库服务的推荐方式
 - 本地开发直连远端 `MySQL 3306` 的约定
 - 腾讯云 COS 的变量约定、目录前缀和文档落位方式
+- 项目级部署 `playbooks` 入口与当前回滚口径
 
 ## 推荐阅读
 
 - 想先搞清 `car` 主要依赖哪台共享主机、共享层和项目层怎么分工：`E:\web_work_-1\_workspace-base\ops\docs\operations\project-server-map.md`
 - 想确认 `cloud2026` 的 SSH、目录和端口基线：`cloud2026.md`
 - 想确认腾讯云 COS 怎么配、目录前缀怎么避混：`tencent-cos.md`
+- 想直接看项目级部署/回滚手册：`playbooks/README.md`
+- 想看 `cloud2026` 后端部署前检查：`playbooks/cloud2026-backend-deploy.md`
+- 想看 H5 构建与发布口径：`playbooks/h5-release.md`
+- 想看通用回滚与备份约定：`playbooks/rollback.md`
 
 ## 当前约定
 
@@ -35,9 +40,11 @@
 
 ## 后续还要补充的内容
 
-- 后端部署步骤
-- `apps/mobile` 的 H5 发布步骤
+- `apps/admin-web` 的发布步骤
 - 后续小程序构建与发布记录
 - 域名、反向代理与 HTTPS 接入说明
 
-这些内容如果属于 `car` 自己怎么部署、怎么回滚，继续留在本目录；如果属于共享主机、共享公网边界或跨项目运维规则，统一回 `_workspace-base/ops`。
+其中：
+
+- 如果属于 `car` 自己怎么部署、怎么回滚，继续留在本目录和 `playbooks/`
+- 如果属于共享主机、共享公网边界或跨项目运维规则，统一回 `_workspace-base/ops`
