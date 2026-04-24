@@ -28,4 +28,13 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).not.toContain("homeFlowImage");
     expect(source).not.toContain("homeTrustImage");
   });
+
+  it("keeps the branded hero compact on mobile", () => {
+    expect(source).toContain("pt-[calc(env(safe-area-inset-top)+14px)]");
+    expect(source).toContain("pb-8");
+    expect(source).toContain("mb-4 flex items-center justify-between");
+    expect(source).toContain("w-[164px] max-w-[54vw]");
+    expect(source).toContain("px-5 py-6");
+    expect(source).toContain("px-margin-page pt-8 pb-stack-lg");
+  });
 });

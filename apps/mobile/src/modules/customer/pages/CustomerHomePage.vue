@@ -1,12 +1,12 @@
 <template>
   <main class="min-h-screen bg-background pb-mobile-bottom-nav">
-    <section class="mesh-bg relative overflow-hidden px-margin-page pb-10 pt-[calc(env(safe-area-inset-top)+20px)]">
+    <section class="mesh-bg relative overflow-hidden px-margin-page pb-8 pt-[calc(env(safe-area-inset-top)+14px)]">
       <div class="absolute -left-10 top-12 h-32 w-32 rounded-full bg-primary-fixed/30 blur-3xl" />
       <div class="absolute -right-12 top-20 h-36 w-36 rounded-full bg-secondary-container/15 blur-3xl" />
 
       <div class="relative mx-auto max-w-md">
-        <div class="mb-5 flex items-center justify-between">
-          <img :src="homeBrandImage" alt="安心报废" class="h-auto w-[180px] max-w-[58vw]" />
+        <div class="mb-4 flex items-center justify-between">
+          <img :src="homeBrandImage" alt="安心报废" class="h-auto w-[164px] max-w-[54vw]" />
           <RouterLink
             to="/customer/support"
             class="inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-2 text-label-md text-on-surface shadow-subtle backdrop-blur-sm"
@@ -16,7 +16,7 @@
           </RouterLink>
         </div>
 
-        <section class="relative overflow-hidden rounded-[28px] bg-primary px-6 py-7 text-on-primary shadow-premium">
+        <section class="relative overflow-hidden rounded-[28px] bg-primary px-5 py-6 text-on-primary shadow-premium">
           <div class="absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
           <div class="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-primary-fixed/20 blur-2xl" />
 
@@ -50,7 +50,7 @@
       </div>
     </section>
 
-    <section class="px-margin-page py-stack-lg">
+    <section class="px-margin-page pt-8 pb-stack-lg">
       <div class="mb-stack-md flex items-end justify-between gap-4">
         <div>
           <p class="text-label-sm uppercase tracking-[0.18em] text-primary/70">为什么选我们</p>
