@@ -6,7 +6,7 @@
 
       <div class="relative mx-auto max-w-md">
         <div class="mb-4 flex items-center justify-between">
-          <img :src="homeBrandImage" alt="安心报废" class="h-auto w-[164px] max-w-[54vw]" />
+          <img :src="homeBrandImage" alt="安心报废" class="h-auto w-[150px] max-w-[52vw]" />
           <RouterLink
             to="/customer/support"
             class="inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-2 text-label-md text-on-surface shadow-subtle backdrop-blur-sm"

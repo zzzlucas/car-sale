@@ -6,6 +6,14 @@ import { describe, expect, it } from "vitest";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, "CustomerHomePage.vue"), "utf8");
+const brandImage = fs.readFileSync(path.join(__dirname, "../../../assets/customer-home/brand-mark.png"));
+
+function readPngSize(buffer: Buffer) {
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+}
 
 describe("CustomerHomePage landing layout", () => {
   it("removes the legacy fixed header and inline plate input", () => {
@@ -33,8 +41,15 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("pt-[calc(env(safe-area-inset-top)+14px)]");
     expect(source).toContain("pb-8");
     expect(source).toContain("mb-4 flex items-center justify-between");
-    expect(source).toContain("w-[164px] max-w-[54vw]");
+    expect(source).toContain("w-[150px] max-w-[52vw]");
     expect(source).toContain("px-5 py-6");
     expect(source).toContain("px-margin-page pt-8 pb-stack-lg");
+  });
+
+  it("uses a cropped brand image without large transparent padding", () => {
+    const { width, height } = readPngSize(brandImage);
+
+    expect(width).toBeLessThanOrEqual(690);
+    expect(height).toBeLessThanOrEqual(250);
   });
 });
