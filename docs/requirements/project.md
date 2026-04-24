@@ -54,8 +54,8 @@
   - `apps/mobile` 首期只落“地址搜索建议 + 经纬度回填”，不直接上完整嵌入地图页
   - 客户侧地图请求统一走 `apps/backend` 代理接口，不在前端直出高德 Key
   - 高德 Key 池通过 `AMAP_WEB_SERVICE_KEYS` 注入，并兼容单 Key 配置 `AMAP_WEB_SERVICE_KEY`
-  - 直连高德 Web 服务时，池内 Key 必须是“Web服务”Key；如果使用“Web端(JS API)”Key，则必须通过 `AMAP_WEB_SERVICE_PROXY_BASE_URL` 等代理变量走兼容链路
-  - 线上遇到 `USERKEY_PLAT_NOMATCH` / `10009` 时，优先按 Key 类型或代理变量排查，不把该问题归因到前端 H5
+  - 当前项目地图调用默认显式走高德中转站链路，`AMAP_WEB_SERVICE_PROXY_BASE_URL` 等代理变量应在本地模板和生产环境同时配置
+  - 线上遇到 `USERKEY_PLAT_NOMATCH` / `10009` 时，优先按中转站变量是否缺失排查，不把该问题归因到前端 H5
   - backend 侧按池内顺序尝试 Key；遇到额度、鉴权或网络异常时切下一个 Key 兜底
 - 原因：当前项目还处于低成本验证阶段，优先保证预约页地址搜索能闭环，同时把 Key 暴露面和后续替换成本压到最低。
 
