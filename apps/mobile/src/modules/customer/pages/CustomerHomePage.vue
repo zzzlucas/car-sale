@@ -6,10 +6,7 @@
 
       <div class="relative mx-auto max-w-md">
         <div class="mb-5 flex items-center justify-between">
-          <div class="inline-flex items-center gap-2 rounded-full border border-surface-variant/70 bg-white/80 px-3 py-2 text-label-md text-primary shadow-subtle backdrop-blur-sm">
-            <span class="material-symbols-outlined icon-fill text-[18px]">recycling</span>
-            车辆报废回收
-          </div>
+          <img :src="homeBrandImage" alt="安心报废" class="h-auto w-[180px] max-w-[58vw]" />
           <RouterLink
             to="/customer/support"
             class="inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-2 text-label-md text-on-surface shadow-subtle backdrop-blur-sm"
@@ -160,6 +157,7 @@ import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 import type { FaqItem } from "@car/shared-types";
+import homeBrandImage from "@/assets/customer-home/brand-mark.png";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getFaqs } from "@/services/content";
 

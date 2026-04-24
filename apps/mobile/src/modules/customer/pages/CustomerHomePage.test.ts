@@ -20,4 +20,12 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("常见问题");
     expect(source).toContain("联系客服");
   });
+
+  it("uses only the brand image as a restrained homepage visual", () => {
+    expect(source).toContain("homeBrandImage");
+    expect(source).toContain("brand-mark.png");
+    expect(source).not.toContain("homeHeroImage");
+    expect(source).not.toContain("homeFlowImage");
+    expect(source).not.toContain("homeTrustImage");
+  });
 });
