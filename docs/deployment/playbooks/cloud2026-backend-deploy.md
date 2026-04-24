@@ -76,7 +76,11 @@ pnpm build:backend
 2. 确认远端已经准备好 `apps/backend/.env.production.local`，而不是继续依赖模板默认值。
 3. 确认你准备使用的数据库口径是 `car_platform`，而不是模板里的 `cool`。
 4. 确认 `COS_*` 变量只从本地环境变量或安全工具提供，不写入仓库文档。
-5. 登录 `cloud2026`，确认目标目录存在或准备创建：
+5. 确认地图服务变量已按 Key 类型配置：
+   - 直连高德 Web 服务时，`AMAP_WEB_SERVICE_KEYS` / `AMAP_WEB_SERVICE_KEY` 必须填写“Web服务”Key，不能填“Web端(JS API)”Key。
+   - 如果只能使用通过代理链路可用的 JS Key，必须同时配置 `AMAP_WEB_SERVICE_PROXY_BASE_URL`，并按需配置 `AMAP_WEB_SERVICE_PROXY_APPNAME`。
+   - 线上出现 `USERKEY_PLAT_NOMATCH` / `10009` / “当前高德 Key 不支持后端 Web 服务调用”时，优先检查这一项，而不是重启服务或改前端。
+6. 登录 `cloud2026`，确认目标目录存在或准备创建：
 
 ```powershell
 ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
@@ -143,6 +147,12 @@ pnpm --filter @car/backend pm2:stop
 
 ```bash
 curl -fsS http://127.0.0.1:8120/app/content/support
+```
+
+- 地图反解接口可按真实环境变量探活，返回 `code:1000` 或业务可接受的空结果；如果返回 `10009`，说明线上 Key 类型或代理变量仍不匹配：
+
+```bash
+curl -fsS "http://127.0.0.1:8120/app/map/regeo?longitude=113.366739&latitude=23.128003"
 ```
 
 - 如果本轮涉及 COS 或上传，还要确认环境变量没有继续指向别的项目前缀
