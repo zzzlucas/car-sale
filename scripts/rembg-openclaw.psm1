@@ -52,7 +52,7 @@ function Get-AvailableCompressionTools {
 function Resolve-RembgCompressionMode {
   [CmdletBinding()]
   param(
-    [ValidateSet('auto', 'none', 'indexed8', 'pngquant', 'magick')]
+    [ValidateSet('auto', 'none', 'pngquant', 'magick')]
     [string]$RequestedMode = 'auto',
 
     [hashtable]$AvailableCompressionTools = (Get-AvailableCompressionTools)
@@ -60,10 +60,6 @@ function Resolve-RembgCompressionMode {
 
   if ($RequestedMode -eq 'none') {
     return 'none'
-  }
-
-  if ($RequestedMode -eq 'indexed8') {
-    return 'indexed8'
   }
 
   if ($RequestedMode -eq 'pngquant') {
@@ -90,7 +86,7 @@ function Resolve-RembgCompressionMode {
     return 'magick'
   }
 
-  return 'indexed8'
+  return 'none'
 }
 
 function Get-RembgRawOutputPath {
@@ -165,45 +161,6 @@ function Invoke-MagickCompression {
   return (Test-Path -LiteralPath $OutputPath)
 }
 
-function Invoke-Indexed8Compression {
-  [CmdletBinding()]
-  param(
-    [Parameter(Mandatory = $true)]
-    [string]$InputPath,
-
-    [Parameter(Mandatory = $true)]
-    [string]$OutputPath
-  )
-
-  Add-Type -AssemblyName PresentationCore
-
-  $bitmap = New-Object System.Windows.Media.Imaging.BitmapImage
-  $bitmap.BeginInit()
-  $bitmap.CacheOption = [System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad
-  $bitmap.UriSource = New-Object System.Uri([System.IO.Path]::GetFullPath($InputPath))
-  $bitmap.EndInit()
-  $bitmap.Freeze()
-
-  $converted = New-Object System.Windows.Media.Imaging.FormatConvertedBitmap
-  $converted.BeginInit()
-  $converted.Source = $bitmap
-  $converted.DestinationFormat = [System.Windows.Media.PixelFormats]::Indexed8
-  $converted.DestinationPalette = [System.Windows.Media.Imaging.BitmapPalettes]::Halftone256Transparent
-  $converted.EndInit()
-
-  $encoder = New-Object System.Windows.Media.Imaging.PngBitmapEncoder
-  $encoder.Frames.Add([System.Windows.Media.Imaging.BitmapFrame]::Create($converted))
-
-  $stream = [System.IO.File]::Open($OutputPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write)
-  try {
-    $encoder.Save($stream)
-  } finally {
-    $stream.Dispose()
-  }
-
-  return (Test-Path -LiteralPath $OutputPath)
-}
-
 function Compress-RembgPng {
   [CmdletBinding()]
   param(
@@ -214,7 +171,7 @@ function Compress-RembgPng {
     [string]$FinalOutputPath,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet('none', 'indexed8', 'pngquant', 'magick')]
+    [ValidateSet('none', 'pngquant', 'magick')]
     [string]$CompressionMode,
 
     [switch]$KeepRawOutput
@@ -248,9 +205,6 @@ function Compress-RembgPng {
 
   try {
     switch ($CompressionMode) {
-      'indexed8' {
-        $compressionSucceeded = Invoke-Indexed8Compression -InputPath $resolvedInputPath -OutputPath $temporaryOutputPath
-      }
       'pngquant' {
         $compressionSucceeded = Invoke-PngquantCompression -InputPath $resolvedInputPath -OutputPath $temporaryOutputPath
       }
@@ -306,7 +260,7 @@ function Invoke-OpenClawRembg {
 
     [string]$ApiBaseUrl = 'http://100.98.52.104:17000',
 
-    [ValidateSet('auto', 'none', 'indexed8', 'pngquant', 'magick')]
+    [ValidateSet('auto', 'none', 'pngquant', 'magick')]
     [string]$CompressionMode = 'auto',
 
     [int]$TimeoutSec = 600,

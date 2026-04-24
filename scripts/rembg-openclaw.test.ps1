@@ -31,7 +31,7 @@ $modeAuto = Resolve-RembgCompressionMode -RequestedMode 'auto' -AvailableCompres
   pngquant = $false
   magick = $false
 }
-Assert-Equal -Actual $modeAuto -Expected 'indexed8' -Message 'Auto mode should fall back to indexed8 when no external compressor is available'
+Assert-Equal -Actual $modeAuto -Expected 'none' -Message 'Auto mode should fall back to none when no alpha-safe external compressor is available'
 
 $modePngquant = Resolve-RembgCompressionMode -RequestedMode 'auto' -AvailableCompressionTools @{
   pngquant = $true

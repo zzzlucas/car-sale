@@ -7,7 +7,7 @@ param(
 
   [string]$ApiBaseUrl = 'http://100.98.52.104:17000',
 
-  [ValidateSet('auto', 'none', 'indexed8', 'pngquant', 'magick')]
+  [ValidateSet('auto', 'none', 'pngquant', 'magick')]
   [string]$CompressionMode = 'auto',
 
   [int]$TimeoutSec = 600,
