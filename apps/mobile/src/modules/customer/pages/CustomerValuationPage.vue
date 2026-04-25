@@ -316,6 +316,13 @@
                 已记录当前位置，系统会据此安排上门服务。
               </p>
             </div>
+
+            <p
+              v-if="addressMessage"
+              class="rounded-xl bg-surface-container px-4 py-3 text-body-md text-on-surface-variant"
+            >
+              {{ addressMessage }}
+            </p>
           </section>
 
           <section class="space-y-stack-md border-t border-surface-variant pt-stack-md">
@@ -436,6 +443,7 @@ const uploading = ref(false);
 const locationLoading = ref(false);
 const addressSuggestionLoading = ref(false);
 const message = ref("");
+const addressMessage = ref("");
 const photoPreviews = ref<PhotoPreview[]>([]);
 const addressSuggestions = ref<MapAddressSuggestion[]>([]);
 
@@ -481,6 +489,7 @@ function resetForm() {
   clearPhotoPreviews();
   addressSuggestions.value = [];
   message.value = "表单已重置，可以重新填写。";
+  addressMessage.value = "";
 }
 
 function handleWeightInput(event: Event) {
@@ -499,23 +508,23 @@ async function handlePickupAddressSearch() {
   const keywords = form.pickupAddress.trim();
   if (keywords.length < 2) {
     addressSuggestions.value = [];
-    message.value = "请至少输入 2 个字后再搜索地址。";
+    addressMessage.value = "请至少输入 2 个字后再搜索地址。";
     return;
   }
 
   addressSuggestionLoading.value = true;
-  message.value = "";
+  addressMessage.value = "";
 
   try {
     const suggestions = await searchAddressSuggestions(keywords);
     addressSuggestions.value = suggestions;
 
     if (!suggestions.length) {
-      message.value = "暂未命中地址，建议改搜小区、写字楼或道路名称。";
+      addressMessage.value = "暂未命中地址，建议改搜小区、写字楼或道路名称。";
     }
   } catch (error) {
     addressSuggestions.value = [];
-    message.value = error instanceof Error ? `地址搜索失败：${error.message}` : "地址搜索失败，请稍后重试。";
+    addressMessage.value = error instanceof Error ? `地址搜索失败：${error.message}` : "地址搜索失败，请稍后重试。";
   } finally {
     addressSuggestionLoading.value = false;
   }
@@ -526,7 +535,7 @@ function applyAddressSuggestion(item: MapAddressSuggestion) {
   form.pickupLatitude = item.latitude;
   form.pickupLongitude = item.longitude;
   addressSuggestions.value = [];
-  message.value = "已回填地址与当前位置，可继续补充信息或直接提交。";
+  addressMessage.value = "已回填地址与当前位置，可继续补充信息或直接提交。";
 }
 
 function removePhoto(photoId: string) {
@@ -578,12 +587,12 @@ async function handlePhotoChange(event: Event) {
 
 async function fillCurrentLocation() {
   if (!("geolocation" in navigator)) {
-    message.value = "当前浏览器不支持定位，请手动填写地址。";
+    addressMessage.value = "当前浏览器不支持定位，请手动填写地址。";
     return;
   }
 
   locationLoading.value = true;
-  message.value = "";
+  addressMessage.value = "";
 
   await new Promise<void>(resolve => {
     navigator.geolocation.getCurrentPosition(
@@ -598,7 +607,7 @@ async function fillCurrentLocation() {
 
         if (rejectionMessage) {
           clearPickupLocation(form);
-          message.value = rejectionMessage;
+          addressMessage.value = rejectionMessage;
           locationLoading.value = false;
           resolve();
           return;
@@ -611,12 +620,12 @@ async function fillCurrentLocation() {
             const result = await reverseGeocodeLocation(form.pickupLongitude!, form.pickupLatitude!);
             if (result?.formattedAddress) {
               form.pickupAddress = result.formattedAddress;
-              message.value = "已回填当前位置的中文地址，请补充门牌号等细节。";
+              addressMessage.value = "已回填当前位置的中文地址，请补充门牌号等细节。";
             } else {
-              message.value = "已获取当前位置，请补充中文地址或继续搜索地址建议。";
+              addressMessage.value = "已获取当前位置，请补充中文地址或继续搜索地址建议。";
             }
           } catch (error) {
-            message.value =
+            addressMessage.value =
               error instanceof Error
                 ? `已获取当前位置，但中文地址解析失败：${error.message}`
                 : "已获取当前位置，但中文地址解析失败，请手动补充地址。";
@@ -627,7 +636,7 @@ async function fillCurrentLocation() {
         })();
       },
       () => {
-        message.value = "定位失败，请手动填写地址。";
+        addressMessage.value = "定位失败，请手动填写地址。";
         locationLoading.value = false;
         resolve();
       },
@@ -643,7 +652,7 @@ function clearLocation() {
   form.pickupAddress = "";
   clearPickupLocation(form);
   addressSuggestions.value = [];
-  message.value = "已清空当前位置。";
+  addressMessage.value = "已清空取车地址与当前位置。";
 }
 
 async function handleSubmit() {

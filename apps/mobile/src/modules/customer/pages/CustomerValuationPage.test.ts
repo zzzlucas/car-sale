@@ -39,6 +39,12 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("已获取当前位置，请补充中文地址或继续搜索地址建议。");
   });
 
+  it("shows address and location feedback inside the pickup address section", () => {
+    expect(source).toContain('v-if="addressMessage"');
+    expect(source).toContain("{{ addressMessage }}");
+    expect(source).toContain("addressMessage.value = rejectionMessage");
+  });
+
   it("keeps coordinate wording away from customer-facing copy", () => {
     expect(source).not.toContain("坐标");
     expect(source).not.toContain("经纬度");
