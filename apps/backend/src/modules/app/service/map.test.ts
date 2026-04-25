@@ -120,6 +120,47 @@ describe('AppMapService', () => {
     );
   });
 
+  it('falls back to the next key when the current key domain is invalid', async () => {
+    const { service, requests } = createService('key-a,key-b', [
+      {
+        status: '0',
+        info: 'INVALID_USER_DOMAIN',
+        infocode: '10006',
+      },
+      {
+        status: '1',
+        info: 'OK',
+        infocode: '10000',
+        regeocode: {
+          formatted_address: '广东省广州市天河区天园街道天河公园',
+        },
+      },
+    ]);
+
+    const result = await service.reverseGeocode(113.366739, 23.128003);
+
+    expect(requests.map(item => item.params.key)).toEqual(['key-a', 'key-b']);
+    expect(result).toEqual(
+      expect.objectContaining({
+        formattedAddress: '广东省广州市天河区天园街道天河公园',
+      })
+    );
+  });
+
+  it('returns a clear domain message when the only key is not authorized for the proxy domain', async () => {
+    const { service } = createService('key-a', [
+      {
+        status: '0',
+        info: 'INVALID_USER_DOMAIN',
+        infocode: '10006',
+      },
+    ]);
+
+    await expect(service.reverseGeocode(113.366739, 23.128003)).rejects.toThrow(
+      '当前高德 Key 未授权线上域名'
+    );
+  });
+
   it('resolves a chinese address from reverse geocode output', async () => {
     const { service } = createService('key-a', [
       {

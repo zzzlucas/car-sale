@@ -97,6 +97,24 @@ sudo mkdir -p /srv/apps/car-platform/backups
 
 ## 当前建议的部署动作顺序
 
+### 0. 优先使用项目根脚本入口
+
+当前 `name10.lucasishere.top` 按 `preprod` 管理。日常不再优先手敲 SSH 命令，而是从项目根运行：
+
+```powershell
+pnpm deploy:check:preprod
+pnpm env:update:preprod:backend
+pnpm deploy:preprod:backend
+```
+
+其中：
+
+- `deploy:check:preprod`：检查远端 `.env.production.local` 必需变量、后端探活和地图反解状态
+- `env:update:preprod:backend`：从本地 `apps/backend/.env.local` 同步高德中转站变量到远端，并自动备份、重启、探活
+- `deploy:preprod:backend`：远端拉代码、安装依赖、构建后端、重启 PM2 并探活
+
+手工命令只作为脚本异常时的排障参考。
+
 ### 1. 先同步代码和依赖
 
 同步方式可以是 `git pull`、`scp` 或后续脚本，但标准目标统一是：
@@ -150,7 +168,7 @@ pnpm --filter @car/backend pm2:stop
 curl -fsS http://127.0.0.1:8120/app/content/support
 ```
 
-- 地图反解接口可按真实环境变量探活，返回 `code:1000` 或业务可接受的空结果；如果返回 `10009`，说明线上中转站变量仍未生效：
+- 地图反解接口可按真实环境变量探活，返回 `code:1000` 或业务可接受的空结果；如果返回 `10009`，说明线上中转站变量仍未生效；如果返回“当前高德 Key 未授权线上域名”，说明高德控制台需要授权当前预发布域名或更换已授权 Key：
 
 ```bash
 curl -fsS "http://127.0.0.1:8120/app/map/regeo?longitude=113.366739&latitude=23.128003"

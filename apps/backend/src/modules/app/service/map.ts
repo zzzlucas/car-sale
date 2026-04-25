@@ -17,6 +17,7 @@ const KEY_POOL_ERROR_CODES = new Set([
   '10001',
   '10003',
   '10004',
+  '10006',
   '10008',
   '10009',
   '10010',
@@ -30,6 +31,7 @@ const KEY_POOL_ERROR_INFOS = new Set([
   'SERVICE_NOT_AVAILABLE',
   'DAILY_QUERY_OVER_LIMIT',
   'ACCESS_TOO_FREQUENT',
+  'INVALID_USER_DOMAIN',
   'USERKEY_PLAT_NOMATCH',
   'INVALID_USER_SCODE',
   'USER_DAILY_QUERY_OVER_LIMIT',
@@ -269,6 +271,10 @@ export class AppMapService extends BaseService {
 
     if (String(payload.infocode || '').trim() === '10009') {
       return '当前高德 Key 不支持后端 Web 服务调用';
+    }
+
+    if (String(payload.infocode || '').trim() === '10006') {
+      return '当前高德 Key 未授权线上域名';
     }
 
     return '地图服务暂时不可用，请稍后重试';
