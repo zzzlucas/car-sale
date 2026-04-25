@@ -49,6 +49,7 @@ cd "`$APP_DIR"
 
 echo "DEPLOY_COMMIT=$commit"
 $installCommand
+pnpm --filter @car/shared-types build
 pnpm build:backend
 pnpm --filter @car/backend pm2:restart
 sleep 4
