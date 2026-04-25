@@ -21,7 +21,7 @@ function Invoke-RemoteScript {
         scp -i $SshKey $localScript "${SshHost}:$remoteScriptPath" | Out-Host
         ssh -i $SshKey $SshHost "bash '$remoteScriptPath'; code=`$?; rm -f '$remoteScriptPath'; exit `$code"
         if ($LASTEXITCODE -ne 0) {
-            throw "远端预发布检查失败，退出码：$LASTEXITCODE"
+            throw "remote preprod check failed, exit code: $LASTEXITCODE"
         }
     }
     finally {
