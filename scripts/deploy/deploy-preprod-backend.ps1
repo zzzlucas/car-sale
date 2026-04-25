@@ -4,7 +4,8 @@ param(
     [string]$SshHost = 'ubuntu@124.222.31.238',
     [string]$SshKey = 'C:/Users/Lucas/.ssh/id_ed25519',
     [string]$RemoteAppDir = '/srv/apps/car-platform/app',
-    [string]$Ref = 'HEAD'
+    [string]$Ref = 'HEAD',
+    [switch]$Install
 )
 
 Set-StrictMode -Version 2.0
@@ -13,6 +14,9 @@ $ErrorActionPreference = 'Stop'
 function Invoke-RemoteScript {
     param([Parameter(Mandatory = $true)][string]$Script)
     ($Script -replace "`r`n", "`n") | ssh -i $SshKey $SshHost 'bash -s'
+    if ($LASTEXITCODE -ne 0) {
+        throw "远端后端部署失败，退出码：$LASTEXITCODE"
+    }
 }
 
 $commit = (git rev-parse $Ref).Trim()
@@ -26,6 +30,7 @@ try {
     $remoteArchive = "/tmp/car-platform-$($commit.Substring(0, 12)).tar"
     scp -i $SshKey $archivePath "${SshHost}:$remoteArchive" | Out-Host
 
+    $installCommand = if ($Install) { 'pnpm install --frozen-lockfile' } else { "echo 'SKIP_INSTALL=1'" }
     $remoteScript = @"
 set -euo pipefail
 APP_DIR='$RemoteAppDir'
@@ -43,7 +48,7 @@ rm -f "`$ARCHIVE"
 cd "`$APP_DIR"
 
 echo "DEPLOY_COMMIT=$commit"
-pnpm install --frozen-lockfile
+$installCommand
 pnpm build:backend
 pnpm --filter @car/backend pm2:restart
 sleep 4
