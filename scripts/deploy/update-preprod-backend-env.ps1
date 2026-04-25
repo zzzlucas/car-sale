@@ -112,6 +112,7 @@ foreach ($entry in $proxyDefaults.GetEnumerator()) {
 }
 
 $tempFile = Join-Path $env:TEMP ("car-preprod-amap-{0}.env" -f ([guid]::NewGuid().ToString('N')))
+$localScript = $null
 try {
     $updateLines | Set-Content -LiteralPath $tempFile -Encoding UTF8
     $remoteTemp = "/tmp/car-preprod-amap-$([guid]::NewGuid().ToString('N')).env"
@@ -198,10 +199,21 @@ if [ '$restartFlag' = '1' ]; then
   echo
 fi
 "@
-    ($remoteScript -replace "`r`n", "`n") | ssh -i $SshKey $SshHost 'bash -s'
+    $localScript = Join-Path $env:TEMP ("car-preprod-env-update-{0}.sh" -f ([guid]::NewGuid().ToString('N')))
+    $remoteScriptPath = "/tmp/car-preprod-env-update-$([guid]::NewGuid().ToString('N')).sh"
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($localScript, ($remoteScript -replace "`r`n", "`n"), $utf8NoBom)
+    scp -i $SshKey $localScript "${SshHost}:$remoteScriptPath" | Out-Host
+    ssh -i $SshKey $SshHost "bash '$remoteScriptPath'; code=`$?; rm -f '$remoteScriptPath'; exit `$code"
+    if ($LASTEXITCODE -ne 0) {
+        throw "远端预发布 env 更新失败，退出码：$LASTEXITCODE"
+    }
 }
 finally {
     if (Test-Path -LiteralPath $tempFile) {
         Remove-Item -LiteralPath $tempFile -Force
+    }
+    if ($localScript -and (Test-Path -LiteralPath $localScript)) {
+        Remove-Item -LiteralPath $localScript -Force
     }
 }
