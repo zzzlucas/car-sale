@@ -3,6 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.0.0",
   "scripts": {
+    "dev": "pnpm --parallel --filter @car/mobile --filter @car/backend dev",
     "dev:mobile": "pnpm --filter @car/mobile dev",
     "build:mobile": "pnpm --filter @car/mobile build",
     "typecheck:mobile": "pnpm --filter @car/mobile typecheck",
