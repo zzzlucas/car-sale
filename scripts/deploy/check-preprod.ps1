@@ -52,9 +52,23 @@ check_key() {
 }
 
 missing=0
-for key in DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_NAME AMAP_WEB_SERVICE_KEYS AMAP_WEB_SERVICE_PROXY_BASE_URL AMAP_WEB_SERVICE_PROXY_APPNAME AMAP_WEB_SERVICE_PROXY_CALLBACK AMAP_WEB_SERVICE_PROXY_REFERER AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH; do
+for key in DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_NAME MAP_SERVICE_PROVIDER; do
   check_key "$key" || missing=1
 done
+
+provider=$(grep -E '^MAP_SERVICE_PROVIDER=' "$ENV_FILE" | tail -n1 | cut -d= -f2- | tr '[:upper:]' '[:lower:]')
+if [ -z "$provider" ] || [ "$provider" = "tianditu" ]; then
+  for key in TIANDITU_WEB_SERVICE_KEYS TIANDITU_WEB_SERVICE_TIMEOUT_MS; do
+    check_key "$key" || missing=1
+  done
+elif [ "$provider" = "amap" ]; then
+  for key in AMAP_WEB_SERVICE_KEYS AMAP_WEB_SERVICE_PROXY_BASE_URL AMAP_WEB_SERVICE_PROXY_APPNAME AMAP_WEB_SERVICE_PROXY_CALLBACK AMAP_WEB_SERVICE_PROXY_REFERER AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH; do
+    check_key "$key" || missing=1
+  done
+else
+  echo "MAP_SERVICE_PROVIDER=INVALID:$provider"
+  missing=1
+fi
 
 if [ "$missing" -ne 0 ]; then
   exit 1

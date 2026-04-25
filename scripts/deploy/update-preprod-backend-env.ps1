@@ -49,7 +49,41 @@ function Add-EnvLine {
 $localEnv = Read-EnvFile -Path $LocalEnvPath
 $updateLines = New-Object System.Collections.Generic.List[string]
 
-if (-not $SkipAmapKeys) {
+$mapProvider = if ($localEnv.Contains('MAP_SERVICE_PROVIDER') -and -not [string]::IsNullOrWhiteSpace([string]$localEnv['MAP_SERVICE_PROVIDER'])) {
+    [string]$localEnv['MAP_SERVICE_PROVIDER']
+}
+else {
+    'tianditu'
+}
+$mapProvider = $mapProvider.Trim().ToLowerInvariant()
+if ($mapProvider -ne 'tianditu' -and $mapProvider -ne 'amap') {
+    throw "MAP_SERVICE_PROVIDER 只允许 tianditu 或 amap，当前值: $mapProvider"
+}
+Add-EnvLine -Lines $updateLines -Key 'MAP_SERVICE_PROVIDER' -Value $mapProvider
+
+$tiandituKeys = [string]($localEnv['TIANDITU_WEB_SERVICE_KEYS'])
+if ($mapProvider -eq 'tianditu' -and ([string]::IsNullOrWhiteSpace($tiandituKeys) -or $tiandituKeys -like '<*' -or $tiandituKeys -eq 'change-me')) {
+    throw "请先在 $LocalEnvPath 填写真实 TIANDITU_WEB_SERVICE_KEYS，或将 MAP_SERVICE_PROVIDER 改为 amap。"
+}
+if (-not [string]::IsNullOrWhiteSpace($tiandituKeys) -and $tiandituKeys -notlike '<*' -and $tiandituKeys -ne 'change-me') {
+    Add-EnvLine -Lines $updateLines -Key 'TIANDITU_WEB_SERVICE_KEYS' -Value $tiandituKeys
+}
+
+$tiandituDefaults = [ordered]@{
+    TIANDITU_WEB_SERVICE_TIMEOUT_MS = '2500'
+}
+
+foreach ($entry in $tiandituDefaults.GetEnumerator()) {
+    $value = if ($localEnv.Contains($entry.Key) -and -not [string]::IsNullOrWhiteSpace([string]$localEnv[$entry.Key])) {
+        [string]$localEnv[$entry.Key]
+    }
+    else {
+        [string]$entry.Value
+    }
+    Add-EnvLine -Lines $updateLines -Key $entry.Key -Value $value
+}
+
+if ($mapProvider -eq 'amap' -and -not $SkipAmapKeys) {
     $amapKeys = [string]($localEnv['AMAP_WEB_SERVICE_KEYS'])
     if ([string]::IsNullOrWhiteSpace($amapKeys) -or $amapKeys -like '<*') {
         throw "请先在 $LocalEnvPath 填写真实 AMAP_WEB_SERVICE_KEYS，或加 -SkipAmapKeys 只更新非密钥中转站变量。"
@@ -104,6 +138,9 @@ from pathlib import Path
 env_path = Path(sys.argv[1])
 update_path = Path(sys.argv[2])
 allowed = {
+    'MAP_SERVICE_PROVIDER',
+    'TIANDITU_WEB_SERVICE_KEYS',
+    'TIANDITU_WEB_SERVICE_TIMEOUT_MS',
     'AMAP_WEB_SERVICE_KEYS',
     'AMAP_WEB_SERVICE_TIMEOUT_MS',
     'AMAP_WEB_SERVICE_PROXY_BASE_URL',

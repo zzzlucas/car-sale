@@ -76,11 +76,10 @@ pnpm build:backend
 2. 确认远端已经准备好 `apps/backend/.env.production.local`，而不是继续依赖模板默认值。
 3. 确认你准备使用的数据库口径是 `car_platform`，而不是模板里的 `cool`。
 4. 确认 `COS_*` 变量只从本地环境变量或安全工具提供，不写入仓库文档。
-5. 确认地图服务按高德中转站链路显式配置：
-   - `AMAP_WEB_SERVICE_KEYS` / `AMAP_WEB_SERVICE_KEY` 填写中转站链路可用的高德 Key。
-   - `AMAP_WEB_SERVICE_PROXY_BASE_URL` 固定配置为 `https://amap.bangban.cc/_AMapService`。
-   - `AMAP_WEB_SERVICE_PROXY_APPNAME`、`AMAP_WEB_SERVICE_PROXY_CALLBACK`、`AMAP_WEB_SERVICE_PROXY_REFERER`、`AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH` 与本地模板保持一致。
-   - 线上出现 `USERKEY_PLAT_NOMATCH` / `10009` / “当前高德 Key 不支持后端 Web 服务调用”时，优先检查中转站变量是否缺失，而不是重启服务或改前端。
+5. 确认地图服务 provider 显式配置：
+   - 默认 `MAP_SERVICE_PROVIDER=tianditu`，并填写 `TIANDITU_WEB_SERVICE_KEYS`。
+   - 需要临时回退高德时，改为 `MAP_SERVICE_PROVIDER=amap`，并填写 `AMAP_WEB_SERVICE_KEYS` 与 `AMAP_WEB_SERVICE_PROXY_*`。
+   - 线上出现 `USERKEY_PLAT_NOMATCH` / `10009` / “当前高德 Key 不支持后端 Web 服务调用”时，优先确认是否仍在使用 `amap` provider。
 6. 登录 `cloud2026`，确认目标目录存在或准备创建：
 
 ```powershell
@@ -112,7 +111,7 @@ pnpm deploy:preprod:backend
 
 - `deploy:check:preprod`：检查远端 `.env.production.local` 必需变量、后端探活和地图反解状态
 - `env:pull:preprod:backend`：从远端预发布 `.env.production.local` 拉取到本地 `apps/backend/.env.preprod`，只在本机保存真实值
-- `env:update:preprod:backend`：从本地 `apps/backend/.env.preprod` 同步高德中转站变量到远端，并自动备份、重启、探活
+- `env:update:preprod:backend`：从本地 `apps/backend/.env.preprod` 同步地图 provider 变量到远端，并自动备份、重启、探活
 - `deploy:preprod:backend`：远端拉代码、安装依赖、构建后端、重启 PM2 并探活
 
 手工命令只作为脚本异常时的排障参考。

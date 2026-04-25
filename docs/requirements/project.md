@@ -52,9 +52,10 @@
 - 优先级：`P1`
 - 决策：
   - `apps/mobile` 首期只落“地址搜索建议 + 经纬度回填”，不直接上完整嵌入地图页
-  - 客户侧地图请求统一走 `apps/backend` 代理接口，不在前端直出高德 Key
-  - 高德 Key 池通过 `AMAP_WEB_SERVICE_KEYS` 注入，并兼容单 Key 配置 `AMAP_WEB_SERVICE_KEY`
-  - 当前项目地图调用默认显式走高德中转站链路，`AMAP_WEB_SERVICE_PROXY_BASE_URL` 等代理变量应在本地模板和生产环境同时配置
+  - 客户侧地图请求统一走 `apps/backend` 代理接口，不在前端直出地图 Key
+  - 地图 provider 通过 `MAP_SERVICE_PROVIDER=tianditu|amap` 切换，默认使用 `tianditu`
+  - 天地图 Key 池通过 `TIANDITU_WEB_SERVICE_KEYS` 注入，并兼容单 Key 配置 `TIANDITU_WEB_SERVICE_KEY`
+  - 高德中转站作为显式回退 provider 保留，通过 `AMAP_WEB_SERVICE_KEYS` 和 `AMAP_WEB_SERVICE_PROXY_*` 配置
   - 线上遇到 `USERKEY_PLAT_NOMATCH` / `10009` 时，优先按中转站变量是否缺失排查，不把该问题归因到前端 H5
   - backend 侧按池内顺序尝试 Key；遇到额度、鉴权或网络异常时切下一个 Key 兜底
 - 原因：当前项目还处于低成本验证阶段，优先保证预约页地址搜索能闭环，同时把 Key 暴露面和后续替换成本压到最低。
@@ -146,7 +147,7 @@
   - `apps/backend/.env.preprod` 是预发布环境变量的本地真实来源文件，不提交 Git
   - `apps/backend/.env.preprod.example` 入 Git，只列变量名和示例值
   - `pnpm env:pull:preprod:backend` 从远端预发布 `.env.production.local` 拉取到本地 `.env.preprod`
-  - `pnpm env:update:preprod:backend` 默认从 `.env.preprod` 同步高德中转站变量到远端
+  - `pnpm env:update:preprod:backend` 默认从 `.env.preprod` 同步地图 provider 变量到远端
 - 原因：预发布不是正式生产环境，按 `_workspace-base` 口径应允许本地显式保存非正式环境配置来源，避免继续用 `.env.local` 同时承担 dev 与 preprod，导致 Key、域名和数据库口径互相污染。
 
 ## 当前核心数据对象
