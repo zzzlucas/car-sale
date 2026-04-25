@@ -45,6 +45,12 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("addressMessage.value = rejectionMessage");
   });
 
+  it("logs browser geolocation details for local troubleshooting", () => {
+    expect(source).toContain('console.info("[pickup-location] browser geolocation"');
+    expect(source).toContain("accuracy: position.coords.accuracy");
+    expect(source).toContain("rejectionMessage");
+  });
+
   it("keeps coordinate wording away from customer-facing copy", () => {
     expect(source).not.toContain("坐标");
     expect(source).not.toContain("经纬度");

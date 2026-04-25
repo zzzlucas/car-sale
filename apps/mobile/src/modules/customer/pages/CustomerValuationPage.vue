@@ -605,6 +605,18 @@ async function fillCurrentLocation() {
           accuracy: position.coords.accuracy,
         });
 
+        console.info("[pickup-location] browser geolocation", {
+          latitude,
+          longitude,
+          accuracy: position.coords.accuracy,
+          altitude: position.coords.altitude,
+          altitudeAccuracy: position.coords.altitudeAccuracy,
+          heading: position.coords.heading,
+          speed: position.coords.speed,
+          timestamp: position.timestamp,
+          rejectionMessage,
+        });
+
         if (rejectionMessage) {
           clearPickupLocation(form);
           addressMessage.value = rejectionMessage;
