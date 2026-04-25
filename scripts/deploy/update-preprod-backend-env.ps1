@@ -71,6 +71,7 @@ if (-not [string]::IsNullOrWhiteSpace($tiandituKeys) -and $tiandituKeys -notlike
 
 $tiandituDefaults = [ordered]@{
     TIANDITU_WEB_SERVICE_TIMEOUT_MS = '2500'
+    TIANDITU_WEB_SERVICE_REFERER = 'https://name10.lucasishere.top/'
 }
 
 foreach ($entry in $tiandituDefaults.GetEnumerator()) {
@@ -141,6 +142,7 @@ allowed = {
     'MAP_SERVICE_PROVIDER',
     'TIANDITU_WEB_SERVICE_KEYS',
     'TIANDITU_WEB_SERVICE_TIMEOUT_MS',
+    'TIANDITU_WEB_SERVICE_REFERER',
     'AMAP_WEB_SERVICE_KEYS',
     'AMAP_WEB_SERVICE_TIMEOUT_MS',
     'AMAP_WEB_SERVICE_PROXY_BASE_URL',

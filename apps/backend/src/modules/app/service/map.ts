@@ -9,6 +9,7 @@ const AMAP_BASE_URL = 'https://restapi.amap.com';
 const TIANDITU_BASE_URL = 'https://api.tianditu.gov.cn';
 const DEFAULT_TIMEOUT_MS = 2500;
 const DEFAULT_OFFSET = 5;
+const DEFAULT_TIANDITU_REFERER = 'http://localhost:6173/';
 const DEFAULT_PROXY_APPNAME = 'https%3A%2F%2Famap.bangban.cc%2Fdt.html';
 const DEFAULT_PROXY_CALLBACK = 'jsonp_test';
 const DEFAULT_PROXY_REFERER = 'https://amap.bangban.cc/dt.html';
@@ -125,6 +126,7 @@ export function resolveTiandituWebServiceConfig(env: NodeJS.ProcessEnv) {
     enabled: keys.length > 0,
     keys,
     timeoutMs,
+    referer: env.TIANDITU_WEB_SERVICE_REFERER?.trim() || DEFAULT_TIANDITU_REFERER,
   };
 }
 
@@ -442,8 +444,13 @@ export class AppMapService extends BaseService {
     params: Record<string, string>,
     timeoutMs: number
   ): Promise<TiandituSearchResponse | TiandituRegeoResponse> {
+    const config = resolveTiandituWebServiceConfig(this.env);
     const response = await axios.get(`${TIANDITU_BASE_URL}${path}`, {
       params,
+      headers: {
+        Referer: config.referer,
+        'User-Agent': 'Mozilla/5.0',
+      },
       timeout: timeoutMs,
     });
 

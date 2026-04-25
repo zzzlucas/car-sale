@@ -105,6 +105,15 @@ describe('resolveTiandituWebServiceConfig', () => {
     expect(config.keys).toEqual(['key-a', 'key-b', 'key-c']);
     expect(config.timeoutMs).toBe(3200);
   });
+
+  it('supports a browser referer for browser-side tianditu keys', () => {
+    const config = resolveTiandituWebServiceConfig({
+      TIANDITU_WEB_SERVICE_KEYS: 'key-a',
+      TIANDITU_WEB_SERVICE_REFERER: 'https://name10.lucasishere.top/',
+    } as NodeJS.ProcessEnv);
+
+    expect(config.referer).toBe('https://name10.lucasishere.top/');
+  });
 });
 
 describe('resolveAmapWebServiceConfig', () => {
@@ -388,5 +397,35 @@ describe('AppMapService', () => {
     expect(options?.headers).toMatchObject({
       'X-Requested-With': 'com.bangban.cc',
     });
+  });
+
+  it('builds tianditu requests with a browser referer header', async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        status: '0',
+        result: {
+          formatted_address: '广东省广州市天河区天河公园',
+        },
+      },
+    } as any);
+
+    const service = new AppMapService() as any;
+    service.env = {
+      MAP_SERVICE_PROVIDER: 'tianditu',
+      TIANDITU_WEB_SERVICE_KEYS: 'tdt-key-a',
+      TIANDITU_WEB_SERVICE_REFERER: 'https://name10.lucasishere.top/',
+    } as NodeJS.ProcessEnv;
+
+    await service.reverseGeocode(113.366739, 23.128003);
+
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      'https://api.tianditu.gov.cn/geocoder',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Referer: 'https://name10.lucasishere.top/',
+          'User-Agent': 'Mozilla/5.0',
+        }),
+      })
+    );
   });
 });

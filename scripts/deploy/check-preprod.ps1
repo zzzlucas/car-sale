@@ -58,7 +58,7 @@ done
 
 provider=$(grep -E '^MAP_SERVICE_PROVIDER=' "$ENV_FILE" | tail -n1 | cut -d= -f2- | tr '[:upper:]' '[:lower:]')
 if [ -z "$provider" ] || [ "$provider" = "tianditu" ]; then
-  for key in TIANDITU_WEB_SERVICE_KEYS TIANDITU_WEB_SERVICE_TIMEOUT_MS; do
+  for key in TIANDITU_WEB_SERVICE_KEYS TIANDITU_WEB_SERVICE_TIMEOUT_MS TIANDITU_WEB_SERVICE_REFERER; do
     check_key "$key" || missing=1
   done
 elif [ "$provider" = "amap" ]; then
