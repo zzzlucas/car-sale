@@ -61,7 +61,11 @@ if [ -z "$provider" ] || [ "$provider" = "tianditu" ]; then
   for key in TIANDITU_WEB_SERVICE_KEYS TIANDITU_WEB_SERVICE_TIMEOUT_MS TIANDITU_WEB_SERVICE_ACCESS TIANDITU_WEB_SERVICE_REFERER; do
     check_key "$key" || missing=1
   done
-elif [ "$provider" = "amap" ]; then
+elif [ "$provider" = "amap-official" ]; then
+  for key in AMAP_WEB_SERVICE_KEYS AMAP_WEB_SERVICE_TIMEOUT_MS; do
+    check_key "$key" || missing=1
+  done
+elif [ "$provider" = "amap" ] || [ "$provider" = "amap-proxy" ]; then
   for key in AMAP_WEB_SERVICE_KEYS AMAP_WEB_SERVICE_PROXY_BASE_URL AMAP_WEB_SERVICE_PROXY_APPNAME AMAP_WEB_SERVICE_PROXY_CALLBACK AMAP_WEB_SERVICE_PROXY_REFERER AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH; do
     check_key "$key" || missing=1
   done

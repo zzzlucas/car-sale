@@ -56,14 +56,14 @@ else {
     'tianditu'
 }
 $mapProvider = $mapProvider.Trim().ToLowerInvariant()
-if ($mapProvider -ne 'tianditu' -and $mapProvider -ne 'amap') {
-    throw "MAP_SERVICE_PROVIDER 只允许 tianditu 或 amap，当前值: $mapProvider"
+if ($mapProvider -ne 'tianditu' -and $mapProvider -ne 'amap' -and $mapProvider -ne 'amap-proxy' -and $mapProvider -ne 'amap-official') {
+    throw "MAP_SERVICE_PROVIDER 只允许 tianditu、amap-official、amap 或 amap-proxy，当前值: $mapProvider"
 }
 Add-EnvLine -Lines $updateLines -Key 'MAP_SERVICE_PROVIDER' -Value $mapProvider
 
 $tiandituKeys = [string]($localEnv['TIANDITU_WEB_SERVICE_KEYS'])
 if ($mapProvider -eq 'tianditu' -and ([string]::IsNullOrWhiteSpace($tiandituKeys) -or $tiandituKeys -like '<*' -or $tiandituKeys -eq 'change-me')) {
-    throw "请先在 $LocalEnvPath 填写真实 TIANDITU_WEB_SERVICE_KEYS，或将 MAP_SERVICE_PROVIDER 改为 amap。"
+    throw "请先在 $LocalEnvPath 填写真实 TIANDITU_WEB_SERVICE_KEYS，或将 MAP_SERVICE_PROVIDER 改为 amap-official/amap-proxy。"
 }
 if (-not [string]::IsNullOrWhiteSpace($tiandituKeys) -and $tiandituKeys -notlike '<*' -and $tiandituKeys -ne 'change-me') {
     Add-EnvLine -Lines $updateLines -Key 'TIANDITU_WEB_SERVICE_KEYS' -Value $tiandituKeys
@@ -85,7 +85,7 @@ foreach ($entry in $tiandituDefaults.GetEnumerator()) {
     Add-EnvLine -Lines $updateLines -Key $entry.Key -Value $value
 }
 
-if ($mapProvider -eq 'amap' -and -not $SkipAmapKeys) {
+if (($mapProvider -eq 'amap' -or $mapProvider -eq 'amap-proxy' -or $mapProvider -eq 'amap-official') -and -not $SkipAmapKeys) {
     $amapKeys = [string]($localEnv['AMAP_WEB_SERVICE_KEYS'])
     if ([string]::IsNullOrWhiteSpace($amapKeys) -or $amapKeys -like '<*') {
         throw "请先在 $LocalEnvPath 填写真实 AMAP_WEB_SERVICE_KEYS，或加 -SkipAmapKeys 只更新非密钥中转站变量。"

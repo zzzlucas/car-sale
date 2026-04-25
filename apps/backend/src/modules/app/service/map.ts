@@ -91,7 +91,7 @@ interface TiandituRegeoResponse {
   };
 }
 
-type MapServiceProvider = 'tianditu' | 'amap';
+type MapServiceProvider = 'tianditu' | 'amap-proxy' | 'amap-official';
 type TiandituAccessMode = 'browser' | 'server';
 
 function parseKeyPool(rawPool: string) {
@@ -110,7 +110,15 @@ export function resolveMapServiceProvider(env: NodeJS.ProcessEnv): MapServicePro
     .trim()
     .toLowerCase();
 
-  return provider === 'amap' ? 'amap' : 'tianditu';
+  if (provider === 'amap' || provider === 'amap-proxy') {
+    return 'amap-proxy';
+  }
+
+  if (provider === 'amap-official') {
+    return 'amap-official';
+  }
+
+  return 'tianditu';
 }
 
 export function resolveTiandituWebServiceConfig(env: NodeJS.ProcessEnv) {
@@ -153,7 +161,10 @@ export function resolveAmapWebServiceConfig(env: NodeJS.ProcessEnv) {
     enabled: keys.length > 0,
     keys,
     timeoutMs,
-    proxyBaseUrl: env.AMAP_WEB_SERVICE_PROXY_BASE_URL?.trim() || '',
+    proxyBaseUrl:
+      resolveMapServiceProvider(env) === 'amap-proxy'
+        ? env.AMAP_WEB_SERVICE_PROXY_BASE_URL?.trim() || ''
+        : '',
     proxyAppname: env.AMAP_WEB_SERVICE_PROXY_APPNAME?.trim() || DEFAULT_PROXY_APPNAME,
     proxyCallback: env.AMAP_WEB_SERVICE_PROXY_CALLBACK?.trim() || DEFAULT_PROXY_CALLBACK,
     proxyReferer: env.AMAP_WEB_SERVICE_PROXY_REFERER?.trim() || DEFAULT_PROXY_REFERER,
