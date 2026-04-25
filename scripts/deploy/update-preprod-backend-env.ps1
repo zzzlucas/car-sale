@@ -35,7 +35,7 @@ function Read-EnvFile {
 
 function Add-EnvLine {
     param(
-        [Parameter(Mandatory = $true)][System.Collections.Generic.List[string]]$Lines,
+        [System.Collections.Generic.List[string]]$Lines,
         [Parameter(Mandatory = $true)][string]$Key,
         [Parameter(Mandatory = $true)][string]$Value
     )
