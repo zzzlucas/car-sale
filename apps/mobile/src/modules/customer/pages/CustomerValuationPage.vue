@@ -417,7 +417,12 @@ import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { reverseGeocodeLocation, searchAddressSuggestions } from "@/services/map";
 import { submitValuationOrder } from "@/services/orders";
 import { uploadVehiclePhoto } from "@/services/upload";
-import { createInitialValuationForm, validateValuationForm } from "./customerValuationForm";
+import {
+  clearPickupLocation,
+  createInitialValuationForm,
+  getCurrentLocationRejectionMessage,
+  validateValuationForm,
+} from "./customerValuationForm";
 
 type PhotoPreview = {
   id: string;
@@ -484,6 +489,7 @@ function handleWeightInput(event: Event) {
 }
 
 function handlePickupAddressInput() {
+  clearPickupLocation(form);
   if (addressSuggestions.value.length) {
     addressSuggestions.value = [];
   }
@@ -582,8 +588,24 @@ async function fillCurrentLocation() {
   await new Promise<void>(resolve => {
     navigator.geolocation.getCurrentPosition(
       position => {
-        form.pickupLatitude = Number(position.coords.latitude.toFixed(6));
-        form.pickupLongitude = Number(position.coords.longitude.toFixed(6));
+        const latitude = Number(position.coords.latitude.toFixed(6));
+        const longitude = Number(position.coords.longitude.toFixed(6));
+        const rejectionMessage = getCurrentLocationRejectionMessage({
+          latitude,
+          longitude,
+          accuracy: position.coords.accuracy,
+        });
+
+        if (rejectionMessage) {
+          clearPickupLocation(form);
+          message.value = rejectionMessage;
+          locationLoading.value = false;
+          resolve();
+          return;
+        }
+
+        form.pickupLatitude = latitude;
+        form.pickupLongitude = longitude;
         void (async () => {
           try {
             const result = await reverseGeocodeLocation(form.pickupLongitude!, form.pickupLatitude!);
@@ -618,8 +640,9 @@ async function fillCurrentLocation() {
 }
 
 function clearLocation() {
-  form.pickupLatitude = null;
-  form.pickupLongitude = null;
+  form.pickupAddress = "";
+  clearPickupLocation(form);
+  addressSuggestions.value = [];
   message.value = "已清空当前位置。";
 }
 
