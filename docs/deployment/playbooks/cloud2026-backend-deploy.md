@@ -103,6 +103,7 @@ sudo mkdir -p /srv/apps/car-platform/backups
 
 ```powershell
 pnpm deploy:check:preprod
+pnpm env:pull:preprod:backend
 pnpm env:update:preprod:backend
 pnpm deploy:preprod:backend
 ```
@@ -110,7 +111,8 @@ pnpm deploy:preprod:backend
 其中：
 
 - `deploy:check:preprod`：检查远端 `.env.production.local` 必需变量、后端探活和地图反解状态
-- `env:update:preprod:backend`：从本地 `apps/backend/.env.local` 同步高德中转站变量到远端，并自动备份、重启、探活
+- `env:pull:preprod:backend`：从远端预发布 `.env.production.local` 拉取到本地 `apps/backend/.env.preprod`，只在本机保存真实值
+- `env:update:preprod:backend`：从本地 `apps/backend/.env.preprod` 同步高德中转站变量到远端，并自动备份、重启、探活
 - `deploy:preprod:backend`：远端拉代码、安装依赖、构建后端、重启 PM2 并探活
 
 手工命令只作为脚本异常时的排障参考。

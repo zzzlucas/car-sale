@@ -4,7 +4,7 @@ param(
     [string]$SshHost = 'ubuntu@124.222.31.238',
     [string]$SshKey = 'C:/Users/Lucas/.ssh/id_ed25519',
     [string]$RemoteAppDir = '/srv/apps/car-platform/app',
-    [string]$LocalEnvPath = 'apps/backend/.env.local',
+    [string]$LocalEnvPath = 'apps/backend/.env.preprod',
     [switch]$SkipAmapKeys,
     [switch]$NoRestart
 )

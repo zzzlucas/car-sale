@@ -139,6 +139,16 @@
   - 项目仓库仍负责 `car` 自己的业务代码、部署记录、回滚线索与项目专属文档
 - 原因：工作区已经把共享运维和共享模板收口到 `_workspace-base`，如果项目根 `AGENTS.md` 不显式接入，AI 在 `car` 里仍然容易只围着本仓自转，不知道什么时候该去看共享基座。显式声明后更有利于后续部署、COS、云资源和协作规则复用，也能减少项目边界跑偏。
 
+### [REQ-PRJ-20260425-09] 预发布环境使用本地 `.env.preprod` 作为显式来源
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `apps/backend/.env.preprod` 是预发布环境变量的本地真实来源文件，不提交 Git
+  - `apps/backend/.env.preprod.example` 入 Git，只列变量名和示例值
+  - `pnpm env:pull:preprod:backend` 从远端预发布 `.env.production.local` 拉取到本地 `.env.preprod`
+  - `pnpm env:update:preprod:backend` 默认从 `.env.preprod` 同步高德中转站变量到远端
+- 原因：预发布不是正式生产环境，按 `_workspace-base` 口径应允许本地显式保存非正式环境配置来源，避免继续用 `.env.local` 同时承担 dev 与 preprod，导致 Key、域名和数据库口径互相污染。
+
 ## 当前核心数据对象
 
 - `customer`

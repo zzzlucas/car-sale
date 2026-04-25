@@ -8,6 +8,8 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.preprod.example
+!apps/**/.env.preprod.example
 
 *.log
 pnpm-debug.log*
