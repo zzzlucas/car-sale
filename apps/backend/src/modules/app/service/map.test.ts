@@ -10,6 +10,10 @@ jest.mock('axios');
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 function createService(
   keys = 'key-a,key-b',
   responses: Array<any | Error> = []
@@ -113,6 +117,15 @@ describe('resolveTiandituWebServiceConfig', () => {
     } as NodeJS.ProcessEnv);
 
     expect(config.referer).toBe('https://name10.lucasishere.top/');
+  });
+
+  it('supports server-side tianditu key access mode', () => {
+    const config = resolveTiandituWebServiceConfig({
+      TIANDITU_WEB_SERVICE_KEYS: 'key-a',
+      TIANDITU_WEB_SERVICE_ACCESS: 'server',
+    } as NodeJS.ProcessEnv);
+
+    expect(config.access).toBe('server');
   });
 });
 
@@ -427,5 +440,35 @@ describe('AppMapService', () => {
         }),
       })
     );
+  });
+
+  it('builds tianditu server-side key requests through ajaxproxy', async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: 'var tdt_loadResult={"status":"0","result":{"formatted_address":"广东省广州市天河区天河公园"}};',
+    } as any);
+
+    const service = new AppMapService() as any;
+    service.env = {
+      MAP_SERVICE_PROVIDER: 'tianditu',
+      TIANDITU_WEB_SERVICE_KEYS: 'tdt-key-a',
+      TIANDITU_WEB_SERVICE_ACCESS: 'server',
+    } as NodeJS.ProcessEnv;
+
+    const result = await service.reverseGeocode(113.366739, 23.128003);
+
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      'https://api.tianditu.gov.cn/apiserver/ajaxproxy',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          proxyReqUrl: expect.stringContaining('https://api.tianditu.gov.cn/geocoder'),
+        }),
+        headers: expect.not.objectContaining({
+          Referer: expect.any(String),
+        }),
+      })
+    );
+    const [, options] = mockedAxios.get.mock.calls[0];
+    expect(options?.params?.proxyReqUrl).toContain('tk=tdt-key-a');
+    expect(result?.formattedAddress).toBe('广东省广州市天河区天河公园');
   });
 });

@@ -7,6 +7,7 @@ import type { MapAddressSuggestion, MapReverseGeocodeResult } from '@car/shared-
 
 const AMAP_BASE_URL = 'https://restapi.amap.com';
 const TIANDITU_BASE_URL = 'https://api.tianditu.gov.cn';
+const TIANDITU_SERVER_PROXY_PATH = '/apiserver/ajaxproxy';
 const DEFAULT_TIMEOUT_MS = 2500;
 const DEFAULT_OFFSET = 5;
 const DEFAULT_TIANDITU_REFERER = 'http://localhost:6173/';
@@ -91,6 +92,7 @@ interface TiandituRegeoResponse {
 }
 
 type MapServiceProvider = 'tianditu' | 'amap';
+type TiandituAccessMode = 'browser' | 'server';
 
 function parseKeyPool(rawPool: string) {
   return Array.from(
@@ -122,10 +124,15 @@ export function resolveTiandituWebServiceConfig(env: NodeJS.ProcessEnv) {
     Number(env.TIANDITU_WEB_SERVICE_TIMEOUT_MS || DEFAULT_TIMEOUT_MS)
   );
 
+  const access = String(env.TIANDITU_WEB_SERVICE_ACCESS || 'browser')
+    .trim()
+    .toLowerCase();
+
   return {
     enabled: keys.length > 0,
     keys,
     timeoutMs,
+    access: access === 'server' ? 'server' : 'browser' as TiandituAccessMode,
     referer: env.TIANDITU_WEB_SERVICE_REFERER?.trim() || DEFAULT_TIANDITU_REFERER,
   };
 }
@@ -445,6 +452,10 @@ export class AppMapService extends BaseService {
     timeoutMs: number
   ): Promise<TiandituSearchResponse | TiandituRegeoResponse> {
     const config = resolveTiandituWebServiceConfig(this.env);
+    if (config.access === 'server') {
+      return this.requestTiandituByServerProxy(path, params, timeoutMs);
+    }
+
     const response = await axios.get(`${TIANDITU_BASE_URL}${path}`, {
       params,
       headers: {
@@ -455,6 +466,29 @@ export class AppMapService extends BaseService {
     });
 
     return response.data as TiandituSearchResponse | TiandituRegeoResponse;
+  }
+
+  private async requestTiandituByServerProxy(
+    path: string,
+    params: Record<string, string>,
+    timeoutMs: number
+  ): Promise<TiandituSearchResponse | TiandituRegeoResponse> {
+    const targetUrl = `${TIANDITU_BASE_URL}${path}?${new URLSearchParams(params).toString()}`;
+    const response = await axios.get(`${TIANDITU_BASE_URL}${TIANDITU_SERVER_PROXY_PATH}`, {
+      params: {
+        proxyReqUrl: targetUrl,
+      },
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+      },
+      timeout: timeoutMs,
+      responseType: 'text',
+      transformResponse: [data => data],
+    });
+
+    return this.parseTiandituPayload(response.data) as
+      | TiandituSearchResponse
+      | TiandituRegeoResponse;
   }
 
   private buildAttempts(keys: string[]) {
@@ -645,6 +679,22 @@ export class AppMapService extends BaseService {
       const leftBracket = normalized.indexOf('(');
       if (leftBracket >= 0 && normalized.endsWith(')')) {
         return JSON.parse(normalized.slice(leftBracket + 1, -1).trim());
+      }
+    }
+
+    return payload;
+  }
+
+  private parseTiandituPayload(payload: unknown) {
+    if (typeof payload === 'string') {
+      const normalized = payload.trim();
+      if (normalized.startsWith('{') || normalized.startsWith('[')) {
+        return JSON.parse(normalized);
+      }
+
+      const assignment = normalized.indexOf('=');
+      if (assignment >= 0) {
+        return JSON.parse(normalized.slice(assignment + 1).replace(/;\s*$/, '').trim());
       }
     }
 
