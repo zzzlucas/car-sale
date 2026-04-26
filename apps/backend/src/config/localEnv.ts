@@ -7,6 +7,23 @@ const PRODUCTION_ENV_FILE_NAMES = [
   '.env.production.local',
 ] as const;
 
+const FILE_PRIORITY_ENV_KEYS = new Set([
+  'MAP_SERVICE_PROVIDER',
+  'AMAP_WEB_SERVICE_KEYS',
+  'AMAP_WEB_SERVICE_KEY',
+  'AMAP_WEB_SERVICE_TIMEOUT_MS',
+  'AMAP_WEB_SERVICE_PROXY_BASE_URL',
+  'AMAP_WEB_SERVICE_PROXY_APPNAME',
+  'AMAP_WEB_SERVICE_PROXY_CALLBACK',
+  'AMAP_WEB_SERVICE_PROXY_REFERER',
+  'AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH',
+  'TIANDITU_WEB_SERVICE_KEYS',
+  'TIANDITU_WEB_SERVICE_KEY',
+  'TIANDITU_WEB_SERVICE_TIMEOUT_MS',
+  'TIANDITU_WEB_SERVICE_ACCESS',
+  'TIANDITU_WEB_SERVICE_REFERER',
+]);
+
 function parseEnvValue(rawValue: string) {
   const value = rawValue.trim();
 
@@ -69,7 +86,7 @@ function loadBackendEnvFiles(
 
     const parsed = parseEnvFile(fs.readFileSync(envFile, 'utf8'));
     for (const [key, value] of Object.entries(parsed)) {
-      if (protectedKeys.has(key)) {
+      if (protectedKeys.has(key) && !FILE_PRIORITY_ENV_KEYS.has(key)) {
         continue;
       }
       env[key] = value;

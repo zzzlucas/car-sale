@@ -68,6 +68,26 @@ describe('backend production config env loading', () => {
     });
   });
 
+  it('lets production env files override stale process map provider variables', () => {
+    process.env.MAP_SERVICE_PROVIDER = 'amap-proxy';
+    process.env.AMAP_WEB_SERVICE_KEYS = 'stale-map-key';
+    fs.writeFileSync(
+      appProdEnvLocalPath,
+      [
+        'DB_PASSWORD=from-prod-file',
+        'MAP_SERVICE_PROVIDER=amap-official',
+        'AMAP_WEB_SERVICE_KEYS=official-map-key',
+      ].join('\n') + '\n'
+    );
+
+    jest.isolateModules(() => {
+      require('./config.prod');
+    });
+
+    expect(process.env.MAP_SERVICE_PROVIDER).toBe('amap-official');
+    expect(process.env.AMAP_WEB_SERVICE_KEYS).toBe('official-map-key');
+  });
+
   it('fails fast when production DB_PASSWORD is missing', () => {
     process.env.DB_HOST = '124.222.31.238';
     process.env.DB_PORT = '3306';

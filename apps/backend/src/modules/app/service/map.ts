@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { createHash } from 'crypto';
 import axios from 'axios';
 import { BaseService, CoolCommException } from '@cool-midway/core';
 import { Provide } from '@midwayjs/core';
@@ -185,10 +184,6 @@ export class AppMapService extends BaseService {
       ...this.env,
       ...process.env,
     } as NodeJS.ProcessEnv;
-  }
-
-  private fingerprintKey(key: string) {
-    return createHash('sha256').update(key).digest('hex').slice(0, 12);
   }
 
   async searchAddressSuggestions(rawKeywords: string): Promise<MapAddressSuggestion[]> {
@@ -418,15 +413,6 @@ export class AppMapService extends BaseService {
           },
           config.timeoutMs
         )) as AmapRegeoResponse;
-
-        if (String(payload.status) !== '1') {
-          console.warn('[map] amap reverse geocode failed', {
-            provider: resolveMapServiceProvider(this.getRuntimeEnv()),
-            key: this.fingerprintKey(attempt.key),
-            info: payload.info,
-            infocode: payload.infocode,
-          });
-        }
 
         if (String(payload.status) === '1') {
           this.keyCursor = (attempt.index + 1) % config.keys.length;
