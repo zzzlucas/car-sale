@@ -179,13 +179,20 @@ export class AppMapService extends BaseService {
 
   private keyCursor = 0;
 
+  private getRuntimeEnv() {
+    return {
+      ...process.env,
+      ...this.env,
+    } as NodeJS.ProcessEnv;
+  }
+
   async searchAddressSuggestions(rawKeywords: string): Promise<MapAddressSuggestion[]> {
     const keywords = String(rawKeywords || '').trim();
     if (keywords.length < 2) {
       return [];
     }
 
-    if (resolveMapServiceProvider(this.env) === 'tianditu') {
+    if (resolveMapServiceProvider(this.getRuntimeEnv()) === 'tianditu') {
       return this.searchAddressSuggestionsByTianditu(keywords);
     }
 
@@ -200,7 +207,7 @@ export class AppMapService extends BaseService {
       throw new CoolCommException('缺少有效经纬度');
     }
 
-    if (resolveMapServiceProvider(this.env) === 'tianditu') {
+    if (resolveMapServiceProvider(this.getRuntimeEnv()) === 'tianditu') {
       return this.reverseGeocodeByTianditu(longitude, latitude);
     }
 
@@ -210,7 +217,7 @@ export class AppMapService extends BaseService {
   private async searchAddressSuggestionsByTianditu(
     keywords: string
   ): Promise<MapAddressSuggestion[]> {
-    const config = resolveTiandituWebServiceConfig(this.env);
+    const config = resolveTiandituWebServiceConfig(this.getRuntimeEnv());
     if (!config.enabled) {
       throw new CoolCommException('天地图服务暂未配置');
     }
@@ -273,7 +280,7 @@ export class AppMapService extends BaseService {
     longitude: number,
     latitude: number
   ): Promise<MapReverseGeocodeResult | null> {
-    const config = resolveTiandituWebServiceConfig(this.env);
+    const config = resolveTiandituWebServiceConfig(this.getRuntimeEnv());
     if (!config.enabled) {
       throw new CoolCommException('天地图服务暂未配置');
     }
@@ -329,7 +336,7 @@ export class AppMapService extends BaseService {
     keywords: string
   ): Promise<MapAddressSuggestion[]> {
 
-    const config = resolveAmapWebServiceConfig(this.env);
+    const config = resolveAmapWebServiceConfig(this.getRuntimeEnv());
     if (!config.enabled) {
       throw new CoolCommException('地图服务暂未配置');
     }
@@ -387,7 +394,7 @@ export class AppMapService extends BaseService {
     longitude: number,
     latitude: number
   ): Promise<MapReverseGeocodeResult | null> {
-    const config = resolveAmapWebServiceConfig(this.env);
+    const config = resolveAmapWebServiceConfig(this.getRuntimeEnv());
     if (!config.enabled) {
       throw new CoolCommException('地图服务暂未配置');
     }
@@ -444,7 +451,7 @@ export class AppMapService extends BaseService {
     params: Record<string, string>,
     timeoutMs: number
   ): Promise<AmapPlaceTextResponse | AmapRegeoResponse> {
-    const config = resolveAmapWebServiceConfig(this.env);
+    const config = resolveAmapWebServiceConfig(this.getRuntimeEnv());
     if (config.proxyBaseUrl) {
       return this.requestAmapByProxy(path, params, timeoutMs, config);
     }
@@ -462,7 +469,7 @@ export class AppMapService extends BaseService {
     params: Record<string, string>,
     timeoutMs: number
   ): Promise<TiandituSearchResponse | TiandituRegeoResponse> {
-    const config = resolveTiandituWebServiceConfig(this.env);
+    const config = resolveTiandituWebServiceConfig(this.getRuntimeEnv());
     if (config.access === 'server') {
       return this.requestTiandituByServerProxy(path, params, timeoutMs);
     }

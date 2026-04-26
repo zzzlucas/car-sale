@@ -469,6 +469,39 @@ describe('AppMapService', () => {
     expect(result?.formattedAddress).toBe('广东省广州市天河区天河公园');
   });
 
+  it('falls back to current process env when the service env snapshot is empty', async () => {
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      MAP_SERVICE_PROVIDER: 'amap-official',
+      AMAP_WEB_SERVICE_KEYS: 'amap-official-key',
+    };
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        status: '1',
+        info: 'OK',
+        infocode: '10000',
+        regeocode: {
+          formatted_address: '广东省广州市天河区天河公园',
+        },
+      },
+    } as any);
+
+    try {
+      const service = new AppMapService() as any;
+      service.env = {} as NodeJS.ProcessEnv;
+
+      await service.reverseGeocode(113.366739, 23.128003);
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://restapi.amap.com/v3/geocode/regeo',
+        expect.any(Object)
+      );
+    } finally {
+      process.env = originalEnv;
+    }
+  });
+
   it('builds tianditu requests with a browser referer header', async () => {
     mockedAxios.get.mockResolvedValueOnce({
       data: {
