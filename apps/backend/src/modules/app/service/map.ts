@@ -181,8 +181,8 @@ export class AppMapService extends BaseService {
 
   private getRuntimeEnv() {
     return {
-      ...process.env,
       ...this.env,
+      ...process.env,
     } as NodeJS.ProcessEnv;
   }
 

@@ -502,6 +502,45 @@ describe('AppMapService', () => {
     }
   });
 
+  it('prefers current process env over a stale service env snapshot', async () => {
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      MAP_SERVICE_PROVIDER: 'amap-official',
+      AMAP_WEB_SERVICE_KEYS: 'amap-official-key',
+    };
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        status: '1',
+        info: 'OK',
+        infocode: '10000',
+        regeocode: {
+          formatted_address: '广东省广州市天河区天河公园',
+        },
+      },
+    } as any);
+
+    try {
+      const service = new AppMapService() as any;
+      service.env = {
+        MAP_SERVICE_PROVIDER: 'amap-proxy',
+        AMAP_WEB_SERVICE_KEYS: 'stale-proxy-key',
+        AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+      } as NodeJS.ProcessEnv;
+
+      await service.reverseGeocode(113.366739, 23.128003);
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://restapi.amap.com/v3/geocode/regeo',
+        expect.objectContaining({
+          params: expect.objectContaining({ key: 'amap-official-key' }),
+        })
+      );
+    } finally {
+      process.env = originalEnv;
+    }
+  });
+
   it('builds tianditu requests with a browser referer header', async () => {
     mockedAxios.get.mockResolvedValueOnce({
       data: {
