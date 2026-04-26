@@ -100,6 +100,24 @@ if ! printf '%s' "$map_response" | grep -q '"code":1000'; then
   echo 'MAP_CHECK=FAILED'
   exit 2
 fi
+
+upload_ticket_response=$(curl -sS -X POST 'http://127.0.0.1:8120/app/valuation-orders/photos/upload-ticket' \
+  -H 'Content-Type: application/json' \
+  -H 'X-Visitor-Key: preprod-deploy-check' \
+  --data-binary '{"fileName":"car.jpg","contentType":"image/jpeg"}')
+if ! printf '%s' "$upload_ticket_response" | grep -q '"code":1000'; then
+  echo 'UPLOAD_TICKET_CHECK=FAILED'
+  exit 2
+fi
+if ! printf '%s' "$upload_ticket_response" | grep -q '"method":"PUT"'; then
+  echo 'UPLOAD_TICKET_METHOD_CHECK=FAILED'
+  exit 2
+fi
+if ! printf '%s' "$upload_ticket_response" | grep -q '"objectPointer":"cos://'; then
+  echo 'UPLOAD_TICKET_POINTER_CHECK=FAILED'
+  exit 2
+fi
+echo 'UPLOAD_TICKET_CHECK=OK'
 '@
 
 $remoteScript = $remoteScript.Replace('__REMOTE_APP_DIR__', $RemoteAppDir)
@@ -111,4 +129,25 @@ try {
 }
 catch {
     throw "公网 support 探活失败: $PublicBaseUrl/api/app/content/support"
+}
+
+$publicUploadTicketBody = Join-Path $env:TEMP ("car-upload-ticket-{0}.json" -f ([guid]::NewGuid().ToString('N')))
+try {
+    Set-Content -LiteralPath $publicUploadTicketBody -Value '{"fileName":"car.jpg","contentType":"image/jpeg"}' -NoNewline -Encoding UTF8
+    $uploadTicket = curl.exe -fsS -X POST "$PublicBaseUrl/api/app/valuation-orders/photos/upload-ticket" `
+        -H "Content-Type: application/json" `
+        -H "X-Visitor-Key: preprod-deploy-check" `
+        --data-binary "@$publicUploadTicketBody"
+    if ($uploadTicket -notmatch '"code":1000') {
+        throw "公网 upload-ticket 返回异常"
+    }
+    if ($uploadTicket -notmatch '"method":"PUT"' -or $uploadTicket -notmatch '"objectPointer":"cos://') {
+        throw "公网 upload-ticket 响应缺少 PUT 或 objectPointer"
+    }
+    Write-Output 'PUBLIC_UPLOAD_TICKET_CHECK=OK'
+}
+finally {
+    if (Test-Path -LiteralPath $publicUploadTicketBody) {
+        Remove-Item -LiteralPath $publicUploadTicketBody -Force
+    }
 }
