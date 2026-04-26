@@ -112,6 +112,33 @@ foreach ($entry in $proxyDefaults.GetEnumerator()) {
     Add-EnvLine -Lines $updateLines -Key $entry.Key -Value $value
 }
 
+$cosRequiredKeys = @(
+    'COS_REGION',
+    'COS_BUCKET',
+    'COS_APP_ID',
+    'COS_SECRET_ID',
+    'COS_SECRET_KEY'
+)
+foreach ($key in $cosRequiredKeys) {
+    $value = [string]($localEnv[$key])
+    if ([string]::IsNullOrWhiteSpace($value) -or $value -like '<*' -or $value -eq 'change-me') {
+        throw "请先在 $LocalEnvPath 填写真实 $key。"
+    }
+    Add-EnvLine -Lines $updateLines -Key $key -Value $value
+}
+
+$cosUploadPrefix = if ($localEnv.Contains('COS_UPLOAD_PREFIX') -and -not [string]::IsNullOrWhiteSpace([string]$localEnv['COS_UPLOAD_PREFIX'])) {
+    [string]$localEnv['COS_UPLOAD_PREFIX']
+}
+else {
+    'car-platform-preprod/'
+}
+Add-EnvLine -Lines $updateLines -Key 'COS_UPLOAD_PREFIX' -Value $cosUploadPrefix
+
+if ($localEnv.Contains('COS_SIGN_EXPIRES') -and -not [string]::IsNullOrWhiteSpace([string]$localEnv['COS_SIGN_EXPIRES'])) {
+    Add-EnvLine -Lines $updateLines -Key 'COS_SIGN_EXPIRES' -Value ([string]$localEnv['COS_SIGN_EXPIRES'])
+}
+
 $tempFile = Join-Path $env:TEMP ("car-preprod-amap-{0}.env" -f ([guid]::NewGuid().ToString('N')))
 $localScript = $null
 try {
@@ -153,6 +180,13 @@ allowed = {
     'AMAP_WEB_SERVICE_PROXY_CALLBACK',
     'AMAP_WEB_SERVICE_PROXY_REFERER',
     'AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH',
+    'COS_REGION',
+    'COS_BUCKET',
+    'COS_APP_ID',
+    'COS_SECRET_ID',
+    'COS_SECRET_KEY',
+    'COS_UPLOAD_PREFIX',
+    'COS_SIGN_EXPIRES',
 }
 updates = {}
 for raw_line in update_path.read_text(encoding='utf-8-sig').splitlines():

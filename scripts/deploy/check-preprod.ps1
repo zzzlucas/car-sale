@@ -78,6 +78,14 @@ if [ "$missing" -ne 0 ]; then
   exit 1
 fi
 
+for key in COS_REGION COS_BUCKET COS_APP_ID COS_SECRET_ID COS_SECRET_KEY COS_UPLOAD_PREFIX; do
+  check_key "$key" || missing=1
+done
+
+if [ "$missing" -ne 0 ]; then
+  exit 1
+fi
+
 pm2 describe car-platform-backend >/dev/null
 support_response=$(curl -fsS http://127.0.0.1:8120/app/content/support)
 echo "$support_response"
