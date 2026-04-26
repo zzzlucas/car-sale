@@ -1,15 +1,21 @@
 <template>
   <main class="min-h-screen bg-background pb-mobile-bottom-nav">
     <header class="sticky top-0 z-20 border-b border-surface-variant bg-white">
-      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-4">
+      <div class="relative mx-auto flex h-14 w-full max-w-md items-center justify-center px-4">
         <button
-          class="flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
+          class="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
           @click="goBack"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
         <h1 class="text-lg font-semibold text-primary">车辆估价评估</h1>
-        <div class="w-10" />
+        <RouterLink
+          to="/customer/records"
+          class="absolute right-4 top-1/2 inline-flex h-9 -translate-y-1/2 items-center gap-1 rounded-full border border-surface-variant bg-surface-container-low px-3 text-label-md font-semibold text-primary transition-colors active:bg-surface-container"
+        >
+          <span class="material-symbols-outlined text-[16px]">history</span>
+          预约记录
+        </RouterLink>
       </div>
     </header>
 
@@ -421,7 +427,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 
 import type { MapAddressSuggestion, ValuationOrderPayload } from "@car/shared-types";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";

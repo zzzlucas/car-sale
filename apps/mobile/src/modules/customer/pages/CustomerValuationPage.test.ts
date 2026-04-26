@@ -23,6 +23,11 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("重置表单");
   });
 
+  it("adds a lightweight shortcut to reservation records in the top-right corner", () => {
+    expect(source).toContain('to="/customer/records"');
+    expect(source).toContain("预约记录");
+  });
+
   it("includes address search affordances for the amap key-pool flow", () => {
     expect(source).toContain("搜索地址建议");
     expect(source).toContain("推荐地址");

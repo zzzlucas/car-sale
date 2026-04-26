@@ -11,4 +11,9 @@ describe("mobile router scroll behavior", () => {
   it("resets scroll to top on forward navigation while preserving browser saved positions", () => {
     expect(source).toContain("scrollBehavior: (_to, _from, savedPosition) => savedPosition ?? { left: 0, top: 0 }");
   });
+
+  it("includes a dedicated professional-support contact route under the customer area", () => {
+    expect(source).toContain('path: "support/contact"');
+    expect(source).toContain("CustomerSupportContactPage");
+  });
 });

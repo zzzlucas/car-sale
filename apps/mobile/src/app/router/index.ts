@@ -7,6 +7,7 @@ import CustomerHomePage from "@/modules/customer/pages/CustomerHomePage.vue";
 import CustomerMePage from "@/modules/customer/pages/CustomerMePage.vue";
 import CustomerRecordsPage from "@/modules/customer/pages/CustomerRecordsPage.vue";
 import CustomerProgressPage from "@/modules/customer/pages/CustomerProgressPage.vue";
+import CustomerSupportContactPage from "@/modules/customer/pages/CustomerSupportContactPage.vue";
 import CustomerSupportPage from "@/modules/customer/pages/CustomerSupportPage.vue";
 import CustomerValuationPage from "@/modules/customer/pages/CustomerValuationPage.vue";
 import OperatorHomePage from "@/modules/operator/pages/OperatorHomePage.vue";
@@ -26,6 +27,7 @@ export const router = createRouter({
         { path: "progress/:orderId", component: CustomerProgressPage, props: true },
         { path: "guide", component: CustomerGuidePage },
         { path: "me", component: CustomerMePage },
+        { path: "support/contact", component: CustomerSupportContactPage },
         { path: "support", component: CustomerSupportPage },
       ],
     },
