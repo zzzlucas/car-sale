@@ -60,7 +60,7 @@
     </section>
 
     <footer class="px-margin-page pb-4 pt-8 text-center">
-      <p class="text-[11px] text-outline-variant">© 2024 车辆报废回收平台</p>
+      <p class="text-[11px] text-outline-variant">© {{ currentYear }} 车辆报废回收平台</p>
       <p class="mt-1 flex items-center justify-center gap-1 text-[11px] text-outline-variant">
         <span class="material-symbols-outlined text-[14px]">shield</span>
         保障您的信息安全与合法合规
@@ -80,4 +80,6 @@ const supportItems = [
   { to: "/customer/guide", label: "常见问题", icon: "help" },
   { to: "/customer/support", label: "联系客服", icon: "support_agent" },
 ];
+
+const currentYear = new Date().getFullYear();
 </script>

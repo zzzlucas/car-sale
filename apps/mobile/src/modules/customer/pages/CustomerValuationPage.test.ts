@@ -45,6 +45,12 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("addressMessage.value = rejectionMessage");
   });
 
+  it("uses a cleaner progress rail and a readable delete action for photo cards", () => {
+    expect(source).toContain("absolute inset-x-2 top-4 h-[2px] rounded-full bg-surface-variant");
+    expect(source).toContain("min-w-[3.5rem] shrink-0");
+    expect(source).toContain("truncate text-label-md text-on-surface");
+  });
+
   it("logs browser geolocation details for local troubleshooting", () => {
     expect(source).toContain('console.info("[pickup-location] browser geolocation"');
     expect(source).toContain("accuracy: position.coords.accuracy");

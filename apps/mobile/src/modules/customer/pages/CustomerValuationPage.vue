@@ -14,23 +14,27 @@
     </header>
 
     <section class="mx-auto max-w-md px-margin-page py-stack-lg">
-      <div class="mb-8 flex items-center justify-between">
-        <div v-for="(item, index) in steps" :key="item.label" class="flex flex-1 flex-col items-center">
-          <div class="flex w-full items-center">
+      <div class="relative mb-8 px-2">
+        <div class="absolute inset-x-2 top-4 h-[2px] rounded-full bg-surface-variant" />
+        <div class="relative flex items-start justify-between gap-2">
+          <div
+            v-for="(item, index) in steps"
+            :key="item.label"
+            class="flex min-w-0 flex-1 flex-col items-center gap-2 bg-background text-center"
+          >
             <div
-              class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold"
+              class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background text-sm font-semibold shadow-sm"
               :class="index === 0 ? 'bg-primary text-white' : 'bg-surface-container-highest text-outline'"
             >
               {{ index + 1 }}
             </div>
-            <div v-if="index < steps.length - 1" class="mx-2 h-[2px] flex-1 bg-surface-variant" />
+            <span
+              class="text-label-sm leading-tight"
+              :class="index === 0 ? 'font-semibold text-primary' : 'text-outline'"
+            >
+              {{ item.label }}
+            </span>
           </div>
-          <span
-            class="mt-2 text-label-md"
-            :class="index === 0 ? 'font-semibold text-primary' : 'text-outline'"
-          >
-            {{ item.label }}
-          </span>
         </div>
       </div>
 
@@ -360,14 +364,14 @@
               <article
                 v-for="item in photoPreviews"
                 :key="item.id"
-                class="overflow-hidden rounded-xl border border-surface-variant bg-white"
+                class="flex h-full flex-col overflow-hidden rounded-xl border border-surface-variant bg-white"
               >
-                <img :src="item.previewUrl" :alt="item.name" class="h-28 w-full object-cover" />
-                <div class="flex items-center justify-between gap-3 p-3">
-                  <span class="line-clamp-1 text-label-md text-on-surface">{{ item.name }}</span>
+                <img :src="item.previewUrl" :alt="item.name" class="h-28 w-full flex-none object-cover" />
+                <div class="flex min-w-0 items-center gap-3 p-3">
+                  <span class="min-w-0 flex-1 truncate text-label-md text-on-surface">{{ item.name }}</span>
                   <button
                     type="button"
-                    class="rounded-full bg-surface-container px-2 py-1 text-label-sm text-on-surface-variant"
+                    class="min-w-[3.5rem] shrink-0 rounded-lg border border-surface-variant bg-surface-container px-2 py-2 text-label-sm font-medium text-on-surface-variant transition-colors active:bg-surface-variant"
                     @click="removePhoto(item.id)"
                   >
                     删除
