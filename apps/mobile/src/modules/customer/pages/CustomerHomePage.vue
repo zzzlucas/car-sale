@@ -19,22 +19,26 @@
         <RouterLink
           to="/customer/valuation"
           aria-label="立即估价 / 预约回收"
-          class="customer-home-hero group relative block overflow-hidden rounded-[32px] bg-primary shadow-premium outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
+          class="customer-home-hero group relative block rounded-[32px] outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
         >
-          <img
-            :src="homeHeroBase"
-            alt="专业、合法、省心的官方认证报废车回收服务"
-            class="customer-home-hero__base block h-auto w-full"
-            fetchpriority="high"
-          />
+          <span class="customer-home-hero__depth-shadow" aria-hidden="true" />
+          <span class="customer-home-hero__edge" aria-hidden="true" />
+          <span class="customer-home-hero__screen">
+            <img
+              :src="homeHeroBase"
+              alt="专业、合法、省心的官方认证报废车回收服务"
+              class="customer-home-hero__base block h-auto w-full"
+              fetchpriority="high"
+            />
 
-          <span class="customer-home-hero__shield" aria-hidden="true">
-            <img :src="homeHeroShield" alt="" class="block h-auto w-full" />
-          </span>
+            <span class="customer-home-hero__shield" aria-hidden="true">
+              <img :src="homeHeroShield" alt="" class="block h-auto w-full" />
+            </span>
 
-          <span class="customer-home-hero__cta" aria-hidden="true">
-            <img :src="homeHeroCta" alt="" class="block h-auto w-full" />
-            <span class="customer-home-hero__cta-shine" />
+            <span class="customer-home-hero__cta" aria-hidden="true">
+              <img :src="homeHeroCta" alt="" class="block h-auto w-full" />
+              <span class="customer-home-hero__cta-shine" />
+            </span>
           </span>
 
           <span class="sr-only">立即估价 / 预约回收</span>
@@ -150,7 +154,7 @@ import { RouterLink } from "vue-router";
 
 import type { FaqItem } from "@car/shared-types";
 import homeBrandImage from "@/assets/customer-home/brand-mark.png";
-import homeHeroBase from "@/assets/customer-home/banner-base.jpg";
+import homeHeroBase from "@/assets/customer-home/banner-base.png";
 import homeHeroCta from "@/assets/customer-home/banner-cta.png";
 import homeHeroShield from "@/assets/customer-home/banner-shield.png";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
@@ -184,7 +188,67 @@ onMounted(async () => {
 <style scoped>
 .customer-home-hero {
   isolation: isolate;
+  perspective: 900px;
   transform: translateZ(0);
+  transform-style: preserve-3d;
+}
+
+.customer-home-hero__screen {
+  background: linear-gradient(135deg, rgba(0, 84, 78, 0.96), rgba(0, 45, 49, 0.98));
+  border-radius: 32px;
+  box-shadow:
+    0 26px 42px -28px rgba(0, 29, 30, 0.62),
+    0 10px 22px -18px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  display: block;
+  overflow: hidden;
+  position: relative;
+  transform: rotateY(-1.8deg) translateZ(0);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition:
+    box-shadow 520ms ease,
+    transform 520ms ease;
+  z-index: 2;
+}
+
+.customer-home-hero__edge,
+.customer-home-hero__depth-shadow {
+  pointer-events: none;
+  position: absolute;
+}
+
+.customer-home-hero__edge {
+  animation: home-hero-edge-breathe 4.4s ease-in-out infinite;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(164, 225, 202, 0.32) 18%, rgba(0, 92, 86, 0.72) 54%, rgba(0, 55, 57, 0.9)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.42), rgba(0, 55, 57, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-left: 0;
+  border-radius: 0 28px 28px 0;
+  bottom: 7.2%;
+  box-shadow:
+    inset 10px 0 18px rgba(255, 255, 255, 0.18),
+    inset -6px 0 14px rgba(0, 24, 28, 0.36),
+    12px 16px 24px -20px rgba(0, 23, 25, 0.62);
+  right: -2.8%;
+  top: 7.2%;
+  transform: rotateY(-34deg) translateZ(-10px);
+  transform-origin: left center;
+  width: 8.2%;
+  z-index: 1;
+}
+
+.customer-home-hero__depth-shadow {
+  background: radial-gradient(ellipse at center, rgba(0, 49, 52, 0.36), rgba(0, 49, 52, 0));
+  bottom: -8%;
+  filter: blur(14px);
+  height: 28%;
+  left: 8%;
+  opacity: 0.88;
+  right: -6%;
+  transform: rotate(-1deg);
+  z-index: 0;
 }
 
 .customer-home-hero__base {
@@ -193,6 +257,14 @@ onMounted(async () => {
 
 .customer-home-hero:hover .customer-home-hero__base {
   transform: scale(1.012);
+}
+
+.customer-home-hero:hover .customer-home-hero__screen {
+  box-shadow:
+    0 30px 48px -28px rgba(0, 29, 30, 0.7),
+    0 14px 26px -18px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transform: rotateY(-2.4deg) translateY(-1px) translateZ(0);
 }
 
 .customer-home-hero__shield,
@@ -274,6 +346,19 @@ onMounted(async () => {
   }
 }
 
+@keyframes home-hero-edge-breathe {
+  0%,
+  100% {
+    opacity: 0.86;
+    transform: rotateY(-34deg) translateZ(-10px) translateX(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: rotateY(-38deg) translateZ(-12px) translateX(2px);
+  }
+}
+
 @media (max-width: 380px) {
   .customer-home-hero__shield {
     right: 4.6%;
@@ -290,6 +375,9 @@ onMounted(async () => {
 
 @media (prefers-reduced-motion: reduce) {
   .customer-home-hero,
+  .customer-home-hero__screen,
+  .customer-home-hero__edge,
+  .customer-home-hero__depth-shadow,
   .customer-home-hero__base,
   .customer-home-hero__shield,
   .customer-home-hero__cta,
@@ -300,6 +388,10 @@ onMounted(async () => {
 
   .customer-home-hero:hover .customer-home-hero__base {
     transform: none;
+  }
+
+  .customer-home-hero:hover .customer-home-hero__screen {
+    transform: rotateY(-1.8deg) translateZ(0);
   }
 }
 </style>

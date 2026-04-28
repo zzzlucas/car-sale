@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, "CustomerHomePage.vue"), "utf8");
 const brandImage = fs.readFileSync(path.join(__dirname, "../../../assets/customer-home/brand-mark.png"));
-const heroBasePath = path.join(__dirname, "../../../assets/customer-home/banner-base.jpg");
+const heroBasePath = path.join(__dirname, "../../../assets/customer-home/banner-base.png");
 const heroCtaPath = path.join(__dirname, "../../../assets/customer-home/banner-cta.png");
 const heroShieldPath = path.join(__dirname, "../../../assets/customer-home/banner-shield.png");
 
@@ -15,31 +15,8 @@ function readPngSize(buffer: Buffer) {
   return {
     width: buffer.readUInt32BE(16),
     height: buffer.readUInt32BE(20),
+    colorType: buffer[25],
   };
-}
-
-function readJpegSize(buffer: Buffer) {
-  let offset = 2;
-
-  while (offset < buffer.length) {
-    if (buffer[offset] !== 0xff) {
-      throw new Error("Invalid JPEG marker");
-    }
-
-    const marker = buffer[offset + 1];
-    const length = buffer.readUInt16BE(offset + 2);
-
-    if (marker >= 0xc0 && marker <= 0xc3) {
-      return {
-        height: buffer.readUInt16BE(offset + 5),
-        width: buffer.readUInt16BE(offset + 7),
-      };
-    }
-
-    offset += 2 + length;
-  }
-
-  throw new Error("JPEG size marker not found");
 }
 
 describe("CustomerHomePage landing layout", () => {
@@ -62,9 +39,10 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("homeHeroBase");
     expect(source).toContain("homeHeroCta");
     expect(source).toContain("homeHeroShield");
-    expect(source).toContain("banner-base.jpg");
+    expect(source).toContain("banner-base.png");
     expect(source).toContain("banner-cta.png");
     expect(source).toContain("banner-shield.png");
+    expect(source).not.toContain("banner-base.jpg");
     expect(source).not.toContain("banner-hero-full.jpg");
     expect(source).toContain('aria-label="立即估价 / 预约回收');
     expect(source).toContain("sr-only");
@@ -81,6 +59,9 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("rounded-[32px]");
     expect(source).toContain("fetchpriority=\"high\"");
     expect(source).toContain("customer-home-hero__base");
+    expect(source).toContain("customer-home-hero__screen");
+    expect(source).toContain("customer-home-hero__edge");
+    expect(source).toContain("customer-home-hero__depth-shadow");
     expect(source).toContain("customer-home-hero__cta");
     expect(source).toContain("customer-home-hero__shield");
     expect(source).toContain("px-margin-page pt-8 pb-stack-lg");
@@ -89,7 +70,10 @@ describe("CustomerHomePage landing layout", () => {
   it("adds restrained CTA and shield motion with reduced-motion support", () => {
     expect(source).toContain("@keyframes home-hero-cta-glow");
     expect(source).toContain("@keyframes home-hero-shield-float");
+    expect(source).toContain("@keyframes home-hero-edge-breathe");
     expect(source).toContain("customer-home-hero__cta-shine");
+    expect(source).toContain("transform-style: preserve-3d");
+    expect(source).toContain("rotateY");
     expect(source).toContain("prefers-reduced-motion: reduce");
     expect(source).toContain("animation: none");
   });
@@ -105,18 +89,21 @@ describe("CustomerHomePage landing layout", () => {
     const heroBase = fs.readFileSync(heroBasePath);
     const heroCta = fs.readFileSync(heroCtaPath);
     const heroShield = fs.readFileSync(heroShieldPath);
-    const baseSize = readJpegSize(heroBase);
+    const baseSize = readPngSize(heroBase);
     const ctaSize = readPngSize(heroCta);
     const shieldSize = readPngSize(heroShield);
 
     expect(baseSize.width).toBeLessThanOrEqual(1200);
     expect(baseSize.height).toBeLessThanOrEqual(850);
-    expect(heroBase.byteLength).toBeLessThanOrEqual(380 * 1024);
+    expect([4, 6]).toContain(baseSize.colorType);
+    expect(heroBase.byteLength).toBeLessThanOrEqual(900 * 1024);
     expect(ctaSize.width).toBeLessThanOrEqual(900);
     expect(ctaSize.height).toBeLessThanOrEqual(220);
+    expect([4, 6]).toContain(ctaSize.colorType);
     expect(heroCta.byteLength).toBeLessThanOrEqual(260 * 1024);
     expect(shieldSize.width).toBeLessThanOrEqual(560);
     expect(shieldSize.height).toBeLessThanOrEqual(560);
+    expect([4, 6]).toContain(shieldSize.colorType);
     expect(heroShield.byteLength).toBeLessThanOrEqual(360 * 1024);
   });
 });
