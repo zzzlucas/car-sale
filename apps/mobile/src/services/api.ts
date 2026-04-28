@@ -1,4 +1,5 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || "").replace(/\/+$/, "");
+const JSON_REQUEST_TIMEOUT_MS = 15_000;
 
 interface ApiEnvelope<T> {
   code?: number;
@@ -58,12 +59,26 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: createHeaders(init?.headers, "application/json"),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), JSON_REQUEST_TIMEOUT_MS);
 
-  return parseResponse<T>(response);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: createHeaders(init?.headers, "application/json"),
+      signal: controller.signal,
+    });
+
+    return await parseResponse<T>(response);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Request timeout");
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function requestStream(path: string, init?: RequestInit): Promise<ReadableStream<Uint8Array>> {

@@ -6,6 +6,7 @@ describe("api service base url", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it("uses a relative request path by default so vite proxy can forward backend calls", async () => {
@@ -38,6 +39,23 @@ describe("api service base url", () => {
     );
   });
 
+  it("aborts json requests instead of leaving order APIs pending forever", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn((_path: string, init?: RequestInit) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+    }));
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const promise = expect(requestJson("/app/me/valuation-orders")).rejects.toThrow("Request timeout");
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    await promise;
+    expect(fetchMock).toHaveBeenCalledWith("/app/me/valuation-orders", expect.objectContaining({
+      signal: expect.any(AbortSignal),
+    }));
+  });
+
   it("returns a readable stream response for backend event streams", async () => {
     const stream = new ReadableStream();
     const fetchMock = vi.fn().mockResolvedValue({
@@ -52,11 +70,11 @@ describe("api service base url", () => {
       body: "{}",
     });
 
-    expect(fetchMock).toHaveBeenCalledWith("/app/support/chat/stream", {
+    expect(fetchMock).toHaveBeenCalledWith("/app/support/chat/stream", expect.objectContaining({
       method: "POST",
       body: "{}",
       headers: { "Content-Type": "application/json" },
-    });
+    }));
     expect(result).toBe(stream);
   });
 });
