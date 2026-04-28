@@ -37,7 +37,7 @@ pnpm install --frozen-lockfile
 '@
     } else {
 @'
-if [ ! -d node_modules ] || [ ! -f node_modules/.pnpm/lock.yaml ] || ! cmp -s pnpm-lock.yaml node_modules/.pnpm/lock.yaml; then
+if [ ! -d node_modules ] || [ ! -d apps/backend/node_modules ] || [ ! -f node_modules/.pnpm/lock.yaml ] || ! cmp -s pnpm-lock.yaml node_modules/.pnpm/lock.yaml; then
   echo 'INSTALL=auto'
   pnpm install --frozen-lockfile
 else
@@ -57,8 +57,26 @@ if [ -d "`$APP_DIR" ] && [ "`$(find "`$APP_DIR" -mindepth 1 -maxdepth 1 | wc -l)
   echo "SOURCE_BACKUP=`$BACKUP_DIR/source-`$STAMP.tgz"
 fi
 
+APP_DIR_REAL=`$(realpath -m "`$APP_DIR")
+if [ "`$APP_DIR_REAL" != '/srv/apps/car-platform/app' ]; then
+  echo "拒绝清理非预期部署目录：`$APP_DIR_REAL" >&2
+  exit 1
+fi
+
+ENV_BACKUP=''
+if [ -f "`$APP_DIR/apps/backend/.env.production.local" ]; then
+  ENV_BACKUP=`$(mktemp)
+  cp "`$APP_DIR/apps/backend/.env.production.local" "`$ENV_BACKUP"
+fi
+
+find "`$APP_DIR" -mindepth 1 -maxdepth 1 ! -name node_modules -exec rm -rf {} +
 tar -xf "`$ARCHIVE" -C "`$APP_DIR"
 rm -f "`$ARCHIVE"
+if [ -n "`$ENV_BACKUP" ]; then
+  mkdir -p "`$APP_DIR/apps/backend"
+  cp "`$ENV_BACKUP" "`$APP_DIR/apps/backend/.env.production.local"
+  rm -f "`$ENV_BACKUP"
+fi
 cd "`$APP_DIR"
 
 echo "DEPLOY_COMMIT=$commit"
