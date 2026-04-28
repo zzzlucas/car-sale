@@ -14,10 +14,12 @@ describe("CustomerSupportPage ai support experience", () => {
     expect(source).toContain("item.label");
   });
 
-  it("includes both the inline and full contact-professional-support escalations", () => {
-    expect(source).toContain("联系专业客服");
+  it("uses clear one-to-one support wording instead of vague professional or real-person copy", () => {
+    expect(source).toContain("联系一对一客服");
     expect(source).toContain("showLargeContactCta");
     expect(source).toContain('to=\"/customer/support/contact\"');
+    expect(source).not.toContain("联系专业客服");
+    expect(source).not.toContain("真人客服");
   });
 
   it("uses the backend support assistant instead of local keyword replies", () => {
@@ -25,5 +27,14 @@ describe("CustomerSupportPage ai support experience", () => {
     expect(source).toContain("upsertStreamingAssistantMessage");
     expect(source).not.toContain("buildAssistantReply");
     expect(source).toContain("isSending");
+  });
+
+  it("shows first-token loading, typewriter state, and markdown-rendered assistant text", () => {
+    expect(source).toContain("isPending");
+    expect(source).toContain("typing-indicator");
+    expect(source).toContain("queueStreamingAssistantText");
+    expect(source).toContain("waitForTypewriterIdle");
+    expect(source).toContain("renderSupportMarkdown");
+    expect(source).toContain("v-html");
   });
 });

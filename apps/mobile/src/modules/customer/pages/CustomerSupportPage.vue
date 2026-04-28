@@ -20,7 +20,7 @@
       <div class="flex justify-center">
         <div class="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-label-sm text-primary">
           <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
-          智能客服助手，可随时转专业客服
+          智能客服助手，可随时转一对一客服
         </div>
       </div>
 
@@ -34,14 +34,26 @@
               {{ message.kind === "welcome" ? "AI 助手" : "AI 助手答复" }}
             </span>
             <div class="rounded-3xl rounded-tl-none bg-white px-4 py-3 shadow-subtle ring-1 ring-surface-variant">
-              <p class="text-body-md leading-6 text-on-surface">{{ message.text }}</p>
+              <div
+                v-if="message.text"
+                class="support-markdown text-body-md leading-6 text-on-surface"
+                v-html="renderSupportMarkdown(message.text)"
+              />
+              <div v-else-if="message.isPending" class="typing-indicator flex items-center gap-2 py-1.5 text-label-md text-on-surface-variant">
+                <span class="flex items-center gap-1">
+                  <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.2s]" />
+                  <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.1s]" />
+                  <span class="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/70" />
+                </span>
+                正在思考
+              </div>
               <RouterLink
                 v-if="message.showInlineProfessionalContact"
                 to="/customer/support/contact"
                 class="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-label-md font-semibold text-primary transition-colors active:bg-primary/10"
               >
                 <span class="material-symbols-outlined text-[16px]">headset_mic</span>
-                联系专业客服
+                联系一对一客服
               </RouterLink>
             </div>
           </div>
@@ -81,14 +93,14 @@
     >
       <div class="mx-auto flex w-full max-w-md items-center justify-between gap-4 rounded-[24px] bg-primary px-4 py-4 text-on-primary shadow-[0_10px_24px_rgba(0,76,76,0.18)]">
         <div class="min-w-0">
-          <p class="text-body-md font-semibold">需要更具体的人工协助？</p>
-          <p class="mt-1 text-label-md text-primary-fixed">超过三轮仍未解决时，建议直接转专业客服。</p>
+          <p class="text-body-md font-semibold">需要更具体的一对一协助？</p>
+          <p class="mt-1 text-label-md text-primary-fixed">超过三轮仍未解决时，建议直接转一对一客服。</p>
         </div>
         <RouterLink
           to="/customer/support/contact"
           class="inline-flex shrink-0 items-center justify-center rounded-full bg-white px-4 py-2 text-label-md font-semibold text-primary"
         >
-          联系专业客服
+          联系一对一客服
         </RouterLink>
       </div>
     </section>
@@ -131,14 +143,19 @@ import {
   SUPPORT_PRESET_QUESTIONS,
   streamSupportAssistantChat,
 } from "./supportChat";
+import { renderSupportMarkdown } from "./supportMarkdown";
 
 type Message = {
   id: string;
   role: "assistant" | "user";
   text: string;
   kind?: "welcome" | "answer";
+  isPending?: boolean;
   showInlineProfessionalContact?: boolean;
 };
+
+const TYPEWRITER_CHUNK_SIZE = 2;
+const TYPEWRITER_DELAY_MS = 18;
 
 const router = useRouter();
 const draft = ref("");
@@ -150,9 +167,12 @@ const messages = ref<Message[]>([
     id: "a-welcome",
     role: "assistant",
     kind: "welcome",
-    text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系专业客服。",
+    text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系一对一客服。",
   },
 ]);
+let typewriterTimer: ReturnType<typeof window.setTimeout> | null = null;
+let typewriterIdleResolver: (() => void) | null = null;
+const pendingAssistantText = ref("");
 
 const answeredTurns = computed(
   () => messages.value.filter(item => item.role === "assistant" && item.kind === "answer").length,
@@ -185,15 +205,68 @@ function goBack() {
 }
 
 function toSupportChatHistory() {
-  return messages.value.map(item => ({
+  return messages.value.filter(item => !item.isPending).map(item => ({
     role: item.role,
     content: item.text,
   }));
 }
 
-function upsertStreamingAssistantMessage(messageId: string, content: string) {
+function sleep(ms: number) {
+  return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+function resolveTypewriterIdleIfNeeded() {
+  if (pendingAssistantText.value || typewriterTimer || !typewriterIdleResolver) {
+    return;
+  }
+
+  typewriterIdleResolver();
+  typewriterIdleResolver = null;
+}
+
+function scheduleTypewriter(messageId: string) {
+  if (typewriterTimer) {
+    return;
+  }
+
+  typewriterTimer = window.setTimeout(() => {
+    typewriterTimer = null;
+    const nextChunk = pendingAssistantText.value.slice(0, TYPEWRITER_CHUNK_SIZE);
+    pendingAssistantText.value = pendingAssistantText.value.slice(TYPEWRITER_CHUNK_SIZE);
+    upsertStreamingAssistantMessage(messageId, nextChunk);
+
+    if (pendingAssistantText.value) {
+      scheduleTypewriter(messageId);
+      return;
+    }
+
+    resolveTypewriterIdleIfNeeded();
+  }, TYPEWRITER_DELAY_MS);
+}
+
+function waitForTypewriterIdle() {
+  if (!pendingAssistantText.value && !typewriterTimer) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>(resolve => {
+    typewriterIdleResolver = resolve;
+  });
+}
+
+function queueStreamingAssistantText(messageId: string, content: string) {
+  if (!content) {
+    return;
+  }
+
+  pendingAssistantText.value += content;
+  scheduleTypewriter(messageId);
+}
+
+function upsertStreamingAssistantMessage(messageId: string, content = "") {
   const existing = messages.value.find(item => item.id === messageId);
   if (existing) {
+    existing.isPending = false;
     existing.text += content;
     return;
   }
@@ -203,6 +276,7 @@ function upsertStreamingAssistantMessage(messageId: string, content: string) {
     role: "assistant",
     kind: "answer",
     text: content,
+    isPending: !content,
   });
 }
 
@@ -210,6 +284,7 @@ function finalizeAssistantMessage(messageId: string, text: string, showInlinePro
   const existing = messages.value.find(item => item.id === messageId);
   if (existing) {
     existing.text = text;
+    existing.isPending = false;
     existing.showInlineProfessionalContact = showInlineProfessionalContact;
     return;
   }
@@ -219,6 +294,7 @@ function finalizeAssistantMessage(messageId: string, text: string, showInlinePro
     role: "assistant",
     kind: "answer",
     text,
+    isPending: false,
     showInlineProfessionalContact,
   });
 }
@@ -242,6 +318,7 @@ async function sendMessage(presetQuestion?: string) {
     const history = toSupportChatHistory();
     const turnCount = history.filter(item => item.role === "user").length;
     const assistantMessageId = `a-${Date.now()}`;
+    upsertStreamingAssistantMessage(assistantMessageId);
     const result = await streamSupportAssistantChat(
       {
         conversationId: conversationId.value || undefined,
@@ -255,9 +332,11 @@ async function sendMessage(presetQuestion?: string) {
             conversationId.value = event.conversationId;
           }
         },
-        onDelta: content => upsertStreamingAssistantMessage(assistantMessageId, content),
+        onDelta: content => queueStreamingAssistantText(assistantMessageId, content),
       },
     );
+    await waitForTypewriterIdle();
+    await sleep(TYPEWRITER_DELAY_MS);
 
     if (result.conversationId) {
       conversationId.value = result.conversationId;
@@ -274,3 +353,46 @@ async function sendMessage(presetQuestion?: string) {
   }
 }
 </script>
+
+<style scoped>
+.support-markdown :deep(p) {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.support-markdown :deep(p + p),
+.support-markdown :deep(ul + p),
+.support-markdown :deep(p + ul) {
+  margin-top: 0.5rem;
+}
+
+.support-markdown :deep(ul) {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.support-markdown :deep(li + li) {
+  margin-top: 0.25rem;
+}
+
+.support-markdown :deep(strong) {
+  font-weight: 700;
+  color: #004c4c;
+}
+
+.support-markdown :deep(code) {
+  border-radius: 0.45rem;
+  background: rgba(0, 76, 76, 0.08);
+  padding: 0.08rem 0.35rem;
+  color: #004c4c;
+  font-size: 0.92em;
+}
+
+.support-markdown :deep(a) {
+  color: #006a6a;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+</style>

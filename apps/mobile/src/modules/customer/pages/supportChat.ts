@@ -22,7 +22,7 @@ export const PROFESSIONAL_SUPPORT_CONTACT = {
 } as const;
 
 const SUPPORT_FALLBACK_REPLY =
-  "我先为您转成基础人工协助建议：当前智能答复暂时不可用，建议直接联系专业客服继续处理。";
+  "我先为您转成基础人工协助建议：当前智能答复暂时不可用，建议直接联系一对一客服继续处理。";
 
 export type SupportAssistantChatPayload = {
   conversationId?: string;

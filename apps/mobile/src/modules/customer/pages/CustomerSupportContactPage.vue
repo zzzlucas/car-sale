@@ -8,7 +8,7 @@
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 class="text-lg font-semibold tracking-tight text-primary">专业客服</h1>
+        <h1 class="text-lg font-semibold tracking-tight text-primary">一对一客服</h1>
         <div class="w-8" />
       </div>
     </header>
@@ -17,9 +17,9 @@
       <div class="rounded-[28px] border border-primary/10 bg-[linear-gradient(180deg,rgba(0,76,76,0.08),rgba(255,255,255,0.96))] px-5 py-6">
         <div class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-label-sm text-primary">
           <span class="material-symbols-outlined text-[16px]">support_agent</span>
-          专业人工支持
+          一对一人工支持
         </div>
-        <h2 class="mt-4 text-headline-md text-on-surface">需要更具体的协助时，可以直接联系专业客服。</h2>
+        <h2 class="mt-4 text-headline-md text-on-surface">需要更具体的协助时，可以直接联系一对一客服。</h2>
         <p class="mt-2 text-body-md text-on-surface-variant">
           适用于订单异常、资料补充、报价争议、拖车时间协调等需要人工跟进的情况。
         </p>
