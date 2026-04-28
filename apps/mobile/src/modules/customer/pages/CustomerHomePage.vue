@@ -246,20 +246,20 @@ onMounted(async () => {
 }
 
 .customer-home-hero__shield {
-  right: 5.6%;
-  top: 3.8%;
-  width: 27%;
+  right: 8.2%;
+  top: 6.2%;
+  width: 22%;
   animation: home-hero-shield-float 4.8s ease-in-out infinite;
-  filter: drop-shadow(0 16px 18px rgba(67, 38, 0, 0.18));
+  filter: drop-shadow(0 12px 14px rgba(67, 38, 0, 0.16));
   transform-origin: 50% 58%;
 }
 
 .customer-home-hero__cta {
-  left: 4.3%;
-  top: 53.8%;
-  width: 68%;
+  left: 7.8%;
+  top: 55.2%;
+  width: 60%;
   animation: home-hero-cta-glow 2.8s ease-in-out infinite;
-  filter: drop-shadow(0 12px 18px rgba(43, 25, 0, 0.2));
+  filter: drop-shadow(0 9px 14px rgba(43, 25, 0, 0.18));
 }
 
 .customer-home-hero__cta-shine {
@@ -319,15 +319,15 @@ onMounted(async () => {
 
 @media (max-width: 380px) {
   .customer-home-hero__shield {
-    right: 4.6%;
-    top: 4.4%;
-    width: 26%;
+    right: 7.6%;
+    top: 6.4%;
+    width: 22%;
   }
 
   .customer-home-hero__cta {
-    left: 4%;
-    top: 54.4%;
-    width: 69%;
+    left: 7%;
+    top: 55.4%;
+    width: 61%;
   }
 }
 

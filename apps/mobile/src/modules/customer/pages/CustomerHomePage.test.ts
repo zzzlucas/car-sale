@@ -78,6 +78,13 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("@keyframes home-hero-cta-glow");
     expect(source).toContain("@keyframes home-hero-shield-float");
     expect(source).toContain("customer-home-hero__cta-shine");
+    expect(source).toContain("width: 60%;");
+    expect(source).toContain("width: 22%;");
+    expect(source).toContain("width: 61%;");
+    expect(source).not.toContain("width: 68%;");
+    expect(source).not.toContain("width: 27%;");
+    expect(source).not.toContain("width: 69%;");
+    expect(source).not.toContain("width: 26%;");
     expect(source).toContain("prefers-reduced-motion: reduce");
     expect(source).toContain("animation: none");
   });
