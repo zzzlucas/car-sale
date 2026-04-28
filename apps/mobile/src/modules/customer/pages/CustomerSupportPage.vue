@@ -20,7 +20,7 @@
       <div class="flex justify-center">
         <div class="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-label-sm text-primary">
           <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
-          演示版 AI 助手，可随时转专业客服
+          智能客服助手，可随时转专业客服
         </div>
       </div>
 
@@ -104,6 +104,7 @@
         <div class="flex flex-1 items-center rounded-full border border-transparent bg-surface-container-low px-4 py-2.5 focus-within:border-primary">
           <input
             v-model="draft"
+            :disabled="isSending"
             type="text"
             placeholder="请输入您的问题..."
             class="h-6 w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
@@ -111,7 +112,8 @@
           />
         </div>
         <button
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition-all active:scale-90"
+          :disabled="isSending"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition-all active:scale-90 disabled:scale-100 disabled:opacity-60"
           @click="sendMessage()"
         >
           <span class="material-symbols-outlined icon-fill text-[20px]">send</span>
@@ -127,9 +129,7 @@ import { RouterLink, useRouter } from "vue-router";
 
 import {
   SUPPORT_PRESET_QUESTIONS,
-  buildAssistantReply,
-  shouldShowFullProfessionalContact,
-  shouldShowInlineProfessionalContact,
+  chatWithSupportAssistant,
 } from "./supportChat";
 
 type Message = {
@@ -142,13 +142,15 @@ type Message = {
 
 const router = useRouter();
 const draft = ref("");
+const isSending = ref(false);
 const chatBodyRef = ref<HTMLElement | null>(null);
+const conversationId = ref<string | null>(null);
 const messages = ref<Message[]>([
   {
     id: "a-welcome",
     role: "assistant",
     kind: "welcome",
-    text: "您好，我是演示版 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系专业客服。",
+    text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系专业客服。",
   },
 ]);
 
@@ -156,7 +158,7 @@ const answeredTurns = computed(
   () => messages.value.filter(item => item.role === "assistant" && item.kind === "answer").length,
 );
 const showPresetQuestions = computed(() => answeredTurns.value === 0);
-const showLargeContactCta = computed(() => shouldShowFullProfessionalContact(answeredTurns.value));
+const showLargeContactCta = ref(false);
 
 watch(
   () => messages.value.length,
@@ -182,9 +184,16 @@ function goBack() {
   router.push("/customer/me");
 }
 
-function sendMessage(presetQuestion?: string) {
+function toSupportChatHistory() {
+  return messages.value.map(item => ({
+    role: item.role,
+    content: item.text,
+  }));
+}
+
+async function sendMessage(presetQuestion?: string) {
   const content = (presetQuestion ?? draft.value).trim();
-  if (!content) {
+  if (!content || isSending.value) {
     return;
   }
 
@@ -194,16 +203,33 @@ function sendMessage(presetQuestion?: string) {
     text: content,
   });
 
-  const nextAnsweredTurns = answeredTurns.value + 1;
-
-  messages.value.push({
-    id: `a-${Date.now()}`,
-    role: "assistant",
-    kind: "answer",
-    text: buildAssistantReply(content),
-    showInlineProfessionalContact: shouldShowInlineProfessionalContact(nextAnsweredTurns),
-  });
-
   draft.value = "";
+  isSending.value = true;
+
+  try {
+    const history = toSupportChatHistory();
+    const turnCount = history.filter(item => item.role === "user").length;
+    const result = await chatWithSupportAssistant({
+      conversationId: conversationId.value || undefined,
+      userMessage: content,
+      turnCount,
+      history,
+    });
+
+    if (result.conversationId) {
+      conversationId.value = result.conversationId;
+    }
+
+    messages.value.push({
+      id: `a-${Date.now()}`,
+      role: "assistant",
+      kind: "answer",
+      text: result.reply,
+      showInlineProfessionalContact: result.escalation.showInlineProfessionalContact,
+    });
+    showLargeContactCta.value = result.escalation.showLargeProfessionalContact;
+  } finally {
+    isSending.value = false;
+  }
 }
 </script>

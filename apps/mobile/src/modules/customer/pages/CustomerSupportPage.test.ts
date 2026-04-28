@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, "CustomerSupportPage.vue"), "utf8");
 
-describe("CustomerSupportPage ai demo experience", () => {
+describe("CustomerSupportPage ai support experience", () => {
   it("shows three preset quick questions when the page first loads", () => {
     expect(source).toContain("showPresetQuestions");
     expect(source).toContain("SUPPORT_PRESET_QUESTIONS");
@@ -18,5 +18,11 @@ describe("CustomerSupportPage ai demo experience", () => {
     expect(source).toContain("联系专业客服");
     expect(source).toContain("showLargeContactCta");
     expect(source).toContain('to=\"/customer/support/contact\"');
+  });
+
+  it("uses the backend support assistant instead of local keyword replies", () => {
+    expect(source).toContain("chatWithSupportAssistant");
+    expect(source).not.toContain("buildAssistantReply");
+    expect(source).toContain("isSending");
   });
 });

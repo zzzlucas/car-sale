@@ -2,17 +2,17 @@
 
 ## 目标
 
-这份文档用于收口 `car` 项目“客户侧 AI 客服模块”的接入要求，服务当前已上线的前端演示版客服页面，为后续正式接入硅基流动平台提供统一的前后端边界、接口契约与配置约定。
+这份文档用于收口 `car` 项目“客户侧 AI 客服模块”的接入要求，服务当前已上线的客户侧客服页面，并为硅基流动等 OpenAI 风格 AI 平台提供统一的前后端边界、接口契约与配置约定。
 
-当前阶段目标不是一次性做完整智能客服平台，而是先把“客户提问 -> backend 代理 AI -> 返回答复 -> 必要时升级专业客服”这条最小闭环定义清楚。
+当前阶段目标不是一次性做完整智能客服平台，而是先把“客户提问 -> backend 代理 AI -> 返回答复 -> 必要时升级专业客服”这条最小闭环跑通并保持可回退。
 
 ## 当前范围
 
-- 当前已存在前端演示版页面：
+- 当前已存在客户侧客服页面：
   - `apps/mobile/src/modules/customer/pages/CustomerSupportPage.vue`
   - `apps/mobile/src/modules/customer/pages/CustomerSupportContactPage.vue`
-- 当前演示版仍使用前端本地规则答复，不调用真实 AI
-- 后续真实 AI 接入时，默认只替换答复来源与升级判定，不推翻现有页面结构
+- 当前页面已改为调用 `apps/backend` 的 `/app/support/chat`，由 backend 代理第三方 AI 平台
+- 前端保留请求失败兜底文案与专业客服入口，不直接持有第三方平台 key
 
 ## 总体边界
 
@@ -122,7 +122,7 @@ type SupportChatResponse = {
 
 ## 升级专业客服规则
 
-### 当前前端演示版规则
+### 当前前端兜底规则
 
 - 第一轮答复后显示小号“联系专业客服”
 - 超过三轮答复后显示大号“联系专业客服”
@@ -165,6 +165,10 @@ type SupportChatResponse = {
   - 主模型不可用时的回退模型
 - `AI_SUPPORT_ENABLE_STREAM`
   - 后续若切流式输出可显式控制
+- `AI_SUPPORT_LEVEL1_ALLOWLIST`
+  - 复用共享 runtime 的模型分级路由时，用于声明普通 key 可走的模型列表
+- `AI_SUPPORT_FALLBACK_API_KEYS`
+  - 复用共享 runtime 的 fallback key 池时使用
 
 ## Key 与安全要求
 
@@ -214,28 +218,28 @@ type SupportChatResponse = {
 
 ## 与当前前端页面的对接要求
 
-正式接入时，优先复用现有页面和路由：
+当前接入已优先复用现有页面和路由：
 
 - `apps/mobile/src/modules/customer/pages/CustomerSupportPage.vue`
 - `apps/mobile/src/modules/customer/pages/CustomerSupportContactPage.vue`
 - `apps/mobile/src/modules/customer/pages/supportChat.ts`
 
-替换顺序建议为：
+已完成替换顺序为：
 
 1. 保留页面结构与“联系专业客服”入口
 2. 用 backend AI 接口替换 `supportChat.ts` 的本地答复逻辑
-3. 再把升级规则逐步从前端收口到 backend 响应
+3. 将升级规则逐步从前端收口到 backend 响应，前端只保留失败兜底
 
 ## 当前未定项
 
-以下内容待你后续提供硅基流动平台真实资料后补齐：
+以下内容仍待按真实环境资料补齐或验证：
 
 - 真实请求 URL / path
 - 鉴权方式
 - 模型名
-- 是否兼容 OpenAI 风格接口
+- 生产环境是否继续使用硅基流动 OpenAI 风格 `/chat/completions`
 - 是否启用流式返回
-- 是否使用单 key 还是 key 池
+- 是否使用单 key 还是 key 池，以及 fallback key 池策略
 - 是否需要模型 fallback
 
 ## 后续升级条件
