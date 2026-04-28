@@ -37,8 +37,9 @@ describe("supportChat backend integration", () => {
     mockedRequestStream.mockReset();
   });
 
-  it("provides exactly three preset quick questions for first-entry guidance", () => {
-    expect(SUPPORT_PRESET_QUESTIONS).toHaveLength(3);
+  it("provides four preset quick questions including subsidy guidance", () => {
+    expect(SUPPORT_PRESET_QUESTIONS).toHaveLength(4);
+    expect(SUPPORT_PRESET_QUESTIONS.map(item => item.question)).toContain("报废补贴怎么申领？");
   });
 
   it("sends customer support questions to the backend support chat endpoint", async () => {

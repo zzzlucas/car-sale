@@ -111,6 +111,38 @@ describe('AppSupportAiService', () => {
     expect(result.escalation.showInlineProfessionalContact).toBe(true);
   });
 
+  it('adds project progress and official subsidy context to provider messages', async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: {
+        choices: [{ message: { content: '可在预约记录里查看当前进度。' } }],
+      },
+      headers: {},
+    } as any);
+
+    const service = createService();
+    await service.chat({
+      scene: 'customer_support',
+      userMessage: '怎么查看预约进度？',
+      turnCount: 1,
+      history: [{ role: 'user', content: '怎么查看预约进度？' }],
+    });
+
+    const requestBody = mockedAxios.post.mock.calls[0][1] as any;
+    const systemContext = requestBody.messages
+      .filter((item: any) => item.role === 'system')
+      .map((item: any) => item.content)
+      .join('\n');
+
+    expect(systemContext).toContain('/customer/records');
+    expect(systemContext).toContain('/customer/progress/:orderId');
+    expect(systemContext).toContain('scrap_order.currentStatus');
+    expect(systemContext).toContain('order_timeline');
+    expect(systemContext).toContain('汽车以旧换新');
+    expect(systemContext).toContain('2026年1月1日');
+    expect(systemContext).toContain('最高 2 万元');
+    expect(systemContext).toContain('全国汽车流通信息管理系统网站');
+  });
+
   it('falls back to professional support when provider config or request fails', async () => {
     mockedAxios.post.mockRejectedValueOnce(new Error('network down'));
 

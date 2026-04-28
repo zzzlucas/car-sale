@@ -10,6 +10,7 @@ export const SUPPORT_PRESET_QUESTIONS = [
   { id: "flow", label: "报废流程怎么走", question: "报废流程怎么走？" },
   { id: "materials", label: "需要准备哪些材料", question: "需要准备哪些材料？" },
   { id: "progress", label: "怎么查看预约进度", question: "怎么查看预约进度？" },
+  { id: "subsidy", label: "报废补贴怎么申领", question: "报废补贴怎么申领？" },
 ] as const;
 
 export const PROFESSIONAL_SUPPORT_CONTACT = {

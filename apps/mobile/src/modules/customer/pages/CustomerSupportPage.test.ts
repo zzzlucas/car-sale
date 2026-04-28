@@ -6,12 +6,14 @@ import { describe, expect, it } from "vitest";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, "CustomerSupportPage.vue"), "utf8");
+const supportChatSource = fs.readFileSync(path.join(__dirname, "supportChat.ts"), "utf8");
 
 describe("CustomerSupportPage ai support experience", () => {
-  it("shows three preset quick questions when the page first loads", () => {
+  it("shows preset quick questions when the page first loads", () => {
     expect(source).toContain("showPresetQuestions");
     expect(source).toContain("SUPPORT_PRESET_QUESTIONS");
     expect(source).toContain("item.label");
+    expect(supportChatSource).toContain("报废补贴怎么申领");
   });
 
   it("uses clear one-to-one support wording instead of vague professional or real-person copy", () => {
