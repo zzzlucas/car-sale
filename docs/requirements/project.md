@@ -6,6 +6,15 @@
 
 ## 当前活跃需求
 
+### [REQ-PRJ-20260428-17] 预发布根命令必须同时发布 backend 与 mobile H5 静态站点
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `pnpm deploy:preprod` 不再只发布 backend，而是先执行 `pnpm deploy:preprod:backend`，再执行 `pnpm deploy:preprod:mobile`
+  - `pnpm deploy:preprod:mobile` 负责以 `VITE_API_BASE_URL=/api` 构建 `apps/mobile`，并把 `apps/mobile/dist` 同步到 `/srv/nginx/name10.lucasishere.top`
+  - `pnpm deploy:check:preprod` 必须同时探活公网 H5 首页入口资源与 API，避免后端已更新但根站点仍停留在旧静态产物
+- 原因：`https://name10.lucasishere.top/` 的页面效果来自 Nginx 静态目录，不来自 backend 进程；如果根部署命令只重启后端，用户看到的 H5 仍会是旧构建产物。
+
 ### [REQ-PRJ-20260428-16] 客户侧品牌型号选择先以内置车型目录 + 手填兜底落地
 - 状态：`accepted`
 - 优先级：`P1`

@@ -124,6 +124,32 @@ $remoteScript = $remoteScript.Replace('__REMOTE_APP_DIR__', $RemoteAppDir)
 Invoke-RemoteScript -Script $remoteScript
 
 try {
+    $publicIndex = (curl.exe -fsS -H 'Cache-Control: no-cache' "$PublicBaseUrl/") -join "`n"
+    $publicEntryAssets = @(
+        [regex]::Matches($publicIndex, '(?:src|href)="/?(assets/[^"?#]+)') |
+            ForEach-Object { $_.Groups[1].Value } |
+            Sort-Object -Unique
+    )
+
+    if ($publicEntryAssets.Count -eq 0) {
+        throw "公网首页缺少移动端 assets 入口引用"
+    }
+
+    foreach ($asset in $publicEntryAssets) {
+        $assetUrl = "$($PublicBaseUrl.TrimEnd('/'))/$asset"
+        $assetContent = (curl.exe -fsS -H 'Cache-Control: no-cache' $assetUrl) -join "`n"
+        if ($assetContent -match '127\.0\.0\.1:8001') {
+            throw "公网移动端资源仍包含本地 API 地址：$assetUrl"
+        }
+    }
+
+    Write-Output "PUBLIC_MOBILE_ENTRY_ASSETS=$($publicEntryAssets -join ',')"
+}
+catch {
+    throw "公网移动端首页探活失败: $PublicBaseUrl/"
+}
+
+try {
     $support = curl.exe -fsS "$PublicBaseUrl/api/app/content/support"
     Write-Output $support
 }

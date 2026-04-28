@@ -51,8 +51,9 @@ rg -n "127.0.0.1:8001" .\apps\mobile\dist
 
 ## 当前推荐发布口径
 
-- 先把 `apps/mobile/dist` 当成唯一上线产物
-- 远端发布路径、Nginx 站点名和 HTTPS 域名一旦固定，再补回这份手册，不另开第二份“正式发布版”
+- 预发布根站点发布入口使用 `pnpm deploy:preprod:mobile`
+- 项目整体预发布入口使用 `pnpm deploy:preprod`，会先发布 backend，再发布 `apps/mobile` H5 静态产物
+- `apps/mobile/dist` 仍是唯一上线产物，脚本会以 `VITE_API_BASE_URL=/api` 构建后同步到 `/srv/nginx/name10.lucasishere.top`
 - 本轮如果只是先交付测试包或给云端静态站上传，至少也要记录：
   - 发布到哪
   - 用的 API 地址是什么
@@ -62,6 +63,7 @@ rg -n "127.0.0.1:8001" .\apps\mobile\dist
 
 - H5 首页能打开
 - 关键 API 不再指向 `127.0.0.1:8001`
+- `pnpm deploy:check:preprod` 能输出 `PUBLIC_MOBILE_ENTRY_ASSETS=...`
 - 如果本轮有上传图片，浏览器侧上传链路至少做一次真实验证
 
 ## 关联文档
