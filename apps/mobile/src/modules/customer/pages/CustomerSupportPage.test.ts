@@ -45,4 +45,19 @@ describe("CustomerSupportPage ai support experience", () => {
     expect(source).toContain("restartConversation");
     expect(source).toContain("重新开始");
   });
+
+  it("uses a fixed chat shell with dynamic viewport height and keyboard-safe footer", () => {
+    expect(source).toContain("support-chat-shell");
+    expect(source).toContain("support-chat-body");
+    expect(source).toContain("support-chat-composer");
+    expect(source).toContain("min-h-0");
+    expect(source).toContain("visualViewport");
+    expect(source).toContain("--support-chat-viewport-height");
+  });
+
+  it("styles restart conversation as a real button", () => {
+    expect(source).toContain("重新开始");
+    expect(source).toContain("restart-button");
+    expect(source).toContain("rounded-full border");
+  });
 });

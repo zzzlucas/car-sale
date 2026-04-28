@@ -1,5 +1,5 @@
 <template>
-  <main class="flex h-screen flex-col overflow-hidden bg-surface">
+  <main class="support-chat-shell flex min-h-0 flex-col overflow-hidden bg-surface">
     <header class="shrink-0 border-b border-surface-variant bg-white">
       <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
         <button
@@ -11,7 +11,7 @@
         <h1 class="text-lg font-semibold tracking-tight text-primary">AI 客服助手</h1>
         <button
           type="button"
-          class="rounded-full px-2 py-1 text-label-md font-semibold text-primary transition-colors active:bg-primary/10 disabled:opacity-40"
+          class="restart-button rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-label-md font-semibold text-primary shadow-sm transition-colors active:bg-primary/10 disabled:opacity-40"
           :disabled="isSending"
           @click="restartConversation"
         >
@@ -20,16 +20,14 @@
       </div>
     </header>
 
-    <section
-      ref="chatBodyRef"
-      class="hide-scrollbar mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto bg-surface-bright px-margin-page py-stack-lg"
-    >
-      <div class="flex justify-center">
-        <div class="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-label-sm text-primary">
-          <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
-          智能客服助手，可随时转一对一客服
+    <section ref="chatBodyRef" class="support-chat-body hide-scrollbar min-h-0 flex-1 overflow-y-auto bg-surface-bright">
+      <div class="mx-auto flex min-h-full w-full max-w-md flex-col gap-5 px-margin-page py-stack-lg">
+        <div class="flex justify-center">
+          <div class="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-label-sm text-primary">
+            <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+            智能客服助手，可随时转一对一客服
+          </div>
         </div>
-      </div>
 
       <template v-for="message in messages" :key="message.id">
         <div v-if="message.role === 'assistant'" class="flex max-w-[95%] items-start gap-3">
@@ -78,20 +76,21 @@
         </div>
       </template>
 
-      <section v-if="showPresetQuestions" class="rounded-[24px] bg-white px-4 py-4 shadow-subtle ring-1 ring-surface-variant">
-        <p class="text-label-md text-on-surface-variant">快捷问题</p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <button
-            v-for="item in SUPPORT_PRESET_QUESTIONS"
-            :key="item.id"
-            type="button"
-            class="rounded-full border border-surface-variant bg-surface-container-low px-3 py-2 text-label-md text-on-surface transition-colors active:border-primary active:text-primary"
-            @click="sendMessage(item.question)"
-          >
-            {{ item.label }}
-          </button>
-        </div>
-      </section>
+        <section v-if="showPresetQuestions" class="rounded-[24px] bg-white px-4 py-4 shadow-subtle ring-1 ring-surface-variant">
+          <p class="text-label-md text-on-surface-variant">快捷问题</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button
+              v-for="item in SUPPORT_PRESET_QUESTIONS"
+              :key="item.id"
+              type="button"
+              class="rounded-full border border-surface-variant bg-surface-container-low px-3 py-2 text-label-md text-on-surface transition-colors active:border-primary active:text-primary"
+              @click="sendMessage(item.question)"
+            >
+              {{ item.label }}
+            </button>
+          </div>
+        </section>
+      </div>
     </section>
 
     <section
@@ -112,7 +111,7 @@
       </div>
     </section>
 
-    <footer class="shrink-0 border-t border-surface-variant bg-surface-container-lowest px-margin-page pb-[calc(12px+env(safe-area-inset-bottom))] pt-3">
+    <footer class="support-chat-composer shrink-0 border-t border-surface-variant bg-surface-container-lowest px-margin-page pb-[calc(12px+env(safe-area-inset-bottom))] pt-3">
       <div class="mx-auto flex w-full max-w-md items-center gap-3">
         <RouterLink
           to="/customer/support/contact"
@@ -143,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
 import {
@@ -174,6 +173,7 @@ const WELCOME_MESSAGE: Message = {
   kind: "welcome",
   text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系一对一客服。",
 };
+const SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR = "--support-chat-viewport-height";
 
 const router = useRouter();
 const draft = ref("");
@@ -185,6 +185,29 @@ const messages = ref<Message[]>(cachedChat?.messages?.length ? cachedChat.messag
 let typewriterTimer: ReturnType<typeof window.setTimeout> | null = null;
 let typewriterIdleResolver: (() => void) | null = null;
 const pendingAssistantText = ref("");
+
+function updateSupportChatViewportHeight() {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return;
+  }
+
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  document.documentElement.style.setProperty(SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR, `${Math.round(viewportHeight)}px`);
+}
+
+onMounted(() => {
+  updateSupportChatViewportHeight();
+  window.visualViewport?.addEventListener("resize", updateSupportChatViewportHeight);
+  window.visualViewport?.addEventListener("scroll", updateSupportChatViewportHeight);
+  window.addEventListener("resize", updateSupportChatViewportHeight);
+});
+
+onBeforeUnmount(() => {
+  window.visualViewport?.removeEventListener("resize", updateSupportChatViewportHeight);
+  window.visualViewport?.removeEventListener("scroll", updateSupportChatViewportHeight);
+  window.removeEventListener("resize", updateSupportChatViewportHeight);
+  document.documentElement.style.removeProperty(SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR);
+});
 
 const answeredTurns = computed(
   () => messages.value.filter(item => item.role === "assistant" && item.kind === "answer").length,
@@ -406,6 +429,21 @@ async function sendMessage(presetQuestion?: string) {
 </script>
 
 <style scoped>
+.support-chat-shell {
+  height: var(--support-chat-viewport-height, 100dvh);
+  max-height: var(--support-chat-viewport-height, 100dvh);
+}
+
+.support-chat-body {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.support-chat-composer {
+  position: relative;
+  z-index: 10;
+}
+
 .support-markdown :deep(p) {
   margin: 0;
   white-space: pre-wrap;
