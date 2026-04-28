@@ -3,8 +3,15 @@ import { MidwayConfig } from '@midwayjs/core';
 import { TenantSubscriber } from '../modules/base/db/tenant';
 import { loadBackendLocalEnv, requireBackendLocalEnv } from './localEnv';
 
-loadBackendLocalEnv();
-const dbPassword = requireBackendLocalEnv('DB_PASSWORD');
+const shouldLoadLocalEnv = process.env.NODE_ENV !== 'prod';
+
+if (shouldLoadLocalEnv) {
+  loadBackendLocalEnv();
+}
+
+const dbPassword = shouldLoadLocalEnv
+  ? requireBackendLocalEnv('DB_PASSWORD')
+  : '';
 
 /**
  * 本地开发 npm run dev 读取的配置文件
