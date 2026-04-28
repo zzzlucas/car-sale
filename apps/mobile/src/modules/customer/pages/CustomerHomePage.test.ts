@@ -97,10 +97,10 @@ describe("CustomerHomePage landing layout", () => {
     const ctaSize = readPngSize(heroCta);
     const shieldSize = readPngSize(heroShield);
 
-    expect(baseSize.width).toBeLessThanOrEqual(1200);
+    expect(baseSize.width).toBeLessThanOrEqual(790);
     expect(baseSize.height).toBeLessThanOrEqual(850);
     expect([4, 6]).toContain(baseSize.colorType);
-    expect(heroBase.byteLength).toBeLessThanOrEqual(900 * 1024);
+    expect(heroBase.byteLength).toBeLessThanOrEqual(850 * 1024);
     expect(ctaSize.width).toBeLessThanOrEqual(900);
     expect(ctaSize.height).toBeLessThanOrEqual(220);
     expect([4, 6]).toContain(ctaSize.colorType);
