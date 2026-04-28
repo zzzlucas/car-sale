@@ -22,7 +22,6 @@
           class="customer-home-hero group relative block rounded-[32px] outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
         >
           <span class="customer-home-hero__depth-shadow" aria-hidden="true" />
-          <span class="customer-home-hero__edge" aria-hidden="true" />
           <span class="customer-home-hero__screen">
             <img
               :src="homeHeroBase"
@@ -188,66 +187,38 @@ onMounted(async () => {
 <style scoped>
 .customer-home-hero {
   isolation: isolate;
-  perspective: 900px;
   transform: translateZ(0);
-  transform-style: preserve-3d;
 }
 
 .customer-home-hero__screen {
   background: linear-gradient(135deg, rgba(0, 84, 78, 0.96), rgba(0, 45, 49, 0.98));
   border-radius: 32px;
   box-shadow:
-    0 26px 42px -28px rgba(0, 29, 30, 0.62),
-    0 10px 22px -18px rgba(0, 0, 0, 0.42),
+    0 24px 42px -30px rgba(0, 29, 30, 0.58),
+    0 8px 18px -16px rgba(0, 0, 0, 0.36),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
   display: block;
   overflow: hidden;
   position: relative;
-  transform: rotateY(-1.8deg) translateZ(0);
-  transform-origin: left center;
-  transform-style: preserve-3d;
   transition:
     box-shadow 520ms ease,
     transform 520ms ease;
   z-index: 2;
 }
 
-.customer-home-hero__edge,
 .customer-home-hero__depth-shadow {
   pointer-events: none;
   position: absolute;
 }
 
-.customer-home-hero__edge {
-  animation: home-hero-edge-breathe 4.4s ease-in-out infinite;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(164, 225, 202, 0.32) 18%, rgba(0, 92, 86, 0.72) 54%, rgba(0, 55, 57, 0.9)),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.42), rgba(0, 55, 57, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-left: 0;
-  border-radius: 0 28px 28px 0;
-  bottom: 7.2%;
-  box-shadow:
-    inset 10px 0 18px rgba(255, 255, 255, 0.18),
-    inset -6px 0 14px rgba(0, 24, 28, 0.36),
-    12px 16px 24px -20px rgba(0, 23, 25, 0.62);
-  right: -2.8%;
-  top: 7.2%;
-  transform: rotateY(-34deg) translateZ(-10px);
-  transform-origin: left center;
-  width: 8.2%;
-  z-index: 1;
-}
-
 .customer-home-hero__depth-shadow {
-  background: radial-gradient(ellipse at center, rgba(0, 49, 52, 0.36), rgba(0, 49, 52, 0));
-  bottom: -8%;
-  filter: blur(14px);
-  height: 28%;
-  left: 8%;
-  opacity: 0.88;
-  right: -6%;
-  transform: rotate(-1deg);
+  background: radial-gradient(ellipse at center, rgba(0, 49, 52, 0.26), rgba(0, 49, 52, 0));
+  bottom: -7%;
+  filter: blur(16px);
+  height: 26%;
+  left: 9%;
+  opacity: 0.72;
+  right: 9%;
   z-index: 0;
 }
 
@@ -261,10 +232,10 @@ onMounted(async () => {
 
 .customer-home-hero:hover .customer-home-hero__screen {
   box-shadow:
-    0 30px 48px -28px rgba(0, 29, 30, 0.7),
-    0 14px 26px -18px rgba(0, 0, 0, 0.46),
+    0 28px 46px -30px rgba(0, 29, 30, 0.64),
+    0 10px 22px -18px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
-  transform: rotateY(-2.4deg) translateY(-1px) translateZ(0);
+  transform: translateY(-1px);
 }
 
 .customer-home-hero__shield,
@@ -346,19 +317,6 @@ onMounted(async () => {
   }
 }
 
-@keyframes home-hero-edge-breathe {
-  0%,
-  100% {
-    opacity: 0.86;
-    transform: rotateY(-34deg) translateZ(-10px) translateX(0);
-  }
-
-  50% {
-    opacity: 1;
-    transform: rotateY(-38deg) translateZ(-12px) translateX(2px);
-  }
-}
-
 @media (max-width: 380px) {
   .customer-home-hero__shield {
     right: 4.6%;
@@ -376,7 +334,6 @@ onMounted(async () => {
 @media (prefers-reduced-motion: reduce) {
   .customer-home-hero,
   .customer-home-hero__screen,
-  .customer-home-hero__edge,
   .customer-home-hero__depth-shadow,
   .customer-home-hero__base,
   .customer-home-hero__shield,
@@ -391,7 +348,7 @@ onMounted(async () => {
   }
 
   .customer-home-hero:hover .customer-home-hero__screen {
-    transform: rotateY(-1.8deg) translateZ(0);
+    transform: none;
   }
 }
 </style>

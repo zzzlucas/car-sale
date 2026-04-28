@@ -60,20 +60,24 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("fetchpriority=\"high\"");
     expect(source).toContain("customer-home-hero__base");
     expect(source).toContain("customer-home-hero__screen");
-    expect(source).toContain("customer-home-hero__edge");
     expect(source).toContain("customer-home-hero__depth-shadow");
     expect(source).toContain("customer-home-hero__cta");
     expect(source).toContain("customer-home-hero__shield");
+    expect(source).not.toContain("customer-home-hero__edge");
     expect(source).toContain("px-margin-page pt-8 pb-stack-lg");
+  });
+
+  it("keeps the banner clean without the rejected pseudo-3d edge", () => {
+    expect(source).not.toContain("@keyframes home-hero-edge-breathe");
+    expect(source).not.toContain("transform-style: preserve-3d");
+    expect(source).not.toContain("rotateY");
+    expect(source).not.toContain("perspective:");
   });
 
   it("adds restrained CTA and shield motion with reduced-motion support", () => {
     expect(source).toContain("@keyframes home-hero-cta-glow");
     expect(source).toContain("@keyframes home-hero-shield-float");
-    expect(source).toContain("@keyframes home-hero-edge-breathe");
     expect(source).toContain("customer-home-hero__cta-shine");
-    expect(source).toContain("transform-style: preserve-3d");
-    expect(source).toContain("rotateY");
     expect(source).toContain("prefers-reduced-motion: reduce");
     expect(source).toContain("animation: none");
   });
