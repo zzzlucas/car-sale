@@ -21,7 +21,8 @@ describe("CustomerSupportPage ai support experience", () => {
   });
 
   it("uses the backend support assistant instead of local keyword replies", () => {
-    expect(source).toContain("chatWithSupportAssistant");
+    expect(source).toContain("streamSupportAssistantChat");
+    expect(source).toContain("upsertStreamingAssistantMessage");
     expect(source).not.toContain("buildAssistantReply");
     expect(source).toContain("isSending");
   });

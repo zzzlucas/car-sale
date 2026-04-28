@@ -6,14 +6,14 @@
 
 ## 当前活跃需求
 
-### [REQ-PRJ-20260426-15] 客户侧 AI 客服正式接入先走 backend 代理，并以非流式最小闭环落地
+### [REQ-PRJ-20260426-15] 客户侧 AI 客服正式接入先走 backend 代理，并以流式最小闭环落地
 - 状态：`accepted`
 - 优先级：`P1`
 - 决策：
   - `apps/mobile` AI 客服页面只作为前端交互承载层，第三方 AI 统一走 `apps/backend` 代理，不允许前端直连供应商
-  - 第一版真实 AI 接入采用非流式请求，已按“用户提问 -> backend 调 AI -> 返回答复 -> 必要时升级专业客服”的最小闭环落地
-  - 前端与 backend 之间保留稳定的项目内接口契约，至少支持 `userMessage`、`conversationId`、`turnCount`、`reply` 与升级专业客服信号
-  - 第三方平台 key、模型名、超时、重试和 fallback 策略统一收口在 backend 配置，并复用 `_workspace-packages` 的 `@workspace-packages/ai-provider-runtime` 处理 key 路由与 fallback
+  - 第一版真实 AI 接入采用 SSE 流式请求，已按“用户提问 -> backend 调 AI -> 增量返回答复 -> done 补齐最终响应 -> 必要时升级专业客服”的最小闭环落地
+  - 前端与 backend 之间保留稳定的项目内接口契约，至少支持 `userMessage`、`conversationId`、`turnCount`、`delta`、`reply` 与升级专业客服信号
+  - 第三方平台 key、模型名、超时、重试和 fallback 策略统一收口在 backend 配置，并复用 `_workspace-packages` 的 `@workspace-packages/ai-provider-runtime` 处理 key 路由与 fallback；真实配置从 `koa-rent` 现有 SiliconFlow 配置同步到本地忽略 env，不写入仓库
   - AI 客服当前只负责流程说明、材料说明、预约记录/进度引导；涉及订单异常、价格争议、资料缺失或人工诉求时，应允许升级到专业客服
 - 原因：项目已经先做了前端客服页面，现在把真实 AI 调用收口到 backend 和共享 runtime，可以避免供应商 key 暴露到前端，也能让 `car` 轻量复用 `koa-rent` 沉淀出的 AI provider 基础设施，而不是复制完整业务任务中心。
 

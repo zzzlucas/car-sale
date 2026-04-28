@@ -1,10 +1,20 @@
 import axios from 'axios';
+import { Readable } from 'stream';
 
 import { AppSupportAiService } from './supportAi';
 
 jest.mock('axios');
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+async function collectStream(stream: NodeJS.ReadableStream) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
+}
 
 function createService(env: NodeJS.ProcessEnv = {}) {
   const service = new AppSupportAiService() as any;
@@ -23,6 +33,44 @@ beforeEach(() => {
 });
 
 describe('AppSupportAiService', () => {
+  it('streams support chat deltas and a final response through the backend proxy', async () => {
+    mockedAxios.post.mockResolvedValueOnce({
+      data: Readable.from([
+        'data: {"choices":[{"delta":{"content":"可以先"}}]}\n\n',
+        'data: {"choices":[{"delta":{"content":"提交车辆信息"}}]}\n\n',
+        'data: [DONE]\n\n',
+      ]),
+      headers: { 'x-request-id': 'trace-stream-1' },
+    } as any);
+
+    const service = createService();
+    const stream = service.streamChat({
+      scene: 'customer_support',
+      userMessage: '报废流程怎么走？',
+      turnCount: 1,
+      history: [{ role: 'user', content: '报废流程怎么走？' }],
+    });
+    const output = await collectStream(stream);
+
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      'https://api.siliconflow.cn/v1/chat/completions',
+      expect.objectContaining({
+        model: 'deepseek-ai/DeepSeek-V3.2',
+        stream: true,
+      }),
+      expect.objectContaining({
+        responseType: 'stream',
+        timeout: 3000,
+      })
+    );
+    expect(output).toContain('"type":"meta"');
+    expect(output).toContain('"type":"delta","content":"可以先"');
+    expect(output).toContain('"type":"delta","content":"提交车辆信息"');
+    expect(output).toContain('"type":"done"');
+    expect(output).toContain('"reply":"可以先提交车辆信息"');
+    expect(output).toContain('"traceId":"trace-stream-1"');
+  });
+
   it('calls the shared-provider style chat completion endpoint through backend config', async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: {

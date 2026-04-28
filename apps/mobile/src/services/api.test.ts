@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { requestJson } from "./api";
+import { requestJson, requestStream } from "./api";
 
 describe("api service base url", () => {
   afterEach(() => {
@@ -36,5 +36,27 @@ describe("api service base url", () => {
     await expect(requestJson("/app/map/address-suggestions")).rejects.toThrow(
       "当前高德 Key 不支持后端 Web 服务调用",
     );
+  });
+
+  it("returns a readable stream response for backend event streams", async () => {
+    const stream = new ReadableStream();
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      body: stream,
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await requestStream("/app/support/chat/stream", {
+      method: "POST",
+      body: "{}",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/app/support/chat/stream", {
+      method: "POST",
+      body: "{}",
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(result).toBe(stream);
   });
 });

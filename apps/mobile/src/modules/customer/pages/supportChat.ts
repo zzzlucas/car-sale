@@ -1,9 +1,10 @@
 import type {
   SupportChatHistoryMessage,
   SupportChatResponse,
+  SupportChatStreamEvent,
 } from "@car/shared-types";
 
-import { requestJson } from "../../../services/api";
+import { requestJson, requestStream } from "../../../services/api";
 
 export const SUPPORT_PRESET_QUESTIONS = [
   { id: "flow", label: "报废流程怎么走", question: "报废流程怎么走？" },
@@ -31,32 +32,116 @@ export type SupportAssistantChatPayload = {
   history: SupportChatHistoryMessage[];
 };
 
+export type SupportAssistantStreamHandlers = {
+  onDelta?: (content: string) => void;
+  onMeta?: (event: Extract<SupportChatStreamEvent, { type: "meta" }>) => void;
+};
+
+function buildSupportChatBody(payload: SupportAssistantChatPayload) {
+  return JSON.stringify({
+    scene: "customer_support",
+    conversationId: payload.conversationId,
+    userMessage: payload.userMessage,
+    turnCount: payload.turnCount,
+    orderId: payload.orderId,
+    history: payload.history,
+  });
+}
+
 export async function chatWithSupportAssistant(
   payload: SupportAssistantChatPayload,
 ): Promise<SupportChatResponse> {
   try {
     return await requestJson<SupportChatResponse>("/app/support/chat", {
       method: "POST",
-      body: JSON.stringify({
-        scene: "customer_support",
-        conversationId: payload.conversationId,
-        userMessage: payload.userMessage,
-        turnCount: payload.turnCount,
-        orderId: payload.orderId,
-        history: payload.history,
-      }),
+      body: buildSupportChatBody(payload),
     });
   } catch {
-    return {
-      conversationId: String(payload.conversationId || "").trim(),
-      reply: SUPPORT_FALLBACK_REPLY,
-      escalation: {
-        showInlineProfessionalContact: shouldShowInlineProfessionalContact(payload.turnCount),
-        showLargeProfessionalContact: shouldShowFullProfessionalContact(payload.turnCount),
-      },
-      usage: null,
-    };
+    return buildSupportFallbackResponse(payload);
   }
+}
+
+export async function streamSupportAssistantChat(
+  payload: SupportAssistantChatPayload,
+  handlers: SupportAssistantStreamHandlers = {},
+): Promise<SupportChatResponse> {
+  try {
+    const stream = await requestStream("/app/support/chat/stream", {
+      method: "POST",
+      body: buildSupportChatBody(payload),
+    });
+
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalResponse: SupportChatResponse | null = null;
+
+    const processEvent = (raw: string) => {
+      const data = raw
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.startsWith("data:"))
+        .map(line => line.slice(5).trim())
+        .join("\n");
+
+      if (!data) {
+        return;
+      }
+
+      const event = JSON.parse(data) as SupportChatStreamEvent;
+      if (event.type === "meta") {
+        handlers.onMeta?.(event);
+        return;
+      }
+
+      if (event.type === "delta") {
+        handlers.onDelta?.(event.content);
+        return;
+      }
+
+      if (event.type === "done") {
+        finalResponse = event.response;
+        return;
+      }
+
+      if (event.type === "error" && event.response) {
+        finalResponse = event.response;
+      }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split(/\n\n/);
+      buffer = events.pop() || "";
+      events.forEach(processEvent);
+    }
+
+    buffer += decoder.decode();
+    if (buffer.trim()) {
+      processEvent(buffer);
+    }
+
+    return finalResponse || buildSupportFallbackResponse(payload);
+  } catch {
+    return buildSupportFallbackResponse(payload);
+  }
+}
+
+function buildSupportFallbackResponse(payload: SupportAssistantChatPayload): SupportChatResponse {
+  return {
+    conversationId: String(payload.conversationId || "").trim(),
+    reply: SUPPORT_FALLBACK_REPLY,
+    escalation: {
+      showInlineProfessionalContact: shouldShowInlineProfessionalContact(payload.turnCount),
+      showLargeProfessionalContact: shouldShowFullProfessionalContact(payload.turnCount),
+    },
+    usage: null,
+  };
 }
 
 export function shouldShowInlineProfessionalContact(answeredTurns: number) {

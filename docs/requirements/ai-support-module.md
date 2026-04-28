@@ -11,7 +11,7 @@
 - 当前已存在客户侧客服页面：
   - `apps/mobile/src/modules/customer/pages/CustomerSupportPage.vue`
   - `apps/mobile/src/modules/customer/pages/CustomerSupportContactPage.vue`
-- 当前页面已改为调用 `apps/backend` 的 `/app/support/chat`，由 backend 代理第三方 AI 平台
+- 当前页面已改为调用 `apps/backend` 的 `/app/support/chat/stream`，由 backend 代理第三方 AI 平台并以 SSE 流式返回；`/app/support/chat` 保留为非流式兼容接口
 - 前端保留请求失败兜底文案与专业客服入口，不直接持有第三方平台 key
 
 ## 总体边界
@@ -39,7 +39,7 @@
 ## 接入原则
 
 1. 真实 AI 请求必须走 `apps/backend`，不允许 `apps/mobile` 直连第三方。
-2. 第一版默认先走非流式请求，优先把闭环跑通。
+2. 第一版默认走流式请求，优先保证页面能增量显示答复；非流式接口仅作为兼容与测试兜底。
 3. 前端只依赖项目内稳定响应格式，不依赖硅基流动的原始字段名。
 4. AI 能力当前只做流程说明、材料说明、预约记录/进度引导，不直接承诺价格、政策结论或最终办理结果。
 5. 即使 AI 不可用，页面也必须能正常展示“联系专业客服”。
@@ -82,6 +82,20 @@ type SupportChatResponse = {
   };
 };
 ```
+
+### Stream Response
+
+`POST /app/support/chat/stream` 使用 `text/event-stream`，每个事件为 `data: <json>`：
+
+```ts
+type SupportChatStreamEvent =
+  | { type: "meta"; conversationId: string; traceId?: string; model?: string }
+  | { type: "delta"; content: string }
+  | { type: "done"; response: SupportChatResponse }
+  | { type: "error"; message: string; response?: SupportChatResponse };
+```
+
+前端收到 `delta` 时增量更新当前 AI 答复气泡，收到 `done.response` 后以 backend 最终响应覆盖并补齐 `escalation`、`traceId`、`model` 与 `usage`。
 
 ## 字段要求
 
@@ -140,18 +154,18 @@ type SupportChatResponse = {
 
 ## 配置要求
 
-当前先只约定变量名和用途，不记录真实值。
+当前先只约定变量名和用途，不记录真实 key。`car` 本地后端已按 `koa-rent` 现有 SiliconFlow 配置同步到 Git 忽略的 `apps/backend/.env.local`，仓库示例仍只保留占位值。
 
 ### 必要配置项
 
 - `AI_SUPPORT_PROVIDER`
   - 当前建议预留为 `siliconflow`
 - `AI_SUPPORT_BASE_URL`
-  - 第三方平台基础地址
+  - 第三方平台基础地址；当前按 `koa-rent` 现有配置使用 `https://api.siliconflow.cn/v1`
 - `AI_SUPPORT_API_KEY`
   - 单 key 模式时使用
 - `AI_SUPPORT_MODEL`
-  - 默认模型名
+  - 默认模型名；当前按 `koa-rent` 现有配置使用 `deepseek-ai/DeepSeek-V3.2`
 - `AI_SUPPORT_TIMEOUT_MS`
   - 请求超时
 
@@ -164,7 +178,7 @@ type SupportChatResponse = {
 - `AI_SUPPORT_FALLBACK_MODEL`
   - 主模型不可用时的回退模型
 - `AI_SUPPORT_ENABLE_STREAM`
-  - 后续若切流式输出可显式控制
+  - 当前已默认启用流式输出；如后续需要灰度或回退，可再补显式开关
 - `AI_SUPPORT_LEVEL1_ALLOWLIST`
   - 复用共享 runtime 的模型分级路由时，用于声明普通 key 可走的模型列表
 - `AI_SUPPORT_FALLBACK_API_KEYS`
@@ -227,18 +241,16 @@ type SupportChatResponse = {
 已完成替换顺序为：
 
 1. 保留页面结构与“联系专业客服”入口
-2. 用 backend AI 接口替换 `supportChat.ts` 的本地答复逻辑
-3. 将升级规则逐步从前端收口到 backend 响应，前端只保留失败兜底
+2. 用 backend AI 流式接口替换 `supportChat.ts` 的本地答复逻辑
+3. 页面收到 `delta` 后增量更新当前答复气泡，收到 `done` 后补齐最终响应与升级信号
+4. 将升级规则逐步从前端收口到 backend 响应，前端只保留失败兜底
 
 ## 当前未定项
 
 以下内容仍待按真实环境资料补齐或验证：
 
-- 真实请求 URL / path
-- 鉴权方式
-- 模型名
-- 生产环境是否继续使用硅基流动 OpenAI 风格 `/chat/completions`
-- 是否启用流式返回
+- 生产环境真实 key 注入方式与轮换流程
+- 生产环境是否继续复用 `koa-rent` 的 SiliconFlow 账号与额度
 - 是否使用单 key 还是 key 池，以及 fallback key 池策略
 - 是否需要模型 fallback
 
@@ -246,10 +258,9 @@ type SupportChatResponse = {
 
 当以下信息明确后，建议把本文件升级为正式实现 spec：
 
-- 硅基流动真实 API 调用方式已明确
-- key 管理方式已明确
-- 模型与超时策略已明确
-- 是否需要流式输出已明确
-- 是否需要后端持久化会话已明确
+- 硅基流动 API 调用方式已按 `/chat/completions` + SSE 流式落地，真实环境仍需用现有 key 做联调验证
+- key 管理方式已明确到 backend 环境变量，后续仍需补生产轮换与 fallback 策略
+- 模型与超时策略已先按 `deepseek-ai/DeepSeek-V3.2` 和 `60000ms` 落地
+- 是否需要后端持久化会话仍待明确
 
 在那之前，本文件应作为“接入要求 + 协作契约”使用，而不是实现细节 spec。

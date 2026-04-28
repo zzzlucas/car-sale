@@ -66,6 +66,23 @@ export async function requestJson<T>(path: string, init?: RequestInit): Promise<
   return parseResponse<T>(response);
 }
 
+export async function requestStream(path: string, init?: RequestInit): Promise<ReadableStream<Uint8Array>> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers: createHeaders(init?.headers, "application/json"),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  if (!response.body) {
+    throw new Error("Readable stream is not available");
+  }
+
+  return response.body;
+}
+
 export async function requestFormData<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,

@@ -1,6 +1,7 @@
 import { BaseService } from '@cool-midway/core';
 import { Provide } from '@midwayjs/core';
 import axios from 'axios';
+import { PassThrough } from 'stream';
 import {
   executeChatCompletion,
   parseEnvKeys,
@@ -20,9 +21,38 @@ const DEFAULT_SUPPORT_MODEL = 'deepseek-ai/DeepSeek-V3.2';
 const FALLBACK_REPLY =
   '我先为您转成基础人工协助建议：当前智能答复暂时不可用，建议直接联系专业客服继续处理。';
 
+type SupportChatStreamEvent =
+  | {
+      type: 'meta';
+      conversationId: string;
+      traceId?: string;
+      model?: string;
+    }
+  | {
+      type: 'delta';
+      content: string;
+    }
+  | {
+      type: 'done';
+      response: SupportChatResponse;
+    }
+  | {
+      type: 'error';
+      message: string;
+      response?: SupportChatResponse;
+    };
+
 @Provide()
 export class AppSupportAiService extends BaseService {
   env: NodeJS.ProcessEnv = process.env;
+
+  streamChat(payload: SupportChatRequest): NodeJS.ReadableStream {
+    const stream = new PassThrough();
+
+    void this.writeStreamChat(payload, stream);
+
+    return stream;
+  }
 
   async chat(payload: SupportChatRequest): Promise<SupportChatResponse> {
     const conversationId = this.resolveConversationId(payload?.conversationId);
@@ -103,6 +133,161 @@ export class AppSupportAiService extends BaseService {
         };
       },
     });
+  }
+
+  protected async executeRuntimeChatStream(params: {
+    scene: string;
+    messages: SupportChatMessage[];
+    orderId?: string;
+  }): Promise<AiProviderExecutionResult<NodeJS.ReadableStream>> {
+    const baseUrl = this.resolveBaseUrl();
+    const primaryKeys = this.resolvePrimaryKeys();
+    const fallbackKeys = this.resolveFallbackKeys();
+    const model = this.resolveModel();
+    const timeoutMs = this.resolveTimeoutMs();
+
+    if (!baseUrl || (primaryKeys.length === 0 && fallbackKeys.length === 0)) {
+      throw new Error('Support AI provider is not configured');
+    }
+
+    return executeChatCompletion({
+      model,
+      level1Allowlist: this.resolveLevel1Allowlist(model),
+      primaryKeys,
+      fallbackKeys,
+      request: async ({ key, model: resolvedModel, meta }) => {
+        const response = await axios.post(
+          `${baseUrl}/chat/completions`,
+          {
+            model: resolvedModel,
+            messages: this.buildRuntimeMessages(params.scene, params.messages, params.orderId),
+            temperature: 0.2,
+            stream: true,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${key}`,
+              'Content-Type': 'application/json',
+            },
+            responseType: 'stream',
+            timeout: timeoutMs,
+          }
+        );
+
+        return {
+          data: response.data as NodeJS.ReadableStream,
+          meta: {
+            ...meta,
+            provider: this.resolveProvider(),
+            traceId: this.extractTraceId(response),
+          },
+        };
+      },
+    });
+  }
+
+  private async writeStreamChat(payload: SupportChatRequest, stream: PassThrough) {
+    const conversationId = this.resolveConversationId(payload?.conversationId);
+    const messages = this.resolveIncomingMessages(payload);
+    const turnCount = this.resolveTurnCount(payload?.turnCount, messages);
+    const latestUserMessage = this.getLatestUserMessage(messages);
+    let reply = '';
+    let usage: SupportChatUsage | null = null;
+
+    try {
+      const aiResponse = await this.executeRuntimeChatStream({
+        scene: payload?.scene || SUPPORT_SCENE,
+        messages,
+        orderId: payload?.orderId,
+      });
+
+      this.writeSseEvent(stream, {
+        type: 'meta',
+        conversationId,
+        traceId: aiResponse.meta?.traceId,
+        model: aiResponse.meta?.model,
+      });
+
+      usage = await this.consumeProviderStream(aiResponse.data, content => {
+        reply += content;
+        this.writeSseEvent(stream, { type: 'delta', content });
+      });
+
+      const response: SupportChatResponse = reply.trim()
+        ? {
+            conversationId,
+            reply,
+            traceId: aiResponse.meta?.traceId,
+            model: aiResponse.meta?.model,
+            escalation: this.buildEscalation(turnCount, latestUserMessage),
+            usage,
+          }
+        : this.buildFallbackResponse(conversationId, turnCount, latestUserMessage);
+
+      this.writeSseEvent(stream, { type: 'done', response });
+    } catch {
+      this.writeSseEvent(stream, {
+        type: 'error',
+        message: '当前智能答复暂时不可用',
+        response: this.buildFallbackResponse(conversationId, turnCount, latestUserMessage),
+      });
+    } finally {
+      stream.end();
+    }
+  }
+
+  private async consumeProviderStream(
+    providerStream: NodeJS.ReadableStream,
+    onDelta: (content: string) => void
+  ): Promise<SupportChatUsage | null> {
+    let buffer = '';
+    let usage: SupportChatUsage | null = null;
+
+    const processLine = (line: string) => {
+      const normalized = line.trim();
+      if (!normalized.startsWith('data:')) {
+        return;
+      }
+
+      const raw = normalized.slice(5).trim();
+      if (!raw || raw === '[DONE]') {
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(raw);
+        const content = payload?.choices?.[0]?.delta?.content ?? payload?.choices?.[0]?.message?.content;
+        if (typeof content === 'string' && content.length > 0) {
+          onDelta(content);
+        }
+
+        const normalizedUsage = this.normalizeUsage(payload?.usage);
+        if (normalizedUsage) {
+          usage = normalizedUsage;
+        }
+      } catch {
+        return;
+      }
+    };
+
+    for await (const chunk of providerStream as AsyncIterable<Buffer | string>) {
+      buffer += Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk);
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        processLine(line);
+      }
+    }
+
+    if (buffer.trim()) {
+      processLine(buffer);
+    }
+
+    return usage;
+  }
+
+  private writeSseEvent(stream: PassThrough, event: SupportChatStreamEvent) {
+    stream.write(`data: ${JSON.stringify(event)}\n\n`);
   }
 
   private getRuntimeEnv() {

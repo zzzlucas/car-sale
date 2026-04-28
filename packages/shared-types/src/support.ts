@@ -41,3 +41,24 @@ export interface SupportChatResponse {
   escalation: SupportChatEscalation;
   usage: SupportChatUsage | null;
 }
+
+export type SupportChatStreamEvent =
+  | {
+      type: "meta";
+      conversationId: string;
+      traceId?: string;
+      model?: string;
+    }
+  | {
+      type: "delta";
+      content: string;
+    }
+  | {
+      type: "done";
+      response: SupportChatResponse;
+    }
+  | {
+      type: "error";
+      message: string;
+      response?: SupportChatResponse;
+    };

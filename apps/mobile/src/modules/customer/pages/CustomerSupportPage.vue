@@ -129,7 +129,7 @@ import { RouterLink, useRouter } from "vue-router";
 
 import {
   SUPPORT_PRESET_QUESTIONS,
-  chatWithSupportAssistant,
+  streamSupportAssistantChat,
 } from "./supportChat";
 
 type Message = {
@@ -161,7 +161,7 @@ const showPresetQuestions = computed(() => answeredTurns.value === 0);
 const showLargeContactCta = ref(false);
 
 watch(
-  () => messages.value.length,
+  () => messages.value.map(item => item.text).join("\n"),
   async () => {
     await nextTick();
     if (!chatBodyRef.value) {
@@ -191,6 +191,38 @@ function toSupportChatHistory() {
   }));
 }
 
+function upsertStreamingAssistantMessage(messageId: string, content: string) {
+  const existing = messages.value.find(item => item.id === messageId);
+  if (existing) {
+    existing.text += content;
+    return;
+  }
+
+  messages.value.push({
+    id: messageId,
+    role: "assistant",
+    kind: "answer",
+    text: content,
+  });
+}
+
+function finalizeAssistantMessage(messageId: string, text: string, showInlineProfessionalContact: boolean) {
+  const existing = messages.value.find(item => item.id === messageId);
+  if (existing) {
+    existing.text = text;
+    existing.showInlineProfessionalContact = showInlineProfessionalContact;
+    return;
+  }
+
+  messages.value.push({
+    id: messageId,
+    role: "assistant",
+    kind: "answer",
+    text,
+    showInlineProfessionalContact,
+  });
+}
+
 async function sendMessage(presetQuestion?: string) {
   const content = (presetQuestion ?? draft.value).trim();
   if (!content || isSending.value) {
@@ -209,24 +241,33 @@ async function sendMessage(presetQuestion?: string) {
   try {
     const history = toSupportChatHistory();
     const turnCount = history.filter(item => item.role === "user").length;
-    const result = await chatWithSupportAssistant({
-      conversationId: conversationId.value || undefined,
-      userMessage: content,
-      turnCount,
-      history,
-    });
+    const assistantMessageId = `a-${Date.now()}`;
+    const result = await streamSupportAssistantChat(
+      {
+        conversationId: conversationId.value || undefined,
+        userMessage: content,
+        turnCount,
+        history,
+      },
+      {
+        onMeta: event => {
+          if (event.conversationId) {
+            conversationId.value = event.conversationId;
+          }
+        },
+        onDelta: content => upsertStreamingAssistantMessage(assistantMessageId, content),
+      },
+    );
 
     if (result.conversationId) {
       conversationId.value = result.conversationId;
     }
 
-    messages.value.push({
-      id: `a-${Date.now()}`,
-      role: "assistant",
-      kind: "answer",
-      text: result.reply,
-      showInlineProfessionalContact: result.escalation.showInlineProfessionalContact,
-    });
+    finalizeAssistantMessage(
+      assistantMessageId,
+      result.reply,
+      result.escalation.showInlineProfessionalContact,
+    );
     showLargeContactCta.value = result.escalation.showLargeProfessionalContact;
   } finally {
     isSending.value = false;
