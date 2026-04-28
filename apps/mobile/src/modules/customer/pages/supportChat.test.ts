@@ -13,6 +13,10 @@ vi.mock("../../../services/api", () => ({
   requestStream: vi.fn(),
 }));
 
+vi.mock("../../../services/visitor", () => ({
+  getVisitorHeaders: () => ({ "X-Visitor-Key": "visitor-support-test" }),
+}));
+
 import { requestJson, requestStream } from "../../../services/api";
 
 const mockedRequestJson = vi.mocked(requestJson);
@@ -61,6 +65,7 @@ describe("supportChat backend integration", () => {
 
     expect(mockedRequestJson).toHaveBeenCalledWith("/app/support/chat", {
       method: "POST",
+      headers: { "X-Visitor-Key": "visitor-support-test" },
       body: JSON.stringify({
         scene: "customer_support",
         conversationId: undefined,
@@ -108,6 +113,7 @@ describe("supportChat backend integration", () => {
 
     expect(mockedRequestStream).toHaveBeenCalledWith("/app/support/chat/stream", {
       method: "POST",
+      headers: { "X-Visitor-Key": "visitor-support-test" },
       body: JSON.stringify({
         scene: "customer_support",
         conversationId: undefined,

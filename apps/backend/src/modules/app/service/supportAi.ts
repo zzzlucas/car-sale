@@ -1,5 +1,5 @@
 import { BaseService } from '@cool-midway/core';
-import { Provide } from '@midwayjs/core';
+import { Inject, Provide } from '@midwayjs/core';
 import axios from 'axios';
 import { PassThrough } from 'stream';
 import {
@@ -20,6 +20,9 @@ const SUPPORT_SCENE = 'customer_support';
 const DEFAULT_SUPPORT_MODEL = 'deepseek-ai/DeepSeek-V3.2';
 const FALLBACK_REPLY =
   '我先为您转成基础一对一协助建议：当前智能答复暂时不可用，建议直接联系一对一客服继续处理。';
+const DAILY_LIMIT_REPLY = '今天的 AI 咨询次数已用完，可联系一对一客服继续处理。';
+const DEFAULT_DAILY_LIMIT = 30;
+const dailyUsageMemory = new Map<string, number>();
 const PROJECT_SUPPORT_CONTEXT = `
 项目内预约进度查询口径：
 - 客户提交车辆估价与预约后，移动端会跳转到 /customer/progress/:orderId 展示该订单进度；后续也可以从“我的/预约记录”进入 /customer/records，再点击对应订单“查看详情”。
@@ -64,6 +67,9 @@ type SupportChatStreamEvent =
 export class AppSupportAiService extends BaseService {
   env: NodeJS.ProcessEnv = process.env;
 
+  @Inject()
+  ctx: any;
+
   streamChat(payload: SupportChatRequest): NodeJS.ReadableStream {
     const stream = new PassThrough();
 
@@ -77,6 +83,10 @@ export class AppSupportAiService extends BaseService {
     const messages = this.resolveIncomingMessages(payload);
     const turnCount = this.resolveTurnCount(payload?.turnCount, messages);
     const latestUserMessage = this.getLatestUserMessage(messages);
+
+    if (!this.consumeDailyQuota()) {
+      return this.buildDailyLimitResponse(conversationId);
+    }
 
     try {
       const aiResponse = await this.executeRuntimeChat({
@@ -211,6 +221,12 @@ export class AppSupportAiService extends BaseService {
     const latestUserMessage = this.getLatestUserMessage(messages);
     let reply = '';
     let usage: SupportChatUsage | null = null;
+
+    if (!this.consumeDailyQuota()) {
+      this.writeSseEvent(stream, { type: 'done', response: this.buildDailyLimitResponse(conversationId) });
+      stream.end();
+      return;
+    }
 
     try {
       const aiResponse = await this.executeRuntimeChatStream({
@@ -410,6 +426,44 @@ export class AppSupportAiService extends BaseService {
     };
   }
 
+  private buildDailyLimitResponse(conversationId: string): SupportChatResponse {
+    return {
+      conversationId,
+      reply: DAILY_LIMIT_REPLY,
+      escalation: {
+        showInlineProfessionalContact: true,
+        showLargeProfessionalContact: true,
+        reason: 'daily_ai_limit_exceeded',
+      },
+      usage: null,
+    };
+  }
+
+  private consumeDailyQuota() {
+    const limit = this.resolveDailyLimit();
+    if (limit <= 0) {
+      return false;
+    }
+
+    const visitorKey = this.resolveVisitorKey();
+    const usageKey = `${this.resolveToday()}::${visitorKey}`;
+    const current = dailyUsageMemory.get(usageKey) || 0;
+    if (current >= limit) {
+      return false;
+    }
+
+    dailyUsageMemory.set(usageKey, current + 1);
+    return true;
+  }
+
+  private resolveVisitorKey() {
+    return String(this.ctx?.get?.('x-visitor-key') || '').trim().slice(0, 64) || 'anonymous';
+  }
+
+  private resolveToday() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   private buildEscalation(turnCount: number, latestUserMessage: string) {
     const asksForHuman = /人工|客服|真人|联系|电话|微信/.test(latestUserMessage);
     const hasComplexIssue = /异常|争议|价格|报价|补贴|资料缺失|拖车|取车时间/.test(latestUserMessage);
@@ -526,5 +580,11 @@ export class AppSupportAiService extends BaseService {
     const env = this.getRuntimeEnv();
     const parsed = Number(env.AI_SUPPORT_TIMEOUT_MS || env.SUPPORT_AI_TIMEOUT_MS || 60000);
     return Number.isFinite(parsed) ? Math.max(1000, parsed) : 60000;
+  }
+
+  private resolveDailyLimit() {
+    const env = this.getRuntimeEnv();
+    const parsed = Number(env.AI_SUPPORT_DAILY_LIMIT || env.SUPPORT_AI_DAILY_LIMIT || DEFAULT_DAILY_LIMIT);
+    return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : DEFAULT_DAILY_LIMIT;
   }
 }

@@ -5,6 +5,7 @@ import type {
 } from "@car/shared-types";
 
 import { requestJson, requestStream } from "../../../services/api";
+import { getVisitorHeaders } from "../../../services/visitor";
 
 export const SUPPORT_PRESET_QUESTIONS = [
   { id: "flow", label: "报废流程怎么走", question: "报废流程怎么走？" },
@@ -24,6 +25,10 @@ export const PROFESSIONAL_SUPPORT_CONTACT = {
 
 const SUPPORT_FALLBACK_REPLY =
   "我先为您转成基础人工协助建议：当前智能答复暂时不可用，建议直接联系一对一客服继续处理。";
+const SUPPORT_DAILY_LIMIT_REPLY =
+  "今天的 AI 咨询次数已用完，可联系一对一客服继续处理。";
+const SUPPORT_DAILY_LIMIT = 30;
+const SUPPORT_DAILY_USAGE_STORAGE = "car:customer-support-ai-usage:v1";
 
 export type SupportAssistantChatPayload = {
   conversationId?: string;
@@ -52,9 +57,14 @@ function buildSupportChatBody(payload: SupportAssistantChatPayload) {
 export async function chatWithSupportAssistant(
   payload: SupportAssistantChatPayload,
 ): Promise<SupportChatResponse> {
+  if (!consumeSupportDailyQuota()) {
+    return buildSupportDailyLimitResponse(payload);
+  }
+
   try {
     return await requestJson<SupportChatResponse>("/app/support/chat", {
       method: "POST",
+      headers: getVisitorHeaders(),
       body: buildSupportChatBody(payload),
     });
   } catch {
@@ -66,9 +76,14 @@ export async function streamSupportAssistantChat(
   payload: SupportAssistantChatPayload,
   handlers: SupportAssistantStreamHandlers = {},
 ): Promise<SupportChatResponse> {
+  if (!consumeSupportDailyQuota()) {
+    return buildSupportDailyLimitResponse(payload);
+  }
+
   try {
     const stream = await requestStream("/app/support/chat/stream", {
       method: "POST",
+      headers: getVisitorHeaders(),
       body: buildSupportChatBody(payload),
     });
 
@@ -143,6 +158,59 @@ function buildSupportFallbackResponse(payload: SupportAssistantChatPayload): Sup
     },
     usage: null,
   };
+}
+
+function buildSupportDailyLimitResponse(payload: SupportAssistantChatPayload): SupportChatResponse {
+  return {
+    conversationId: String(payload.conversationId || "").trim(),
+    reply: SUPPORT_DAILY_LIMIT_REPLY,
+    escalation: {
+      showInlineProfessionalContact: true,
+      showLargeProfessionalContact: true,
+      reason: "daily_ai_limit_exceeded",
+    },
+    usage: null,
+  };
+}
+
+function consumeSupportDailyQuota() {
+  const storage = getSupportDailyUsageStorage();
+  if (!storage) {
+    return true;
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const current = readSupportDailyUsage(storage, today);
+  if (current >= SUPPORT_DAILY_LIMIT) {
+    return false;
+  }
+
+  storage.setItem(SUPPORT_DAILY_USAGE_STORAGE, JSON.stringify({ date: today, count: current + 1 }));
+  return true;
+}
+
+function readSupportDailyUsage(storage: Storage, today: string) {
+  try {
+    const raw = JSON.parse(storage.getItem(SUPPORT_DAILY_USAGE_STORAGE) || "{}") as {
+      date?: string;
+      count?: number;
+    };
+    if (raw.date !== today) {
+      return 0;
+    }
+
+    return Number.isFinite(raw.count) ? Number(raw.count) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function getSupportDailyUsageStorage() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+
+  return window.localStorage;
 }
 
 export function shouldShowInlineProfessionalContact(answeredTurns: number) {

@@ -31,6 +31,13 @@ describe("CustomerSupportPage ai support experience", () => {
     expect(source).toContain("isSending");
   });
 
+  it("shows a clear one-to-one support handoff when daily AI quota is exhausted", () => {
+    expect(supportChatSource).toContain("SUPPORT_DAILY_LIMIT");
+    expect(supportChatSource).toContain("30");
+    expect(supportChatSource).toContain("今天的 AI 咨询次数已用完");
+    expect(supportChatSource).toContain("daily_ai_limit_exceeded");
+  });
+
   it("shows first-token loading, typewriter state, and markdown-rendered assistant text", () => {
     expect(source).toContain("isPending");
     expect(source).toContain("typing-indicator");

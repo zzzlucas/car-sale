@@ -28,11 +28,57 @@ function createService(env: NodeJS.ProcessEnv = {}) {
   return service as AppSupportAiService;
 }
 
+function createServiceWithVisitor(visitorKey: string, env: NodeJS.ProcessEnv = {}) {
+  const service = createService(env) as any;
+  service.ctx = {
+    get: (headerName: string) => (headerName.toLowerCase() === 'x-visitor-key' ? visitorKey : ''),
+  };
+  return service as AppSupportAiService;
+}
+
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
 describe('AppSupportAiService', () => {
+  it('does not call provider after a visitor reaches the daily support AI limit', async () => {
+    const service = createServiceWithVisitor('visitor-over-limit', {
+      AI_SUPPORT_DAILY_LIMIT: '0',
+    });
+
+    const result = await service.chat({
+      scene: 'customer_support',
+      userMessage: '还能问吗？',
+      turnCount: 1,
+      history: [{ role: 'user', content: '还能问吗？' }],
+    });
+
+    expect(mockedAxios.post).not.toHaveBeenCalled();
+    expect(result.reply).toContain('今天的 AI 咨询次数已用完');
+    expect(result.escalation.showInlineProfessionalContact).toBe(true);
+    expect(result.escalation.showLargeProfessionalContact).toBe(true);
+    expect(result.escalation.reason).toBe('daily_ai_limit_exceeded');
+  });
+
+  it('streams a limit response without calling provider after the daily support AI limit', async () => {
+    const service = createServiceWithVisitor('visitor-stream-over-limit', {
+      AI_SUPPORT_DAILY_LIMIT: '0',
+    });
+
+    const stream = service.streamChat({
+      scene: 'customer_support',
+      userMessage: '还能问吗？',
+      turnCount: 1,
+      history: [{ role: 'user', content: '还能问吗？' }],
+    });
+    const output = await collectStream(stream);
+
+    expect(mockedAxios.post).not.toHaveBeenCalled();
+    expect(output).toContain('"type":"done"');
+    expect(output).toContain('今天的 AI 咨询次数已用完');
+    expect(output).toContain('daily_ai_limit_exceeded');
+  });
+
   it('streams support chat deltas and a final response through the backend proxy', async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: Readable.from([
