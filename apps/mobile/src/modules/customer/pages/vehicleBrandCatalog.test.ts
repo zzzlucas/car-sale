@@ -5,6 +5,7 @@ import {
   findInitialVehicleBrandId,
   getVehicleBrandCatalog,
   getVehicleCatalogStats,
+  getVehicleModelPanelMeta,
   searchVehicleModels,
 } from "./vehicleBrandCatalog";
 
@@ -51,6 +52,28 @@ describe("vehicle brand catalog", () => {
 
     expect(stats.brandCount).toBeGreaterThan(100);
     expect(stats.modelCount).toBeGreaterThan(1000);
+  });
+
+  it("labels searched results independently from the previously selected brand", () => {
+    expect(
+      getVehicleModelPanelMeta({
+        keyword: "奥迪",
+        selectedBrandName: "现代",
+        searchResultCount: 36,
+        selectedBrandModelCount: 12,
+      }),
+    ).toEqual({ title: "搜索结果", count: 36 });
+  });
+
+  it("falls back to the selected brand metadata when search is empty", () => {
+    expect(
+      getVehicleModelPanelMeta({
+        keyword: "",
+        selectedBrandName: "现代",
+        searchResultCount: 0,
+        selectedBrandModelCount: 12,
+      }),
+    ).toEqual({ title: "现代", count: 12 });
   });
 
   it("builds the submitted value from selected brand and model", () => {

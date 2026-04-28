@@ -492,7 +492,7 @@
                   type="button"
                   class="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-label-md transition-colors"
                   :class="
-                    selectedBrandId === brand.id
+                    !brandModelSearchKeyword.trim() && selectedBrandId === brand.id
                       ? 'bg-white font-semibold text-primary'
                       : 'text-on-surface-variant active:bg-surface-container'
                   "
@@ -505,10 +505,10 @@
               <section class="flex min-w-0 flex-col overflow-hidden">
                 <div class="border-b border-surface-variant px-4 py-3">
                   <p class="truncate text-body-md font-semibold text-on-surface">
-                    {{ selectedBrand?.name || "常见车型" }}
+                    {{ vehicleModelPanelMeta.title }}
                   </p>
                   <p class="mt-1 text-label-md text-on-surface-variant">
-                    {{ visibleModelSuggestions.length || selectedBrandModels.length }} 个可选项
+                    {{ vehicleModelPanelMeta.count }} 个可选项
                   </p>
                 </div>
 
@@ -600,6 +600,7 @@ import {
 import {
   buildBrandModelValue,
   findInitialVehicleBrandId,
+  getVehicleModelPanelMeta,
   getVehicleBrandCatalog,
   getVehicleCatalogStats,
   searchVehicleModels,
@@ -652,6 +653,14 @@ const selectedBrand = computed(
 const selectedBrandModels = computed(() => selectedBrand.value?.models ?? []);
 const visibleModelSuggestions = computed(() =>
   searchVehicleModels(form.vehicleType, brandModelSearchKeyword.value),
+);
+const vehicleModelPanelMeta = computed(() =>
+  getVehicleModelPanelMeta({
+    keyword: brandModelSearchKeyword.value,
+    selectedBrandName: selectedBrand.value?.name ?? "",
+    searchResultCount: visibleModelSuggestions.value.length,
+    selectedBrandModelCount: selectedBrandModels.value.length,
+  }),
 );
 
 function goBack() {

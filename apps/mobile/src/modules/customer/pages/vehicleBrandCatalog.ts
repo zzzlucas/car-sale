@@ -14,6 +14,13 @@ export type VehicleModelSuggestion = {
   value: string;
 };
 
+type VehicleModelPanelMetaInput = {
+  keyword: string;
+  selectedBrandName: string;
+  searchResultCount: number;
+  selectedBrandModelCount: number;
+};
+
 const carCatalog: VehicleBrandCatalogItem[] = [
   {
     "id": "car-1",
@@ -9058,6 +9065,25 @@ export function findInitialVehicleBrandId(value: string, vehicleType: VehicleTyp
 
   const firstSuggestion = searchVehicleModels(vehicleType, value, 1)[0];
   return firstSuggestion?.brandId ?? getVehicleBrandCatalog(vehicleType)[0]?.id ?? "";
+}
+
+export function getVehicleModelPanelMeta({
+  keyword,
+  selectedBrandName,
+  searchResultCount,
+  selectedBrandModelCount,
+}: VehicleModelPanelMetaInput) {
+  if (keyword.trim()) {
+    return {
+      title: "搜索结果",
+      count: searchResultCount,
+    };
+  }
+
+  return {
+    title: selectedBrandName || "常见车型",
+    count: selectedBrandModelCount,
+  };
 }
 
 function getSuggestionScore(
