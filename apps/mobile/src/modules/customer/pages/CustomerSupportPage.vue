@@ -1,5 +1,5 @@
 <template>
-  <main class="support-chat-shell flex min-h-0 flex-col overflow-hidden bg-surface">
+  <main class="support-chat-shell fixed inset-x-0 top-0 flex min-h-0 flex-col overflow-hidden bg-surface">
     <header class="shrink-0 border-b border-surface-variant bg-white">
       <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
         <button
@@ -185,6 +185,28 @@ const messages = ref<Message[]>(cachedChat?.messages?.length ? cachedChat.messag
 let typewriterTimer: ReturnType<typeof window.setTimeout> | null = null;
 let typewriterIdleResolver: (() => void) | null = null;
 const pendingAssistantText = ref("");
+let previousBodyOverflow = "";
+let previousHtmlOverflow = "";
+
+function lockSupportChatPageScroll() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  previousBodyOverflow = document.body.style.overflow;
+  previousHtmlOverflow = document.documentElement.style.overflow;
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function unlockSupportChatPageScroll() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.body.style.overflow = previousBodyOverflow;
+  document.documentElement.style.overflow = previousHtmlOverflow;
+}
 
 function updateSupportChatViewportHeight() {
   if (typeof window === "undefined" || typeof document === "undefined") {
@@ -196,6 +218,7 @@ function updateSupportChatViewportHeight() {
 }
 
 onMounted(() => {
+  lockSupportChatPageScroll();
   updateSupportChatViewportHeight();
   window.visualViewport?.addEventListener("resize", updateSupportChatViewportHeight);
   window.visualViewport?.addEventListener("scroll", updateSupportChatViewportHeight);
@@ -206,6 +229,7 @@ onBeforeUnmount(() => {
   window.visualViewport?.removeEventListener("resize", updateSupportChatViewportHeight);
   window.visualViewport?.removeEventListener("scroll", updateSupportChatViewportHeight);
   window.removeEventListener("resize", updateSupportChatViewportHeight);
+  unlockSupportChatPageScroll();
   document.documentElement.style.removeProperty(SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR);
 });
 

@@ -48,11 +48,14 @@ describe("CustomerSupportPage ai support experience", () => {
 
   it("uses a fixed chat shell with dynamic viewport height and keyboard-safe footer", () => {
     expect(source).toContain("support-chat-shell");
+    expect(source).toContain("fixed inset-x-0 top-0");
     expect(source).toContain("support-chat-body");
     expect(source).toContain("support-chat-composer");
     expect(source).toContain("min-h-0");
     expect(source).toContain("visualViewport");
     expect(source).toContain("--support-chat-viewport-height");
+    expect(source).toContain("lockSupportChatPageScroll");
+    expect(source).toContain("document.body.style.overflow");
   });
 
   it("styles restart conversation as a real button", () => {
