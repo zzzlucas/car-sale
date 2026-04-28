@@ -74,10 +74,13 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).not.toContain("perspective:");
   });
 
-  it("adds restrained CTA and shield motion with reduced-motion support", () => {
-    expect(source).toContain("@keyframes home-hero-cta-glow");
+  it("keeps CTA steady and only uses the shine sweep for button motion", () => {
+    expect(source).not.toContain("@keyframes home-hero-cta-glow");
+    expect(source).not.toContain("animation: home-hero-cta-glow");
+    expect(source).toContain("@keyframes home-hero-cta-shine");
     expect(source).toContain("@keyframes home-hero-shield-float");
     expect(source).toContain("customer-home-hero__cta-shine");
+    expect(source).not.toContain("translateY(-1.5%) scale(1.018)");
     expect(source).toContain("width: 60%;");
     expect(source).toContain("width: 22%;");
     expect(source).toContain("width: 61%;");

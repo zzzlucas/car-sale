@@ -258,7 +258,6 @@ onMounted(async () => {
   left: 7.8%;
   top: 55.2%;
   width: 60%;
-  animation: home-hero-cta-glow 2.8s ease-in-out infinite;
   filter: drop-shadow(0 9px 14px rgba(43, 25, 0, 0.18));
 }
 
@@ -279,19 +278,6 @@ onMounted(async () => {
   top: -70%;
   transform: rotate(18deg);
   width: 28%;
-}
-
-@keyframes home-hero-cta-glow {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-    filter: drop-shadow(0 12px 18px rgba(43, 25, 0, 0.2));
-  }
-
-  50% {
-    transform: translateY(-1.5%) scale(1.018);
-    filter: drop-shadow(0 16px 24px rgba(116, 68, 0, 0.28));
-  }
 }
 
 @keyframes home-hero-cta-shine {
