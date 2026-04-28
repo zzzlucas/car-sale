@@ -1,14 +1,14 @@
 <template>
   <main class="min-h-screen bg-background pb-mobile-bottom-nav">
-    <header class="sticky top-0 z-20 border-b border-surface-variant bg-white">
-      <div class="relative mx-auto flex h-14 w-full max-w-md items-center justify-center px-4">
+    <header class="mobile-page-header mobile-page-header--hide-in-social sticky top-0 z-20 border-b border-surface-variant bg-white">
+      <div class="mobile-page-header__bar relative mx-auto flex h-14 w-full max-w-md items-center justify-center px-4">
         <button
           class="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
           @click="goBack"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 class="text-lg font-semibold text-primary">车辆估价评估</h1>
+        <h1 class="mobile-page-header__title text-lg font-semibold text-primary">车辆估价评估</h1>
         <RouterLink
           to="/customer/records"
           class="absolute right-4 top-1/2 inline-flex h-9 -translate-y-1/2 items-center gap-1 rounded-full border border-surface-variant bg-surface-container-low px-3 text-label-md font-semibold text-primary transition-colors active:bg-surface-container"

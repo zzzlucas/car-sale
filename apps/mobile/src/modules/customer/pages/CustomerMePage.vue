@@ -1,10 +1,10 @@
 <template>
   <main class="min-h-screen bg-background pb-mobile-bottom-nav">
-    <header class="relative overflow-hidden rounded-b-2xl bg-primary px-margin-page pb-12 pt-14 text-on-primary shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+    <header class="customer-me-hero relative overflow-hidden rounded-b-2xl bg-primary px-margin-page pb-12 pt-14 text-on-primary shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
       <div class="absolute right-0 top-0 translate-x-1/3 -translate-y-1/4 opacity-10">
         <div class="h-[200px] w-[200px] rounded-full bg-white" />
       </div>
-      <div class="pointer-events-none absolute left-0 top-4 w-full text-center">
+      <div class="customer-me-hero__title pointer-events-none absolute left-0 top-4 w-full text-center">
         <span class="text-headline-sm">我的</span>
       </div>
       <button type="button" class="relative z-10 flex w-full items-center gap-4 text-left">

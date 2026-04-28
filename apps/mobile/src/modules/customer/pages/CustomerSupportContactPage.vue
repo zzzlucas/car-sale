@@ -1,14 +1,14 @@
 <template>
   <main class="min-h-screen bg-surface">
-    <header class="sticky top-0 z-20 border-b border-surface-variant bg-white">
-      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
+    <header class="mobile-page-header sticky top-0 z-20 border-b border-surface-variant bg-white">
+      <div class="mobile-page-header__bar mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
         <button
           class="-ml-1 flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
           @click="goBack"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 class="text-lg font-semibold tracking-tight text-primary">一对一客服</h1>
+        <h1 class="mobile-page-header__title text-lg font-semibold tracking-tight text-primary">一对一客服</h1>
         <div class="w-8" />
       </div>
     </header>

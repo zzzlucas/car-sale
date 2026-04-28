@@ -68,6 +68,32 @@ body {
   padding-bottom: calc(108px + env(safe-area-inset-bottom));
 }
 
+.is-social-webview .mobile-page-header {
+  border-bottom-color: transparent;
+  background: transparent;
+}
+
+.is-social-webview .mobile-page-header__bar {
+  height: 48px;
+}
+
+.is-social-webview .mobile-page-header__title,
+.is-social-webview .mobile-page-header--hide-in-social {
+  display: none;
+}
+
+.is-social-webview .mobile-page-header-offset {
+  padding-top: 48px;
+}
+
+.is-social-webview .customer-me-hero {
+  padding-top: 32px;
+}
+
+.is-social-webview .customer-me-hero__title {
+  display: none;
+}
+
 .mobile-bottom-nav {
   isolation: isolate;
   background:

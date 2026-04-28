@@ -12,6 +12,14 @@ import CustomerSupportPage from "@/modules/customer/pages/CustomerSupportPage.vu
 import CustomerValuationPage from "@/modules/customer/pages/CustomerValuationPage.vue";
 import OperatorHomePage from "@/modules/operator/pages/OperatorHomePage.vue";
 
+const DEFAULT_DOCUMENT_TITLE = "报废车预约平台";
+
+declare module "vue-router" {
+  interface RouteMeta {
+    title?: string;
+  }
+}
+
 export const router = createRouter({
   history: createWebHistory(),
   scrollBehavior: (_to, _from, savedPosition) => savedPosition ?? { left: 0, top: 0 },
@@ -21,14 +29,14 @@ export const router = createRouter({
       path: "/customer",
       component: CustomerLayout,
       children: [
-        { path: "", component: CustomerHomePage },
-        { path: "records", component: CustomerRecordsPage },
-        { path: "valuation", component: CustomerValuationPage },
-        { path: "progress/:orderId", component: CustomerProgressPage, props: true },
-        { path: "guide", component: CustomerGuidePage },
-        { path: "me", component: CustomerMePage },
-        { path: "support/contact", component: CustomerSupportContactPage },
-        { path: "support", component: CustomerSupportPage },
+        { path: "", component: CustomerHomePage, meta: { title: DEFAULT_DOCUMENT_TITLE } },
+        { path: "records", component: CustomerRecordsPage, meta: { title: "预约记录" } },
+        { path: "valuation", component: CustomerValuationPage, meta: { title: "车辆估价评估" } },
+        { path: "progress/:orderId", component: CustomerProgressPage, props: true, meta: { title: "报废进度" } },
+        { path: "guide", component: CustomerGuidePage, meta: { title: "报废流程指南" } },
+        { path: "me", component: CustomerMePage, meta: { title: "我的" } },
+        { path: "support/contact", component: CustomerSupportContactPage, meta: { title: "一对一客服" } },
+        { path: "support", component: CustomerSupportPage, meta: { title: "AI 客服助手" } },
       ],
     },
     {
@@ -37,4 +45,8 @@ export const router = createRouter({
       children: [{ path: "", component: OperatorHomePage }],
     },
   ],
+});
+
+router.afterEach((to) => {
+  document.title = to.meta.title ?? DEFAULT_DOCUMENT_TITLE;
 });

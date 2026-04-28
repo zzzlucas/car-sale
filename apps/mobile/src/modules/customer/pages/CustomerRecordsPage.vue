@@ -1,19 +1,19 @@
 <template>
   <main class="min-h-screen bg-surface pb-mobile-bottom-nav">
-    <header class="fixed left-0 right-0 top-0 z-20 border-b border-surface-variant bg-white">
-      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
+    <header class="mobile-page-header fixed left-0 right-0 top-0 z-20 border-b border-surface-variant bg-white">
+      <div class="mobile-page-header__bar mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
         <button
           class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
           @click="goBack"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 class="text-lg font-semibold tracking-tight text-primary">车辆报废回收</h1>
+        <h1 class="mobile-page-header__title text-lg font-semibold tracking-tight text-primary">预约记录</h1>
         <div class="w-10" />
       </div>
     </header>
 
-    <section class="mx-auto flex max-w-md flex-col px-margin-page pb-[84px] pt-14">
+    <section class="mobile-page-header-offset mx-auto flex max-w-md flex-col px-margin-page pb-[84px] pt-14">
       <div class="flex flex-col gap-stack-sm pb-stack-md pt-stack-lg">
         <h2 class="text-headline-md text-on-surface">预约记录</h2>
         <p class="text-body-md text-on-surface-variant">查看并管理您的报废业务进度</p>

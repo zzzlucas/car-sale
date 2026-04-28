@@ -1,14 +1,14 @@
 <template>
   <main class="support-chat-shell fixed inset-x-0 top-0 flex min-h-0 flex-col overflow-hidden bg-surface">
-    <header class="shrink-0 border-b border-surface-variant bg-white">
-      <div class="mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
+    <header class="mobile-page-header shrink-0 border-b border-surface-variant bg-white">
+      <div class="mobile-page-header__bar mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
         <button
           class="-ml-1 flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
           @click="goBack"
         >
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 class="text-lg font-semibold tracking-tight text-primary">AI 客服助手</h1>
+        <h1 class="mobile-page-header__title text-lg font-semibold tracking-tight text-primary">AI 客服助手</h1>
         <button
           type="button"
           class="restart-button rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-label-md font-semibold text-primary shadow-sm transition-colors active:bg-primary/10 disabled:opacity-40"
