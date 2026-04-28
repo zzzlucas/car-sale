@@ -9,7 +9,14 @@
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
         <h1 class="text-lg font-semibold tracking-tight text-primary">AI 客服助手</h1>
-        <div class="w-8" />
+        <button
+          type="button"
+          class="rounded-full px-2 py-1 text-label-md font-semibold text-primary transition-colors active:bg-primary/10 disabled:opacity-40"
+          :disabled="isSending"
+          @click="restartConversation"
+        >
+          重新开始
+        </button>
       </div>
     </header>
 
@@ -143,6 +150,11 @@ import {
   SUPPORT_PRESET_QUESTIONS,
   streamSupportAssistantChat,
 } from "./supportChat";
+import {
+  clearSupportChatCache,
+  readSupportChatCache,
+  writeSupportChatCache,
+} from "./supportChatStorage";
 import { renderSupportMarkdown } from "./supportMarkdown";
 
 type Message = {
@@ -156,20 +168,20 @@ type Message = {
 
 const TYPEWRITER_CHUNK_SIZE = 2;
 const TYPEWRITER_DELAY_MS = 18;
+const WELCOME_MESSAGE: Message = {
+  id: "a-welcome",
+  role: "assistant",
+  kind: "welcome",
+  text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系一对一客服。",
+};
 
 const router = useRouter();
 const draft = ref("");
 const isSending = ref(false);
 const chatBodyRef = ref<HTMLElement | null>(null);
 const conversationId = ref<string | null>(null);
-const messages = ref<Message[]>([
-  {
-    id: "a-welcome",
-    role: "assistant",
-    kind: "welcome",
-    text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系一对一客服。",
-  },
-]);
+const cachedChat = readSupportChatCache();
+const messages = ref<Message[]>(cachedChat?.messages?.length ? cachedChat.messages : [{ ...WELCOME_MESSAGE }]);
 let typewriterTimer: ReturnType<typeof window.setTimeout> | null = null;
 let typewriterIdleResolver: (() => void) | null = null;
 const pendingAssistantText = ref("");
@@ -178,7 +190,11 @@ const answeredTurns = computed(
   () => messages.value.filter(item => item.role === "assistant" && item.kind === "answer").length,
 );
 const showPresetQuestions = computed(() => answeredTurns.value === 0);
-const showLargeContactCta = ref(false);
+const showLargeContactCta = ref(Boolean(cachedChat?.showLargeContactCta));
+
+if (cachedChat?.conversationId) {
+  conversationId.value = cachedChat.conversationId;
+}
 
 watch(
   () => messages.value.map(item => item.text).join("\n"),
@@ -195,6 +211,26 @@ watch(
   },
 );
 
+watch(
+  [messages, conversationId, showLargeContactCta],
+  () => {
+    writeSupportChatCache({
+      conversationId: conversationId.value,
+      messages: messages.value
+        .filter(item => !item.isPending)
+        .map(({ id, role, text, kind, showInlineProfessionalContact }) => ({
+          id,
+          role,
+          text,
+          kind,
+          showInlineProfessionalContact,
+        })),
+      showLargeContactCta: showLargeContactCta.value,
+    });
+  },
+  { deep: true },
+);
+
 function goBack() {
   if (window.history.length > 1) {
     router.back();
@@ -202,6 +238,21 @@ function goBack() {
   }
 
   router.push("/customer/me");
+}
+
+function restartConversation() {
+  if (typewriterTimer) {
+    window.clearTimeout(typewriterTimer);
+    typewriterTimer = null;
+  }
+
+  typewriterIdleResolver?.();
+  typewriterIdleResolver = null;
+  pendingAssistantText.value = "";
+  conversationId.value = null;
+  showLargeContactCta.value = false;
+  messages.value = [{ ...WELCOME_MESSAGE }];
+  clearSupportChatCache();
 }
 
 function toSupportChatHistory() {

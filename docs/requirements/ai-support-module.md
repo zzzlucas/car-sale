@@ -110,7 +110,7 @@ type SupportChatStreamEvent =
 ### 建议输入
 
 - `conversationId`
-  - 用于后续承接轻会话或服务端会话存储
+  - 用于承接当前轻会话；前端本地缓存会保存该值，用户点击“重新开始”后清空
 - `turnCount`
   - 用于辅助升级专业客服判断
 - `history`
@@ -209,9 +209,9 @@ type SupportChatStreamEvent =
 ## 会话策略
 
 - 第一版建议采用“轻会话”策略：
-  - 会话仅围绕当前页面短历史
+  - 会话围绕当前页面短历史，并用浏览器本地缓存恢复最近一次对话
   - 不强求长期记忆
-  - `conversationId` 先预留
+  - `conversationId` 随本地历史一起保存，点击“重新开始”时清空本地历史、会话 ID 和升级 CTA
 - 若后续需要真正会话持久化，再补：
   - 会话表
   - 过期策略

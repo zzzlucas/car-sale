@@ -37,4 +37,12 @@ describe("CustomerSupportPage ai support experience", () => {
     expect(source).toContain("renderSupportMarkdown");
     expect(source).toContain("v-html");
   });
+
+  it("persists chat history locally and provides a restart conversation action", () => {
+    expect(source).toContain("readSupportChatCache");
+    expect(source).toContain("writeSupportChatCache");
+    expect(source).toContain("clearSupportChatCache");
+    expect(source).toContain("restartConversation");
+    expect(source).toContain("重新开始");
+  });
 });
