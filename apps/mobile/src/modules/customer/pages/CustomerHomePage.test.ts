@@ -7,12 +7,37 @@ import { describe, expect, it } from "vitest";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, "CustomerHomePage.vue"), "utf8");
 const brandImage = fs.readFileSync(path.join(__dirname, "../../../assets/customer-home/brand-mark.png"));
+const heroBannerPath = path.join(__dirname, "../../../assets/customer-home/banner-hero-full.jpg");
 
 function readPngSize(buffer: Buffer) {
   return {
     width: buffer.readUInt32BE(16),
     height: buffer.readUInt32BE(20),
   };
+}
+
+function readJpegSize(buffer: Buffer) {
+  let offset = 2;
+
+  while (offset < buffer.length) {
+    if (buffer[offset] !== 0xff) {
+      throw new Error("Invalid JPEG marker");
+    }
+
+    const marker = buffer[offset + 1];
+    const length = buffer.readUInt16BE(offset + 2);
+
+    if (marker >= 0xc0 && marker <= 0xc3) {
+      return {
+        height: buffer.readUInt16BE(offset + 5),
+        width: buffer.readUInt16BE(offset + 7),
+      };
+    }
+
+    offset += 2 + length;
+  }
+
+  throw new Error("JPEG size marker not found");
 }
 
 describe("CustomerHomePage landing layout", () => {
@@ -29,10 +54,14 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("联系客服");
   });
 
-  it("uses only the brand image as a restrained homepage visual", () => {
+  it("uses an optimized banner as the primary homepage visual", () => {
     expect(source).toContain("homeBrandImage");
     expect(source).toContain("brand-mark.png");
-    expect(source).not.toContain("homeHeroImage");
+    expect(source).toContain("homeHeroBanner");
+    expect(source).toContain("banner-hero-full.jpg");
+    expect(source).toContain('aria-label="立即估价 / 预约回收');
+    expect(source).toContain("sr-only");
+    expect(source).not.toContain("trustBadges");
     expect(source).not.toContain("homeFlowImage");
     expect(source).not.toContain("homeTrustImage");
   });
@@ -42,7 +71,8 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("pb-8");
     expect(source).toContain("mb-4 flex items-center justify-between");
     expect(source).toContain("w-[150px] max-w-[52vw]");
-    expect(source).toContain("px-5 py-6");
+    expect(source).toContain("rounded-[32px]");
+    expect(source).toContain("fetchpriority=\"high\"");
     expect(source).toContain("px-margin-page pt-8 pb-stack-lg");
   });
 
@@ -51,5 +81,14 @@ describe("CustomerHomePage landing layout", () => {
 
     expect(width).toBeLessThanOrEqual(690);
     expect(height).toBeLessThanOrEqual(250);
+  });
+
+  it("keeps the hero banner optimized for mobile H5", () => {
+    const heroBanner = fs.readFileSync(heroBannerPath);
+    const { width, height } = readJpegSize(heroBanner);
+
+    expect(width).toBeLessThanOrEqual(1200);
+    expect(height).toBeLessThanOrEqual(900);
+    expect(heroBanner.byteLength).toBeLessThanOrEqual(450 * 1024);
   });
 });

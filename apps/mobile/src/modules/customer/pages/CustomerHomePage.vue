@@ -16,37 +16,19 @@
           </RouterLink>
         </div>
 
-        <section class="relative overflow-hidden rounded-[28px] bg-primary px-5 py-6 text-on-primary shadow-premium">
-          <div class="absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-          <div class="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-primary-fixed/20 blur-2xl" />
-
-          <div class="relative z-10">
-            <p class="text-label-sm uppercase tracking-[0.24em] text-on-primary-container">正规回收服务</p>
-            <h1 class="mt-4 text-[34px] font-semibold leading-[1.15] tracking-tight">专业 · 合法 · 省心</h1>
-            <p class="mt-4 max-w-[280px] text-body-md text-on-primary-container/95">
-              官方认证报废车回收服务，免费拖车、代办注销、节点可查，让你少跑腿也少踩坑。
-            </p>
-
-            <RouterLink
-              to="/customer/valuation"
-              class="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-headline-sm text-primary shadow-soft"
-            >
-              <span class="material-symbols-outlined icon-fill text-[20px]">currency_exchange</span>
-              立即估价 / 预约回收
-            </RouterLink>
-
-            <div class="mt-6 grid grid-cols-3 gap-2">
-              <div
-                v-for="item in trustBadges"
-                :key="item.label"
-                class="rounded-2xl border border-white/10 bg-white/8 px-3 py-3 text-center backdrop-blur-sm"
-              >
-                <span class="material-symbols-outlined text-[18px] text-on-primary">{{ item.icon }}</span>
-                <p class="mt-2 text-[11px] leading-4 text-on-primary-container">{{ item.label }}</p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <RouterLink
+          to="/customer/valuation"
+          aria-label="立即估价 / 预约回收"
+          class="group block overflow-hidden rounded-[32px] bg-primary shadow-premium outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
+        >
+          <img
+            :src="homeHeroBanner"
+            alt="专业、合法、省心的官方认证报废车回收服务"
+            class="block h-auto w-full transition duration-500 group-hover:scale-[1.015]"
+            fetchpriority="high"
+          />
+          <span class="sr-only">立即估价 / 预约回收</span>
+        </RouterLink>
       </div>
     </section>
 
@@ -158,14 +140,9 @@ import { RouterLink } from "vue-router";
 
 import type { FaqItem } from "@car/shared-types";
 import homeBrandImage from "@/assets/customer-home/brand-mark.png";
+import homeHeroBanner from "@/assets/customer-home/banner-hero-full.jpg";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getFaqs } from "@/services/content";
-
-const trustBadges = [
-  { icon: "gavel", label: "合法合规" },
-  { icon: "local_shipping", label: "免费拖车" },
-  { icon: "query_stats", label: "进度可查" },
-];
 
 const advantages = [
   { icon: "verified_user", title: "正规资质回收", desc: "按规范拆解并出具所需证明，流程合法可追溯。" },
