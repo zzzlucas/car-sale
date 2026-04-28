@@ -33,16 +33,14 @@ try {
     $installCommand = if ($Install) {
 @'
 echo 'INSTALL=forced'
-pnpm install --frozen-lockfile --force
+rm -rf node_modules apps/*/node_modules packages/*/node_modules
+pnpm install --frozen-lockfile
 '@
     } else {
 @'
-if [ ! -d node_modules ] || [ ! -d apps/backend/node_modules ] || [ ! -f node_modules/.pnpm/lock.yaml ] || ! cmp -s pnpm-lock.yaml node_modules/.pnpm/lock.yaml; then
-  echo 'INSTALL=auto'
-  pnpm install --frozen-lockfile --force
-else
-  echo 'SKIP_INSTALL=1'
-fi
+echo 'INSTALL=workspace-relink'
+rm -rf node_modules apps/*/node_modules packages/*/node_modules
+pnpm install --frozen-lockfile
 '@
     }
     $remoteScript = @"
