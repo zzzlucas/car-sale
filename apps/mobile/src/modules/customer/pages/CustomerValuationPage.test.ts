@@ -28,6 +28,19 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("预约记录");
   });
 
+  it("opens a bottom sheet selector for brand and model picking", () => {
+    expect(source).toContain("openBrandModelPopup");
+    expect(source).toContain("选择品牌型号");
+    expect(source).toContain("brandModelPopupOpen");
+    expect(source).toContain("vehicleCatalogStats.modelCount");
+  });
+
+  it("keeps manual brand-model entry as a fallback for rare legacy vehicles", () => {
+    expect(source).toContain("可继续补充年款、排量或配置");
+    expect(source).toContain("使用当前输入");
+    expect(source).toContain("useCustomBrandModel");
+  });
+
   it("includes address search affordances for the amap key-pool flow", () => {
     expect(source).toContain("搜索地址建议");
     expect(source).toContain("推荐地址");

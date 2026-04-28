@@ -91,7 +91,26 @@
                 品牌型号
                 <span class="text-error">*</span>
               </label>
-              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+              <button
+                type="button"
+                class="flex min-h-14 w-full items-center gap-3 rounded-xl border border-surface-variant px-4 py-3 text-left transition-colors active:bg-surface-container"
+                @click="openBrandModelPopup"
+              >
+                <span class="material-symbols-outlined text-primary">directions_car</span>
+                <span class="min-w-0 flex-1">
+                  <span
+                    class="block truncate text-body-md"
+                    :class="form.brandModel ? 'text-on-surface' : 'text-outline'"
+                  >
+                    {{ form.brandModel || "请选择品牌和型号" }}
+                  </span>
+                  <span class="mt-1 block truncate text-label-md text-on-surface-variant">
+                    可继续补充年款、排量或配置
+                  </span>
+                </span>
+                <span class="material-symbols-outlined text-outline">expand_more</span>
+              </button>
+              <div class="mt-3 flex h-12 items-center rounded-xl border border-surface-variant px-4">
                 <input
                   v-model="form.brandModel"
                   type="text"
@@ -421,12 +440,150 @@
       </div>
     </section>
 
+    <Teleport to="body">
+      <Transition name="brand-model-popup">
+        <div
+          v-if="brandModelPopupOpen"
+          class="fixed inset-0 z-50 flex items-end justify-center bg-scrim/45 px-0"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="brand-model-popup-title"
+          @click.self="closeBrandModelPopup"
+        >
+          <section
+            class="max-h-[88vh] w-full max-w-md overflow-hidden rounded-t-[28px] bg-white shadow-2xl"
+          >
+            <header class="border-b border-surface-variant px-margin-page pb-3 pt-4">
+              <div class="mx-auto mb-3 h-1 w-12 rounded-full bg-surface-variant" />
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="brand-model-popup-title" class="text-headline-sm text-on-surface">
+                    选择品牌型号
+                  </h2>
+                  <p class="mt-1 text-label-md text-on-surface-variant">
+                    已收录 {{ vehicleCatalogStats.brandCount }} 个品牌、{{ vehicleCatalogStats.modelCount }} 个车系，含常见老旧车型
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
+                  @click="closeBrandModelPopup"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="mt-4 flex h-12 items-center rounded-xl border border-surface-variant bg-surface-container-low px-4">
+                <span class="material-symbols-outlined mr-2 text-[20px] text-outline">search</span>
+                <input
+                  v-model="brandModelSearchKeyword"
+                  type="search"
+                  placeholder="搜索品牌或车型，如：桑塔纳、夏利、五菱宏光"
+                  class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
+                />
+              </div>
+            </header>
+
+            <div class="grid h-[56vh] min-h-[420px] grid-cols-[6.75rem_1fr] overflow-hidden">
+              <aside class="overflow-y-auto border-r border-surface-variant bg-surface-container-low">
+                <button
+                  v-for="brand in activeVehicleCatalog"
+                  :key="brand.id"
+                  type="button"
+                  class="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-label-md transition-colors"
+                  :class="
+                    selectedBrandId === brand.id
+                      ? 'bg-white font-semibold text-primary'
+                      : 'text-on-surface-variant active:bg-surface-container'
+                  "
+                  @click="selectedBrandId = brand.id"
+                >
+                  <span class="truncate">{{ brand.name }}</span>
+                </button>
+              </aside>
+
+              <section class="flex min-w-0 flex-col overflow-hidden">
+                <div class="border-b border-surface-variant px-4 py-3">
+                  <p class="truncate text-body-md font-semibold text-on-surface">
+                    {{ selectedBrand?.name || "常见车型" }}
+                  </p>
+                  <p class="mt-1 text-label-md text-on-surface-variant">
+                    {{ visibleModelSuggestions.length || selectedBrandModels.length }} 个可选项
+                  </p>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-3">
+                  <div v-if="brandModelSearchKeyword.trim()" class="space-y-2">
+                    <button
+                      v-for="item in visibleModelSuggestions"
+                      :key="`${item.brandId}-${item.modelName}`"
+                      type="button"
+                      class="flex w-full items-center justify-between gap-3 rounded-xl border border-surface-variant px-4 py-3 text-left transition-colors active:bg-surface-container"
+                      @click="selectBrandModel(item.brandName, item.modelName)"
+                    >
+                      <span class="min-w-0">
+                        <span class="block truncate text-body-md font-medium text-on-surface">{{ item.modelName }}</span>
+                        <span class="mt-1 block text-label-md text-on-surface-variant">{{ item.brandName }}</span>
+                      </span>
+                      <span class="material-symbols-outlined shrink-0 text-outline">chevron_right</span>
+                    </button>
+                  </div>
+
+                  <div v-else class="grid grid-cols-2 gap-2">
+                    <button
+                      v-for="modelName in selectedBrandModels"
+                      :key="modelName"
+                      type="button"
+                      class="min-h-12 rounded-xl border border-surface-variant px-3 py-2 text-left text-label-md font-medium text-on-surface transition-colors active:bg-surface-container"
+                      :class="
+                        form.brandModel === buildBrandModelValue(selectedBrand?.name ?? '', modelName)
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : ''
+                      "
+                      @click="selectBrandModel(selectedBrand?.name ?? '', modelName)"
+                    >
+                      {{ modelName }}
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="brandModelSearchKeyword.trim() && !visibleModelSuggestions.length"
+                    class="flex h-full min-h-52 flex-col items-center justify-center px-6 text-center"
+                  >
+                    <span class="material-symbols-outlined text-[36px] text-outline">manage_search</span>
+                    <p class="mt-3 text-body-md font-semibold text-on-surface">未找到完全匹配的车系</p>
+                    <p class="mt-2 text-label-md text-on-surface-variant">
+                      报废车可能存在停产或地方俗称，可使用当前输入并在提交前补充排量配置。
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <footer class="border-t border-surface-variant px-margin-page pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3">
+              <div class="mb-3 rounded-xl bg-surface-container-low px-4 py-3 text-label-md text-on-surface-variant">
+                数据参考汽车之家公开车型大全，并补充微面、轻卡、摩托车等报废高频老款；目录未覆盖时仍可手填。
+              </div>
+              <button
+                type="button"
+                class="flex h-12 w-full items-center justify-center rounded-xl border border-primary text-label-md font-semibold text-primary disabled:border-surface-variant disabled:text-outline"
+                :disabled="!brandModelSearchKeyword.trim()"
+                @click="useCustomBrandModel"
+              >
+                使用当前输入
+              </button>
+            </footer>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
+
     <MobileBottomNav />
   </main>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, reactive, ref } from "vue";
+import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
 import type { MapAddressSuggestion, ValuationOrderPayload } from "@car/shared-types";
@@ -440,6 +597,13 @@ import {
   getCurrentLocationRejectionMessage,
   validateValuationForm,
 } from "./customerValuationForm";
+import {
+  buildBrandModelValue,
+  findInitialVehicleBrandId,
+  getVehicleBrandCatalog,
+  getVehicleCatalogStats,
+  searchVehicleModels,
+} from "./vehicleBrandCatalog";
 
 type PhotoPreview = {
   id: string;
@@ -456,6 +620,9 @@ const message = ref("");
 const addressMessage = ref("");
 const photoPreviews = ref<PhotoPreview[]>([]);
 const addressSuggestions = ref<MapAddressSuggestion[]>([]);
+const brandModelPopupOpen = ref(false);
+const brandModelSearchKeyword = ref("");
+const selectedBrandId = ref("");
 
 const steps = [
   { label: "车辆信息" },
@@ -476,6 +643,16 @@ const wheelMaterials = [
 ] as const;
 
 const form = reactive<ValuationOrderPayload>(createInitialValuationForm());
+
+const activeVehicleCatalog = computed(() => getVehicleBrandCatalog(form.vehicleType));
+const vehicleCatalogStats = computed(() => getVehicleCatalogStats(form.vehicleType));
+const selectedBrand = computed(
+  () => activeVehicleCatalog.value.find(brand => brand.id === selectedBrandId.value) ?? activeVehicleCatalog.value[0],
+);
+const selectedBrandModels = computed(() => selectedBrand.value?.models ?? []);
+const visibleModelSuggestions = computed(() =>
+  searchVehicleModels(form.vehicleType, brandModelSearchKeyword.value),
+);
 
 function goBack() {
   if (window.history.length > 1) {
@@ -498,8 +675,43 @@ function resetForm() {
   Object.assign(form, createInitialValuationForm());
   clearPhotoPreviews();
   addressSuggestions.value = [];
+  brandModelSearchKeyword.value = "";
+  selectedBrandId.value = activeVehicleCatalog.value[0]?.id ?? "";
+  brandModelPopupOpen.value = false;
   message.value = "表单已重置，可以重新填写。";
   addressMessage.value = "";
+}
+
+function openBrandModelPopup() {
+  selectedBrandId.value = findInitialVehicleBrandId(form.brandModel, form.vehicleType);
+  brandModelSearchKeyword.value = form.brandModel;
+  brandModelPopupOpen.value = true;
+}
+
+function closeBrandModelPopup() {
+  brandModelPopupOpen.value = false;
+}
+
+function selectBrandModel(brandName: string, modelName: string) {
+  if (!brandName || !modelName) {
+    return;
+  }
+
+  form.brandModel = buildBrandModelValue(brandName, modelName);
+  brandModelSearchKeyword.value = form.brandModel;
+  selectedBrandId.value = findInitialVehicleBrandId(form.brandModel, form.vehicleType);
+  closeBrandModelPopup();
+}
+
+function useCustomBrandModel() {
+  const customValue = brandModelSearchKeyword.value.trim();
+  if (!customValue) {
+    return;
+  }
+
+  form.brandModel = customValue;
+  selectedBrandId.value = findInitialVehicleBrandId(customValue, form.vehicleType);
+  closeBrandModelPopup();
 }
 
 function handleWeightInput(event: Event) {
