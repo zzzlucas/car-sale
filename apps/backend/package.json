@@ -20,7 +20,7 @@
     "@midwayjs/typeorm": "^3.20.3",
     "@midwayjs/upload": "^3.20.3",
     "@midwayjs/validate": "^3.20.3",
-    "@workspace-packages/ai-provider-runtime": "file:../../../_workspace-packages/packages/ai-provider-runtime",
+    "@workspace-packages/ai-provider-runtime": "workspace:*",
     "adm-zip": "^0.5.16",
     "axios": "^1.8.4",
     "cos-nodejs-sdk-v5": "^2.15.4",

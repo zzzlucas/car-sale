@@ -5,7 +5,7 @@
 - Repo shape: `monorepo`
 - Current apps: `apps/mobile`, `apps/backend`
 - Planned app: `apps/admin-web`
-- Current shared packages: `packages/shared-types`
+- Current shared packages: `packages/shared-types`, `packages/ai-provider-runtime`
 - Planned shared packages: `packages/api-sdk`, `packages/shared-utils`
 - Current stage: 首期工程已启动，当前真实落地以 `apps/mobile + apps/backend + packages/shared-types` 为准；`admin-web` 和更多共享层仍属于后续扩展
 - Design references: `E:\web_work_-1\car\.temp\stitch_`
@@ -41,7 +41,7 @@
 - 默认按 `apps/*` 承载各端应用，按 `packages/*` 承载稳定共享能力。
 - 当前以 `apps/mobile` 承载客户侧与移动执行分区；若后续确实需要 PC 重操作后台，再补 `apps/admin-web`。
 - 两个以上应用真正共享、且边界稳定后，再抽到 `packages/*`；其余情况优先在应用内闭环。
-- 当前共享层以 `packages/shared-types` 为主；`packages/api-sdk`、`packages/shared-utils` 只有在真实复用出现后再补。
+- 当前共享层以 `packages/shared-types` 为主；`packages/ai-provider-runtime` 是为后端 AI 客服部署闭环内聚的轻量 runtime；`packages/api-sdk`、`packages/shared-utils` 只有在真实复用出现后再补。
 - `packages/shared-utils` 只放平台无关、业务无关或弱业务耦合的纯函数，不把页面流程塞进去。
 
 ### Backend Source Of Truth

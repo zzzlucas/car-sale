@@ -10,6 +10,8 @@
     "dev:backend": "pnpm --filter @car/backend dev",
     "build:backend": "pnpm --filter @car/backend build",
     "typecheck:backend": "pnpm --filter @car/backend typecheck",
+    "build:ai-provider-runtime": "pnpm --filter @workspace-packages/ai-provider-runtime build",
+    "typecheck:ai-provider-runtime": "pnpm --filter @workspace-packages/ai-provider-runtime typecheck",
     "typecheck:shared-types": "pnpm --filter @car/shared-types typecheck",
     "deploy:check:preprod": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/check-preprod.ps1",
     "env:pull:preprod:backend": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/pull-preprod-backend-env.ps1",

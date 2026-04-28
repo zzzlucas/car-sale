@@ -163,7 +163,7 @@ type SupportChatStreamEvent =
 
 ## 配置要求
 
-当前先只约定变量名和用途，不记录真实 key。`car` 本地后端已按 `koa-rent` 现有 SiliconFlow 配置同步到 Git 忽略的 `apps/backend/.env.local`，仓库示例仍只保留占位值。
+当前先只约定变量名和用途，不记录真实 key。`car` 本地后端已按 `koa-rent` 现有 SiliconFlow 配置同步到 Git 忽略的 `apps/backend/.env.local`，仓库示例仍只保留占位值。AI provider key 路由与 fallback runtime 已内聚到 `packages/ai-provider-runtime`，避免预发布 `git archive` 部署遗漏仓库外 `file:` 依赖。
 
 ### 必要配置项
 

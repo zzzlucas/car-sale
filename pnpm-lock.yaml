@@ -59,8 +59,8 @@ importers:
         specifier: ^3.20.3
         version: 3.20.23
       '@workspace-packages/ai-provider-runtime':
-        specifier: file:../../../_workspace-packages/packages/ai-provider-runtime
-        version: file:../_workspace-packages/packages/ai-provider-runtime
+        specifier: workspace:*
+        version: link:../../packages/ai-provider-runtime
       adm-zip:
         specifier: ^0.5.16
         version: 0.5.17
@@ -186,6 +186,12 @@ importers:
       vue-tsc:
         specifier: ^3.2.7
         version: 3.2.7(typescript@6.0.3)
+
+  packages/ai-provider-runtime:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.8.3
 
   packages/shared-types:
     devDependencies:
@@ -1498,9 +1504,6 @@ packages:
 
   '@vue/shared@3.5.33':
     resolution: {integrity: sha512-5vR2QIlmaLG77Ygd4pMP6+SGQ5yox9VhtnbDWTy9DzMzdmeLxZ1QqxrywEZ9sa1AVubfIJyaCG3ytyWU81ufcQ==}
-
-  '@workspace-packages/ai-provider-runtime@file:../_workspace-packages/packages/ai-provider-runtime':
-    resolution: {directory: ../_workspace-packages/packages/ai-provider-runtime, type: directory}
 
   '@yao-pkg/pkg-fetch@3.5.33':
     resolution: {integrity: sha512-j2UoH+eP4VobfovQg1gkWwDoB4O/tv8rlLnEjUEEHuWXJ5eBLNUIrobMSEp773/2pgUJUfqqPUFIhS1pN8OZuQ==}
@@ -7245,8 +7248,6 @@ snapshots:
       vue: 3.5.33(typescript@6.0.3)
 
   '@vue/shared@3.5.33': {}
-
-  '@workspace-packages/ai-provider-runtime@file:../_workspace-packages/packages/ai-provider-runtime': {}
 
   '@yao-pkg/pkg-fetch@3.5.33':
     dependencies:

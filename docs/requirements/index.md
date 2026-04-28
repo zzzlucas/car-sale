@@ -7,7 +7,7 @@
 
 ## Active
 - [REQ-PRJ-20260428-16] | 客户侧品牌型号选择先以内置车型目录 + 手填兜底落地 | scope:project | priority:P1 | status:accepted | tags:mobile,vehicle-catalog,valuation,frontend | updated:2026-04-28
-- [REQ-PRJ-20260426-15] | 客户侧 AI 客服正式接入必须走 backend 代理并先以流式闭环落地 | scope:project | priority:P1 | status:accepted | tags:ai,customer-support,backend,mobile,siliconflow,workspace-packages,streaming | updated:2026-04-28
+- [REQ-PRJ-20260426-15] | 客户侧 AI 客服正式接入必须走 backend 代理并先以流式闭环落地 | scope:project | priority:P1 | status:accepted | tags:ai,customer-support,backend,mobile,siliconflow,ai-provider-runtime,streaming,deployment | updated:2026-04-28
 - [REQ-PRJ-20260424-14] | `car` 图片抠图批处理默认收口为 `openclaw + CPU-only rembg + Tailscale` | scope:project | priority:P1 | status:accepted | tags:image,rembg,openclaw,tailscale,ops | updated:2026-04-24
 - [REQ-PRJ-20260423-12] | `car` 后端正式运行方式收口为 `cloud2026 + pm2 + env-driven prod config` | scope:project | priority:P1 | status:accepted | tags:deployment,backend,pm2,config,cloud2026 | updated:2026-04-23
 - [REQ-PRJ-20260423-11] | 客户侧地图能力先走 backend 代理 + 高德 Key 池，不在前端直出 Key | scope:project | priority:P1 | status:accepted | tags:map,amap,key-pool,backend,mobile | updated:2026-04-23

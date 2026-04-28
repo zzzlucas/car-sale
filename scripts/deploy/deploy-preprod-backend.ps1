@@ -30,7 +30,21 @@ try {
     $remoteArchive = "/tmp/car-platform-$($commit.Substring(0, 12)).tar"
     scp -i $SshKey $archivePath "${SshHost}:$remoteArchive" | Out-Host
 
-    $installCommand = if ($Install) { 'pnpm install --frozen-lockfile' } else { "echo 'SKIP_INSTALL=1'" }
+    $installCommand = if ($Install) {
+@'
+echo 'INSTALL=forced'
+pnpm install --frozen-lockfile
+'@
+    } else {
+@'
+if [ ! -d node_modules ] || [ ! -f node_modules/.pnpm/lock.yaml ] || ! cmp -s pnpm-lock.yaml node_modules/.pnpm/lock.yaml; then
+  echo 'INSTALL=auto'
+  pnpm install --frozen-lockfile
+else
+  echo 'SKIP_INSTALL=1'
+fi
+'@
+    }
     $remoteScript = @"
 set -euo pipefail
 APP_DIR='$RemoteAppDir'
@@ -49,6 +63,7 @@ cd "`$APP_DIR"
 
 echo "DEPLOY_COMMIT=$commit"
 $installCommand
+pnpm --filter @workspace-packages/ai-provider-runtime build
 pnpm --filter @car/shared-types build
 pnpm build:backend
 pnpm --filter @car/backend pm2:restart
