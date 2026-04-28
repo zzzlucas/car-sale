@@ -19,14 +19,24 @@
         <RouterLink
           to="/customer/valuation"
           aria-label="立即估价 / 预约回收"
-          class="group block overflow-hidden rounded-[32px] bg-primary shadow-premium outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
+          class="customer-home-hero group relative block overflow-hidden rounded-[32px] bg-primary shadow-premium outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
         >
           <img
-            :src="homeHeroBanner"
+            :src="homeHeroBase"
             alt="专业、合法、省心的官方认证报废车回收服务"
-            class="block h-auto w-full transition duration-500 group-hover:scale-[1.015]"
+            class="customer-home-hero__base block h-auto w-full"
             fetchpriority="high"
           />
+
+          <span class="customer-home-hero__shield" aria-hidden="true">
+            <img :src="homeHeroShield" alt="" class="block h-auto w-full" />
+          </span>
+
+          <span class="customer-home-hero__cta" aria-hidden="true">
+            <img :src="homeHeroCta" alt="" class="block h-auto w-full" />
+            <span class="customer-home-hero__cta-shine" />
+          </span>
+
           <span class="sr-only">立即估价 / 预约回收</span>
         </RouterLink>
       </div>
@@ -140,7 +150,9 @@ import { RouterLink } from "vue-router";
 
 import type { FaqItem } from "@car/shared-types";
 import homeBrandImage from "@/assets/customer-home/brand-mark.png";
-import homeHeroBanner from "@/assets/customer-home/banner-hero-full.jpg";
+import homeHeroBase from "@/assets/customer-home/banner-base.jpg";
+import homeHeroCta from "@/assets/customer-home/banner-cta.png";
+import homeHeroShield from "@/assets/customer-home/banner-shield.png";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getFaqs } from "@/services/content";
 
@@ -168,3 +180,126 @@ onMounted(async () => {
   faqItems.value = await getFaqs();
 });
 </script>
+
+<style scoped>
+.customer-home-hero {
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.customer-home-hero__base {
+  transition: transform 520ms ease;
+}
+
+.customer-home-hero:hover .customer-home-hero__base {
+  transform: scale(1.012);
+}
+
+.customer-home-hero__shield,
+.customer-home-hero__cta {
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.customer-home-hero__shield {
+  right: 5.6%;
+  top: 3.8%;
+  width: 27%;
+  animation: home-hero-shield-float 4.8s ease-in-out infinite;
+  filter: drop-shadow(0 16px 18px rgba(67, 38, 0, 0.18));
+  transform-origin: 50% 58%;
+}
+
+.customer-home-hero__cta {
+  left: 4.3%;
+  top: 53.8%;
+  width: 68%;
+  animation: home-hero-cta-glow 2.8s ease-in-out infinite;
+  filter: drop-shadow(0 12px 18px rgba(43, 25, 0, 0.2));
+}
+
+.customer-home-hero__cta-shine {
+  border-radius: 999px;
+  inset: 5% 8%;
+  overflow: hidden;
+  position: absolute;
+}
+
+.customer-home-hero__cta-shine::before {
+  animation: home-hero-cta-shine 3.6s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  bottom: -70%;
+  content: "";
+  left: -44%;
+  position: absolute;
+  top: -70%;
+  transform: rotate(18deg);
+  width: 28%;
+}
+
+@keyframes home-hero-cta-glow {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 12px 18px rgba(43, 25, 0, 0.2));
+  }
+
+  50% {
+    transform: translateY(-1.5%) scale(1.018);
+    filter: drop-shadow(0 16px 24px rgba(116, 68, 0, 0.28));
+  }
+}
+
+@keyframes home-hero-cta-shine {
+  0%,
+  38% {
+    transform: translateX(0) rotate(18deg);
+  }
+
+  64%,
+  100% {
+    transform: translateX(520%) rotate(18deg);
+  }
+}
+
+@keyframes home-hero-shield-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3.2%) rotate(1.2deg) scale(1.018);
+  }
+}
+
+@media (max-width: 380px) {
+  .customer-home-hero__shield {
+    right: 4.6%;
+    top: 4.4%;
+    width: 26%;
+  }
+
+  .customer-home-hero__cta {
+    left: 4%;
+    top: 54.4%;
+    width: 69%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customer-home-hero,
+  .customer-home-hero__base,
+  .customer-home-hero__shield,
+  .customer-home-hero__cta,
+  .customer-home-hero__cta-shine::before {
+    animation: none;
+    transition: none;
+  }
+
+  .customer-home-hero:hover .customer-home-hero__base {
+    transform: none;
+  }
+}
+</style>

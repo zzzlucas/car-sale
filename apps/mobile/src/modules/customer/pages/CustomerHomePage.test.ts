@@ -7,7 +7,9 @@ import { describe, expect, it } from "vitest";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, "CustomerHomePage.vue"), "utf8");
 const brandImage = fs.readFileSync(path.join(__dirname, "../../../assets/customer-home/brand-mark.png"));
-const heroBannerPath = path.join(__dirname, "../../../assets/customer-home/banner-hero-full.jpg");
+const heroBasePath = path.join(__dirname, "../../../assets/customer-home/banner-base.jpg");
+const heroCtaPath = path.join(__dirname, "../../../assets/customer-home/banner-cta.png");
+const heroShieldPath = path.join(__dirname, "../../../assets/customer-home/banner-shield.png");
 
 function readPngSize(buffer: Buffer) {
   return {
@@ -54,11 +56,16 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("联系客服");
   });
 
-  it("uses an optimized banner as the primary homepage visual", () => {
+  it("uses optimized layered banner assets as the primary homepage visual", () => {
     expect(source).toContain("homeBrandImage");
     expect(source).toContain("brand-mark.png");
-    expect(source).toContain("homeHeroBanner");
-    expect(source).toContain("banner-hero-full.jpg");
+    expect(source).toContain("homeHeroBase");
+    expect(source).toContain("homeHeroCta");
+    expect(source).toContain("homeHeroShield");
+    expect(source).toContain("banner-base.jpg");
+    expect(source).toContain("banner-cta.png");
+    expect(source).toContain("banner-shield.png");
+    expect(source).not.toContain("banner-hero-full.jpg");
     expect(source).toContain('aria-label="立即估价 / 预约回收');
     expect(source).toContain("sr-only");
     expect(source).not.toContain("trustBadges");
@@ -73,7 +80,18 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).toContain("w-[150px] max-w-[52vw]");
     expect(source).toContain("rounded-[32px]");
     expect(source).toContain("fetchpriority=\"high\"");
+    expect(source).toContain("customer-home-hero__base");
+    expect(source).toContain("customer-home-hero__cta");
+    expect(source).toContain("customer-home-hero__shield");
     expect(source).toContain("px-margin-page pt-8 pb-stack-lg");
+  });
+
+  it("adds restrained CTA and shield motion with reduced-motion support", () => {
+    expect(source).toContain("@keyframes home-hero-cta-glow");
+    expect(source).toContain("@keyframes home-hero-shield-float");
+    expect(source).toContain("customer-home-hero__cta-shine");
+    expect(source).toContain("prefers-reduced-motion: reduce");
+    expect(source).toContain("animation: none");
   });
 
   it("uses a cropped brand image without large transparent padding", () => {
@@ -83,12 +101,22 @@ describe("CustomerHomePage landing layout", () => {
     expect(height).toBeLessThanOrEqual(250);
   });
 
-  it("keeps the hero banner optimized for mobile H5", () => {
-    const heroBanner = fs.readFileSync(heroBannerPath);
-    const { width, height } = readJpegSize(heroBanner);
+  it("keeps the layered hero assets optimized for mobile H5", () => {
+    const heroBase = fs.readFileSync(heroBasePath);
+    const heroCta = fs.readFileSync(heroCtaPath);
+    const heroShield = fs.readFileSync(heroShieldPath);
+    const baseSize = readJpegSize(heroBase);
+    const ctaSize = readPngSize(heroCta);
+    const shieldSize = readPngSize(heroShield);
 
-    expect(width).toBeLessThanOrEqual(1200);
-    expect(height).toBeLessThanOrEqual(900);
-    expect(heroBanner.byteLength).toBeLessThanOrEqual(450 * 1024);
+    expect(baseSize.width).toBeLessThanOrEqual(1200);
+    expect(baseSize.height).toBeLessThanOrEqual(850);
+    expect(heroBase.byteLength).toBeLessThanOrEqual(380 * 1024);
+    expect(ctaSize.width).toBeLessThanOrEqual(900);
+    expect(ctaSize.height).toBeLessThanOrEqual(220);
+    expect(heroCta.byteLength).toBeLessThanOrEqual(260 * 1024);
+    expect(shieldSize.width).toBeLessThanOrEqual(560);
+    expect(shieldSize.height).toBeLessThanOrEqual(560);
+    expect(heroShield.byteLength).toBeLessThanOrEqual(360 * 1024);
   });
 });
