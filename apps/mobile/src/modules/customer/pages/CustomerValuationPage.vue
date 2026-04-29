@@ -1071,7 +1071,7 @@ async function handleSubmit() {
 
   try {
     const result = await submitValuationOrder(form);
-    await router.push(`/customer/progress/${result.id}`);
+    await router.replace(`/customer/progress/${result.id}`);
   } catch (error) {
     message.value = error instanceof Error ? `提交失败：${error.message}` : "提交失败，请稍后重试。";
   } finally {

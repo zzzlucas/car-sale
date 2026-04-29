@@ -49,6 +49,28 @@
           <p class="mt-3 text-body-md text-on-surface-variant">{{ currentNote }}</p>
         </section>
 
+        <section class="rounded-xl border border-primary-fixed-dim bg-primary-fixed p-inset-card shadow-subtle">
+          <p class="text-label-md text-primary">下一步</p>
+          <h3 class="mt-1 text-headline-sm text-on-primary-fixed">预约已提交，可以先回首页</h3>
+          <p class="mt-2 text-body-md text-on-surface-variant">后续进度会保留在预约记录里，客服联系前无需重复填写表单。</p>
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <RouterLink
+              to="/customer"
+              class="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary text-label-lg text-on-primary"
+            >
+              <span class="material-symbols-outlined text-[18px]">home</span>
+              回到首页
+            </RouterLink>
+            <RouterLink
+              to="/customer/support"
+              class="flex h-11 items-center justify-center gap-2 rounded-xl border border-primary bg-white text-label-lg text-primary"
+            >
+              <span class="material-symbols-outlined text-[18px]">support_agent</span>
+              联系客服
+            </RouterLink>
+          </div>
+        </section>
+
         <section class="rounded-xl border border-surface-variant bg-white p-inset-card shadow-subtle">
           <div class="mb-4 flex items-center gap-2 border-b border-surface-variant pb-3">
             <span class="material-symbols-outlined text-primary">timeline</span>
@@ -162,13 +184,6 @@
           </div>
         </section>
 
-        <RouterLink
-          to="/customer/support"
-          class="flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-white text-headline-sm text-primary"
-        >
-          <span class="material-symbols-outlined text-[18px]">support_agent</span>
-          联系客服协助
-        </RouterLink>
       </template>
     </section>
   </main>
