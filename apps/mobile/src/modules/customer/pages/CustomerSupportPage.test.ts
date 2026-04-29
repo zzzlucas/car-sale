@@ -67,6 +67,12 @@ describe("CustomerSupportPage ai support experience", () => {
     expect(source).toContain("document.body.style.overflow");
   });
 
+  it("anchors the fixed chat shell to the visual viewport offset when the iOS keyboard pans the page", () => {
+    expect(source).toContain("--support-chat-viewport-offset-top");
+    expect(source).toContain("visualViewport.offsetTop");
+    expect(source).toContain("top: var(--support-chat-viewport-offset-top, 0px)");
+  });
+
   it("styles restart conversation as a real button", () => {
     expect(source).toContain("重新开始");
     expect(source).toContain("restart-button");
