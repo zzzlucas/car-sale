@@ -70,7 +70,7 @@
     <Transition name="customer-me-toast">
       <div
         v-if="toastMessage"
-        class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-full bg-scrim/80 px-5 py-3 text-body-md text-white shadow-lg"
+        class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-full bg-on-surface px-5 py-3 text-body-md font-semibold text-surface-container-lowest shadow-lg"
       >
         {{ toastMessage }}
       </div>
