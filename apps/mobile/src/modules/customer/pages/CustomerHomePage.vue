@@ -299,7 +299,7 @@ onMounted(async () => {
   }
 
   50% {
-    transform: translateY(-3.2%) rotate(1.2deg) scale(1.018);
+    transform: translateY(-5.2%) rotate(1.2deg) scale(1.018);
   }
 }
 

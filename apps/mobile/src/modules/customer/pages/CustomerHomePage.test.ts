@@ -79,6 +79,8 @@ describe("CustomerHomePage landing layout", () => {
     expect(source).not.toContain("animation: home-hero-cta-glow");
     expect(source).toContain("@keyframes home-hero-cta-shine");
     expect(source).toContain("@keyframes home-hero-shield-float");
+    expect(source).toContain("translateY(-5.2%) rotate(1.2deg) scale(1.018)");
+    expect(source).not.toContain("translateY(-3.2%) rotate(1.2deg) scale(1.018)");
     expect(source).toContain("customer-home-hero__cta-shine");
     expect(source).not.toContain("translateY(-1.5%) scale(1.018)");
     expect(source).toContain("width: 60%;");
