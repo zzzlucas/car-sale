@@ -139,11 +139,37 @@ if ($localEnv.Contains('COS_SIGN_EXPIRES') -and -not [string]::IsNullOrWhiteSpac
     Add-EnvLine -Lines $updateLines -Key 'COS_SIGN_EXPIRES' -Value ([string]$localEnv['COS_SIGN_EXPIRES'])
 }
 
-$tempFile = Join-Path $env:TEMP ("car-preprod-amap-{0}.env" -f ([guid]::NewGuid().ToString('N')))
+$aiRequiredKeys = @(
+    'AI_SUPPORT_PROVIDER',
+    'AI_SUPPORT_BASE_URL',
+    'AI_SUPPORT_API_KEYS',
+    'AI_SUPPORT_MODEL'
+)
+foreach ($key in $aiRequiredKeys) {
+    $value = [string]($localEnv[$key])
+    if ([string]::IsNullOrWhiteSpace($value) -or $value -like '<*' -or $value -eq 'change-me') {
+        throw "请先在 $LocalEnvPath 填写真实 $key。"
+    }
+    Add-EnvLine -Lines $updateLines -Key $key -Value $value
+}
+
+$aiOptionalKeys = @(
+    'AI_SUPPORT_TIMEOUT_MS',
+    'AI_SUPPORT_LEVEL1_ALLOWLIST',
+    'AI_SUPPORT_FALLBACK_API_KEYS',
+    'AI_SUPPORT_DAILY_LIMIT'
+)
+foreach ($key in $aiOptionalKeys) {
+    if ($localEnv.Contains($key) -and -not [string]::IsNullOrWhiteSpace([string]$localEnv[$key])) {
+        Add-EnvLine -Lines $updateLines -Key $key -Value ([string]$localEnv[$key])
+    }
+}
+
+$tempFile = Join-Path $env:TEMP ("car-preprod-env-{0}.env" -f ([guid]::NewGuid().ToString('N')))
 $localScript = $null
 try {
     $updateLines | Set-Content -LiteralPath $tempFile -Encoding UTF8
-    $remoteTemp = "/tmp/car-preprod-amap-$([guid]::NewGuid().ToString('N')).env"
+    $remoteTemp = "/tmp/car-preprod-env-$([guid]::NewGuid().ToString('N')).env"
     scp -i $SshKey $tempFile "${SshHost}:$remoteTemp" | Out-Host
 
     $restartFlag = if ($NoRestart) { '0' } else { '1' }
@@ -187,6 +213,14 @@ allowed = {
     'COS_SECRET_KEY',
     'COS_UPLOAD_PREFIX',
     'COS_SIGN_EXPIRES',
+    'AI_SUPPORT_PROVIDER',
+    'AI_SUPPORT_BASE_URL',
+    'AI_SUPPORT_API_KEYS',
+    'AI_SUPPORT_MODEL',
+    'AI_SUPPORT_TIMEOUT_MS',
+    'AI_SUPPORT_LEVEL1_ALLOWLIST',
+    'AI_SUPPORT_FALLBACK_API_KEYS',
+    'AI_SUPPORT_DAILY_LIMIT',
 }
 updates = {}
 for raw_line in update_path.read_text(encoding='utf-8-sig').splitlines():

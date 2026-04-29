@@ -6,6 +6,7 @@
 `- [REQ-ID] | title | scope:project | priority:P0/P1/P2 | status:* | tags:a,b,c | updated:YYYY-MM-DD`
 
 ## Active
+- [REQ-PRJ-20260429-01] | 预发布环境必须同步 AI 客服配置 | scope:project | priority:P1 | status:accepted | tags:env,preprod,ai-support,secrets | updated:2026-04-29
 - [REQ-PRJ-20260428-17] | 预发布根命令必须同时发布 backend 与 mobile H5 静态站点 | scope:project | priority:P1 | status:accepted | tags:deployment,preprod,mobile,backend,h5 | updated:2026-04-28
 - [REQ-PRJ-20260428-16] | 客户侧品牌型号选择先以内置车型目录 + 手填兜底落地 | scope:project | priority:P1 | status:accepted | tags:mobile,vehicle-catalog,valuation,frontend | updated:2026-04-28
 - [REQ-PRJ-20260426-15] | 客户侧 AI 客服正式接入必须走 backend 代理并先以流式闭环落地 | scope:project | priority:P1 | status:accepted | tags:ai,customer-support,backend,mobile,siliconflow,ai-provider-runtime,streaming,deployment | updated:2026-04-28

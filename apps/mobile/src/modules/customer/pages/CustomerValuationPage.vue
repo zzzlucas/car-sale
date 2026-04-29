@@ -117,20 +117,45 @@
                   placeholder="例如：丰田 凯美瑞 2.0G"
                   class="w-full border-none bg-transparent p-0 text-body-md text-on-surface outline-none placeholder:text-outline"
                 />
-                <span class="material-symbols-outlined text-outline">search</span>
+                <button
+                  v-if="form.brandModel"
+                  type="button"
+                  aria-label="清除品牌型号"
+                  class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-outline transition-colors active:bg-surface-container"
+                  @click="clearBrandModel"
+                >
+                  <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+                <button
+                  type="button"
+                  aria-label="搜索品牌型号"
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-outline transition-colors active:bg-surface-container"
+                  @click="openBrandModelPopup"
+                >
+                  <span class="material-symbols-outlined">search</span>
+                </button>
               </div>
             </div>
 
             <div>
               <label class="mb-2 block text-body-md font-medium text-on-surface">车牌号</label>
-              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4">
+              <div class="flex h-14 items-center rounded-xl border border-surface-variant px-4" @click="openPlateKeyboard">
                 <input
                   v-model="form.plateNumber"
                   type="text"
+                  readonly
                   placeholder="例如：粤A12345"
                   class="w-full border-none bg-transparent p-0 text-body-md uppercase text-on-surface outline-none placeholder:text-outline"
+                  @focus="openPlateKeyboard"
                 />
-                <span class="material-symbols-outlined text-outline">badge</span>
+                <button
+                  type="button"
+                  aria-label="打开车牌号键盘"
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-outline transition-colors active:bg-surface-container"
+                  @click.stop="openPlateKeyboard"
+                >
+                  <span class="material-symbols-outlined">badge</span>
+                </button>
               </div>
             </div>
 
@@ -578,6 +603,72 @@
       </Transition>
     </Teleport>
 
+    <Teleport to="body">
+      <Transition name="brand-model-popup">
+        <div
+          v-if="plateKeyboardOpen"
+          class="fixed inset-0 z-50 flex items-end justify-center bg-scrim/35"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="plate-keyboard-title"
+          @click.self="closePlateKeyboard"
+        >
+          <section class="w-full max-w-md rounded-t-[24px] bg-white p-4 shadow-2xl">
+            <header class="mb-3 flex items-center justify-between">
+              <div>
+                <h2 id="plate-keyboard-title" class="text-headline-sm text-on-surface">车牌号键盘</h2>
+                <p class="mt-1 text-label-md text-on-surface-variant">当前：{{ form.plateNumber || "未填写" }}</p>
+              </div>
+              <button type="button" class="text-label-md font-semibold text-primary" @click="closePlateKeyboard">
+                完成
+              </button>
+            </header>
+
+            <div class="mb-3 grid grid-cols-8 gap-2">
+              <button
+                v-for="key in plateProvinceKeys"
+                :key="key"
+                type="button"
+                class="h-10 rounded-lg bg-surface-container text-label-md font-semibold text-on-surface active:bg-surface-container-high"
+                @click="appendPlateKey(key)"
+              >
+                {{ key }}
+              </button>
+            </div>
+
+            <div class="grid grid-cols-10 gap-2">
+              <button
+                v-for="key in plateAlphaNumericKeys"
+                :key="key"
+                type="button"
+                class="h-10 rounded-lg bg-surface-container-low text-label-md font-semibold text-on-surface active:bg-surface-container"
+                @click="appendPlateKey(key)"
+              >
+                {{ key }}
+              </button>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-3 pb-[env(safe-area-inset-bottom)]">
+              <button
+                type="button"
+                class="h-11 rounded-xl border border-surface-variant text-label-md font-semibold text-on-surface"
+                @click="deletePlateKey"
+              >
+                删除
+              </button>
+              <button
+                type="button"
+                class="h-11 rounded-xl border border-surface-variant text-label-md font-semibold text-on-surface"
+                @click="clearPlateNumber"
+              >
+                清空
+              </button>
+            </div>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
+
     <MobileBottomNav />
   </main>
 </template>
@@ -624,6 +715,7 @@ const addressSuggestions = ref<MapAddressSuggestion[]>([]);
 const brandModelPopupOpen = ref(false);
 const brandModelSearchKeyword = ref("");
 const selectedBrandId = ref("");
+const plateKeyboardOpen = ref(false);
 
 const steps = [
   { label: "车辆信息" },
@@ -642,6 +734,44 @@ const wheelMaterials = [
   { value: "aluminum", label: "铝合金" },
   { value: "other", label: "其他" },
 ] as const;
+
+const plateProvinceKeys = [
+  "京",
+  "沪",
+  "粤",
+  "津",
+  "冀",
+  "晋",
+  "蒙",
+  "辽",
+  "吉",
+  "黑",
+  "苏",
+  "浙",
+  "皖",
+  "闽",
+  "赣",
+  "鲁",
+  "豫",
+  "鄂",
+  "湘",
+  "桂",
+  "琼",
+  "渝",
+  "川",
+  "贵",
+  "云",
+  "藏",
+  "陕",
+  "甘",
+  "青",
+  "宁",
+  "新",
+  "港",
+  "澳",
+] as const;
+
+const plateAlphaNumericKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "Q", "W", "E", "R", "T", "Y", "U", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M"] as const;
 
 const form = reactive<ValuationOrderPayload>(createInitialValuationForm());
 
@@ -701,6 +831,12 @@ function closeBrandModelPopup() {
   brandModelPopupOpen.value = false;
 }
 
+function clearBrandModel() {
+  form.brandModel = "";
+  brandModelSearchKeyword.value = "";
+  selectedBrandId.value = activeVehicleCatalog.value[0]?.id ?? "";
+}
+
 function selectBrandModel(brandName: string, modelName: string) {
   if (!brandName || !modelName) {
     return;
@@ -721,6 +857,31 @@ function useCustomBrandModel() {
   form.brandModel = customValue;
   selectedBrandId.value = findInitialVehicleBrandId(customValue, form.vehicleType);
   closeBrandModelPopup();
+}
+
+function openPlateKeyboard() {
+  plateKeyboardOpen.value = true;
+}
+
+function closePlateKeyboard() {
+  plateKeyboardOpen.value = false;
+}
+
+function appendPlateKey(key: string) {
+  const normalizedPlateNumber = form.plateNumber.toUpperCase().replace(/\s/g, "");
+  if (normalizedPlateNumber.length >= 8) {
+    return;
+  }
+
+  form.plateNumber = `${normalizedPlateNumber}${key}`;
+}
+
+function deletePlateKey() {
+  form.plateNumber = form.plateNumber.slice(0, -1);
+}
+
+function clearPlateNumber() {
+  form.plateNumber = "";
 }
 
 function handleWeightInput(event: Event) {

@@ -41,6 +41,17 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).toContain("useCustomBrandModel");
   });
 
+  it("lets users clear brand model input directly", () => {
+    expect(source).toContain("clearBrandModel");
+    expect(source).toContain('aria-label="清除品牌型号"');
+  });
+
+  it("opens a dedicated license plate keyboard from the plate field", () => {
+    expect(source).toContain("plateKeyboardOpen");
+    expect(source).toContain("appendPlateKey");
+    expect(source).toContain("车牌号键盘");
+  });
+
   it("includes address search affordances for the amap key-pool flow", () => {
     expect(source).toContain("搜索地址建议");
     expect(source).toContain("推荐地址");

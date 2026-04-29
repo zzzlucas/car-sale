@@ -182,6 +182,15 @@
   - `pnpm env:update:preprod:backend` 默认从 `.env.preprod` 同步地图 provider 变量到远端
 - 原因：预发布不是正式生产环境，按 `_workspace-base` 口径应允许本地显式保存非正式环境配置来源，避免继续用 `.env.local` 同时承担 dev 与 preprod，导致 Key、域名和数据库口径互相污染。
 
+### [REQ-PRJ-20260429-01] 预发布环境必须同步 AI 客服配置
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `apps/backend/.env.preprod` 作为预发布真实配置来源时，必须包含 AI 客服所需的 `AI_SUPPORT_*` 变量
+  - `pnpm env:update:preprod:backend` 除地图与 COS 外，也要同步 `AI_SUPPORT_PROVIDER`、`AI_SUPPORT_BASE_URL`、`AI_SUPPORT_API_KEYS`、`AI_SUPPORT_MODEL` 等 AI 客服变量到远端预发布后端
+  - 真实 key 仍只保存在本地忽略 env 与远端环境文件，不写入仓库；变量清单和示例继续写在 `apps/backend/.env.preprod.example`
+- 原因：按 `_workspace-base` 非正式环境“便捷优先、变量清单明确”的口径，预发布应优先给客户完整体验；之前项目级同步脚本只同步地图/COS，导致 AI key 已在本地 `.env.preprod` 配好但不会推到远端。
+
 ## 当前核心数据对象
 
 - `customer`

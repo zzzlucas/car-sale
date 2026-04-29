@@ -7,7 +7,7 @@
       <div class="customer-me-hero__title pointer-events-none absolute left-0 top-4 w-full text-center">
         <span class="text-headline-sm">我的</span>
       </div>
-      <button type="button" class="relative z-10 flex w-full items-center gap-4 text-left">
+      <button type="button" class="relative z-10 flex w-full items-center gap-4 text-left" @click="handleLoginEntryClick">
         <div class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary-fixed bg-surface-variant shadow-inner">
           <span class="material-symbols-outlined text-[32px] text-outline">person</span>
         </div>
@@ -67,11 +67,21 @@
       </p>
     </footer>
 
+    <Transition name="customer-me-toast">
+      <div
+        v-if="toastMessage"
+        class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-full bg-scrim/80 px-5 py-3 text-body-md text-white shadow-lg"
+      >
+        {{ toastMessage }}
+      </div>
+    </Transition>
+
     <MobileBottomNav />
   </main>
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
@@ -82,4 +92,36 @@ const supportItems = [
 ];
 
 const currentYear = new Date().getFullYear();
+const toastMessage = ref("");
+let toastTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+function handleLoginEntryClick() {
+  toastMessage.value = "该功能暂未设计";
+  if (toastTimer) {
+    window.clearTimeout(toastTimer);
+  }
+  toastTimer = window.setTimeout(() => {
+    toastMessage.value = "";
+    toastTimer = undefined;
+  }, 1800);
+}
+
+onBeforeUnmount(() => {
+  if (toastTimer) {
+    window.clearTimeout(toastTimer);
+  }
+});
 </script>
+
+<style scoped>
+.customer-me-toast-enter-active,
+.customer-me-toast-leave-active {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.customer-me-toast-enter-from,
+.customer-me-toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -45%);
+}
+</style>
