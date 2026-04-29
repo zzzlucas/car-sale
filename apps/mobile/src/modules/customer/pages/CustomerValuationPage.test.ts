@@ -90,4 +90,10 @@ describe("CustomerValuationPage form coverage", () => {
     expect(source).not.toContain("坐标");
     expect(source).not.toContain("经纬度");
   });
+
+  it("tracks successful valuation submissions as the main conversion event", () => {
+    expect(source).toContain("CAR_ANALYTICS_EVENTS.valuationSubmitSuccess");
+    expect(source).toContain("trackCarEvent(CAR_ANALYTICS_EVENTS.valuationSubmitSuccess");
+    expect(source).toContain("orderId: result.id");
+  });
 });

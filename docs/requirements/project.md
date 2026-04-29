@@ -6,6 +6,16 @@
 
 ## 当前活跃需求
 
+### [REQ-PRJ-20260429-18] 客户 H5 埋点先复用采集协议，但保持 `car` 独立命名空间
+- 状态：`accepted`
+- 优先级：`P1`
+- 决策：
+  - `apps/mobile` 埋点参考 `decorate/demo` 的 `/collect` 采集协议、设备 ID、签名头、本地默认禁发和页面停留事件
+  - `car` 不复用 `decorate` 的事件名、设备前缀或前端 env，统一使用 `VITE_CAR_ANALYTICS_*`、`car-` 设备前缀和 `5100` 事件号段
+  - payload 固定带 `project: "car"` 与 `app: "car-mobile"`，即使临时打到同一个采集服务，也必须能在数据层过滤隔离
+  - 同一个 dashboard 只适合 MVP、同一负责人、低成本观察阶段；一旦进入甲方演示复盘、正式投放或需要多人看板，应为 `car` 单独建 dashboard 或至少使用强过滤的独立视图
+- 原因：复用采集服务能减少首期接入成本，但混用 dashboard 容易让不同项目的转化、留存和异常数据串台，后续解读成本高于现在多做一层命名空间隔离。
+
 ### [REQ-PRJ-20260428-17] 预发布根命令必须同时发布 backend 与 mobile H5 静态站点
 - 状态：`accepted`
 - 优先级：`P1`

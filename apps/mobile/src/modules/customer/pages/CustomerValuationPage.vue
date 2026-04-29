@@ -679,6 +679,7 @@ import { RouterLink, useRouter } from "vue-router";
 
 import type { MapAddressSuggestion, ValuationOrderPayload } from "@car/shared-types";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
+import { CAR_ANALYTICS_EVENTS, trackCarEvent } from "@/services/analytics";
 import { reverseGeocodeLocation, searchAddressSuggestions } from "@/services/map";
 import { submitValuationOrder } from "@/services/orders";
 import { uploadVehiclePhoto } from "@/services/upload";
@@ -1071,6 +1072,11 @@ async function handleSubmit() {
 
   try {
     const result = await submitValuationOrder(form);
+    void trackCarEvent(CAR_ANALYTICS_EVENTS.valuationSubmitSuccess, {
+      hasLocation: Boolean(form.pickupLatitude && form.pickupLongitude),
+      orderId: result.id,
+      photoCount: form.vehiclePhotos.length,
+    });
     await router.replace(`/customer/progress/${result.id}`);
   } catch (error) {
     message.value = error instanceof Error ? `提交失败：${error.message}` : "提交失败，请稍后重试。";
