@@ -2,14 +2,9 @@
   <main class="min-h-screen bg-surface pb-mobile-bottom-nav">
     <header class="mobile-page-header fixed left-0 right-0 top-0 z-20 border-b border-surface-variant bg-white">
       <div class="mobile-page-header__bar mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
-        <button
-          class="-ml-2 flex h-10 w-10 items-center justify-center rounded-full text-primary transition-colors active:bg-surface-container"
-          @click="goBack"
-        >
-          <span class="material-symbols-outlined">arrow_back</span>
-        </button>
+        <MobileBackButton @click="goBack" />
         <h1 class="mobile-page-header__title text-lg font-semibold tracking-tight text-primary">预约记录</h1>
-        <div class="w-10" />
+        <div class="w-[4.75rem]" />
       </div>
     </header>
 
@@ -142,6 +137,7 @@ import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 
 import type { ScrapOrderSummary } from "@car/shared-types";
+import MobileBackButton from "@/modules/common/components/MobileBackButton.vue";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getMyOrders } from "@/services/orders";
 
