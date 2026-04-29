@@ -6,11 +6,19 @@ dist/
 coverage/
 .turbo/
 
-.env
-.env.*
+# Env policy: only explicitly production env files stay out of Git.
+.env.production
+.env.production.*
+.env.prod
+.env.prod.*
+**/.env.production
+**/.env.production.*
+**/.env.prod
+**/.env.prod.*
 !.env.example
-!.env.preprod.example
-!apps/**/.env.preprod.example
+!.env.*.example
+!apps/**/.env.example
+!apps/**/.env.*.example
 
 *.log
 pnpm-debug.log*
