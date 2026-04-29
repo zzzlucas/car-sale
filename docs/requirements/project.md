@@ -12,8 +12,10 @@
 - 决策：
   - `apps/mobile` 埋点参考 `decorate/demo` 的 `/collect` 采集协议、设备 ID、签名头、本地默认禁发和页面停留事件
   - `car` 不复用 `decorate` 的事件名、设备前缀或前端 env，统一使用 `VITE_CAR_ANALYTICS_*`、`car-` 设备前缀和 `5100` 事件号段
-  - payload 固定带 `project: "car"` 与 `app: "car-mobile"`，即使临时打到同一个采集服务，也必须能在数据层过滤隔离
-  - 同一个 dashboard 只适合 MVP、同一负责人、低成本观察阶段；一旦进入甲方演示复盘、正式投放或需要多人看板，应为 `car` 单独建 dashboard 或至少使用强过滤的独立视图
+  - 采集请求同时在顶层和 payload 内带 `project: "car"`、`app: "car-mobile"`、`env`、`site`、`route`；dashboard 以这些字段作为项目/应用/环境隔离主键，事件号段只做防撞和辅助排查
+  - dashboard URL 的 `key` 只代表读取权限；`project/app/env/site` 可以作为视图过滤 query，例如 `/dashboard-read?key=...&project=car&app=car-mobile&env=preprod`
+  - 页面分析默认看规范化 `route`，例如 `/customer/progress/:orderId`；query 只保留 `utm_*`、`channel` 等归因参数，不用于项目隔离，也不保留订单号、token 等高基数字段
+  - 同一个 dashboard 只适合 MVP、同一负责人、低成本观察阶段；一旦进入甲方演示复盘、正式投放或需要多人看板，应为 `car` 单独建 dashboard/view，并默认固定过滤 `project=car&app=car-mobile`
 - 原因：复用采集服务能减少首期接入成本，但混用 dashboard 容易让不同项目的转化、留存和异常数据串台，后续解读成本高于现在多做一层命名空间隔离。
 
 ### [REQ-PRJ-20260428-17] 预发布根命令必须同时发布 backend 与 mobile H5 静态站点

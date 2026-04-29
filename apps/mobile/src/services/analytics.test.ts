@@ -42,9 +42,10 @@ describe("car mobile analytics", () => {
       env: {
         VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true",
         VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com/",
+        MODE: "test",
       },
       fetchImpl,
-      location: { hostname: "localhost", pathname: "/customer", search: "?from=test" },
+      location: { hostname: "localhost", pathname: "/customer/progress/abc123", search: "?utm_source=demo&orderId=abc123" },
       now: () => 1_700_000_000_000,
       randomId: () => "device-1",
       storage: createMemoryStorage(),
@@ -61,11 +62,20 @@ describe("car mobile analytics", () => {
         "X-Signature": expect.any(String),
       }),
       body: JSON.stringify({
+        app: "car-mobile",
+        env: "test",
+        project: "car",
+        query: { utm_source: "demo" },
+        route: "/customer/progress/:orderId",
+        site: "localhost",
         t: CAR_ANALYTICS_EVENTS.pageView,
-        s: "/customer?from=test",
+        s: "/customer/progress/abc123?utm_source=demo&orderId=abc123",
         p: {
           app: "car-mobile",
+          env: "test",
           project: "car",
+          route: "/customer/progress/:orderId",
+          site: "localhost",
           title: "首页",
         },
       }),
@@ -127,5 +137,23 @@ describe("car mobile analytics", () => {
     expect(trackEvent).toHaveBeenCalledWith(CAR_ANALYTICS_EVENTS.pageView, {
       title: "报废流程指南",
     }, expect.objectContaining({ source: "/customer/guide" }));
+  });
+
+  it("keeps campaign query separately from the normalized route", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+
+    await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: { hostname: "localhost", pathname: "/customer/valuation", search: "?utm_campaign=spring&token=secret" },
+      randomId: () => "device-1",
+      storage: createMemoryStorage(),
+    });
+
+    const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
+
+    expect(body.route).toBe("/customer/valuation");
+    expect(body.query).toEqual({ utm_campaign: "spring" });
+    expect(body.p).toMatchObject({ route: "/customer/valuation" });
   });
 });

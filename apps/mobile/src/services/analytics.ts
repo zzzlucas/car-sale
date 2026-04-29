@@ -2,6 +2,9 @@ const DEFAULT_ANALYTICS_ORIGIN = "https://find.lucasishere.top";
 const DEVICE_ID_STORAGE_KEY = "car_mobile_device_id";
 const DEVICE_FIRST_SEEN_STORAGE_KEY = "car_mobile_device_first_seen";
 const DEVICE_ID_PREFIX = "car-";
+const ANALYTICS_APP = "car-mobile";
+const ANALYTICS_PROJECT = "car";
+const CAMPAIGN_QUERY_KEYS = new Set(["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "channel"]);
 
 type AnalyticsEnv = Partial<Record<string, string | boolean | undefined>>;
 
@@ -187,6 +190,30 @@ function getSourcePath(location: AnalyticsLocation) {
   return `${location.pathname || "/"}${location.search || ""}`;
 }
 
+function getAnalyticsEnvName(env: AnalyticsEnv) {
+  return String(env.MODE || env.VITE_CAR_ANALYTICS_ENV || "").trim() || "production";
+}
+
+function normalizeRoute(pathname: string) {
+  return (pathname || "/")
+    .replace(/\/customer\/progress\/[^/?#]+$/, "/customer/progress/:orderId")
+    .replace(/\/operator\/tasks\/[^/?#]+$/, "/operator/tasks/:taskId");
+}
+
+function getCampaignQuery(search: string) {
+  const query: Record<string, string> = {};
+  const params = new URLSearchParams(search || "");
+
+  CAMPAIGN_QUERY_KEYS.forEach((key) => {
+    const value = params.get(key);
+    if (value) {
+      query[key] = value;
+    }
+  });
+
+  return query;
+}
+
 export async function trackCarEvent(
   eventType: number,
   payload: Record<string, unknown> = {},
@@ -212,9 +239,16 @@ export async function trackCarEvent(
   const identity = getDeviceIdentity(options);
   const timestamp = options.now?.() ?? Date.now();
   const path = "/collect";
+  const route = normalizeRoute(location.pathname);
+  const query = getCampaignQuery(location.search);
+  const envName = getAnalyticsEnvName(env);
+  const site = location.hostname || "unknown";
   const enrichedPayload: Record<string, unknown> = {
-    app: "car-mobile",
-    project: "car",
+    app: ANALYTICS_APP,
+    env: envName,
+    project: ANALYTICS_PROJECT,
+    route,
+    site,
     ...payload,
   };
 
@@ -225,6 +259,12 @@ export async function trackCarEvent(
   try {
     await fetchImpl(`${getAnalyticsOrigin(env)}${path}`, {
       body: JSON.stringify({
+        app: ANALYTICS_APP,
+        env: envName,
+        project: ANALYTICS_PROJECT,
+        query,
+        route,
+        site,
         t: eventType,
         s: options.source || getSourcePath(location),
         p: enrichedPayload,
