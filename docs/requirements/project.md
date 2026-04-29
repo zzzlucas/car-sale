@@ -137,11 +137,11 @@
 - 状态：`accepted`
 - 优先级：`P1`
 - 决策：
-  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket，但文档只记录变量名和接入约定，不记录真实密钥
+  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket；非生产真实值按 [REQ-PRJ-20260429-02] 和 [REQ-PRJ-20260429-03] 可进入项目 env 或 `_workspace-base` 的 `resources-ai` 集中凭据清单，明确生产 COS key 仍单独收紧
   - 若与其他项目共用 bucket，必须使用 `car-platform-*` 这类独立前缀，例如 `car-platform-dev/`、`car-platform-preprod/`、`car-platform-prod/`
   - `COS_BUCKET` 允许写桶名称本体并配套 `COS_APP_ID`，也兼容直接写带 `-AppId` 后缀的完整 bucket 名称
-  - 项目文档里只保留 `COS_REGION`、`COS_BUCKET`、`COS_APP_ID`、`COS_UPLOAD_PREFIX` 等配置项名称，`COS_SECRET_ID`、`COS_SECRET_KEY` 只通过本地环境变量或安全工具分发
-- 原因：这样能在不增加接入阻力的前提下，避免对象路径与 `koa-rent` 等项目混淆，也避免把真实敏感信息泄漏到仓库文档
+  - 对象存储隔离重点是项目级 `COS_UPLOAD_PREFIX`，多项目共用 bucket 时必须避免对象路径互相混淆
+- 原因：这样能在不增加接入阻力的前提下，避免对象路径与 `koa-rent` 等项目混淆；安全边界已从“所有真实密钥不入仓”更新为“非生产便捷优先、生产明确收紧”。
 
 ### [REQ-PRJ-20260423-06] `car` 的提交策略与 `koa-rent` 保持同口径
 - 状态：`accepted`
@@ -201,6 +201,17 @@
   - `.gitignore` 只默认排除 `.env.production*`、`.env.prod*` 等明确生产命名 env；不要再笼统忽略全部 `.env.*`
   - 后续 AI 代理遇到非生产 env 缺失、未提交或不同步时，默认直接补齐并提交，不再把“隐藏 key”作为默认正确做法
 - 原因：本项目是小本自营业务，当前优先级是快速开发、少折腾、客户可完整体验；过度套用大厂生产密钥管理标准会浪费时间精力。生产环境仍保留基本边界，但非生产环境默认便捷优先。
+
+### [REQ-PRJ-20260429-03] `car` 重新接入 `_workspace-base` 最新共享口径
+- 状态：`accepted`
+- 优先级：`P0`
+- 决策：
+  - `car` 根 `AGENTS.md` 显式参考 `E:\web_work_-1\_workspace-base\AGENTS.md`、`agents/AGENTS-baseline.md` 和 `docs/how-projects-use-workspace-base.md`
+  - 需要 AI 可直接复用的 MVP/demo/非生产 key、密码和供应商配置片段时，优先参考 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\nonprod-shared-credentials.md`
+  - 需要真人快速确认共享端口、DNS、COS 等资源台账时，优先参考 `E:\web_work_-1\_workspace-base\ops\docs\_resources-developer`
+  - `car` 的开发、预发布、甲方 demo 默认可以共用同一个非生产数据库；只有进入正式 production、长期试用、真实敏感数据承载或高风险业务流转时，再拆分独立生产资源
+  - 常用能力供应商继续按共享基座候选收口：AI 优先 `SiliconFlow` 或 `sub2api`，地图优先高德 backend 代理，存储优先本地或腾讯云 COS
+- 原因：`_workspace-base` 已经沉淀了新项目 bootstrap、非生产 env 入仓、非生产共享明文凭据、资源目录受众命名和常用能力供应商候选；`car` 作为当前活跃 MVP 项目应重新接入这些最新口径，避免后续代理继续按旧规则保守处理。
 
 ## 当前核心数据对象
 

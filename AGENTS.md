@@ -14,9 +14,12 @@
 
 ## Workspace Base Integration
 - 公共 AGENTS 基线来源：`E:\web_work_-1\_workspace-base\agents\AGENTS-baseline.md`
+- 公共共享基座总规则来源：`E:\web_work_-1\_workspace-base\AGENTS.md`；本项目根 `AGENTS.md` 只写 `car` 的项目差异和例外，不复制共享基座全文。
 - 本文件只维护 `car` 的项目专属差异、当前阶段边界和对公共基线的必要补充，不再把自己当成一份脱离工作区共享层的独立通用模板。
 - 需要共享服务器事实、共享脚本、共享网络边界或跨项目运维规则时，优先看 `E:\web_work_-1\_workspace-base\ops\README.md`。
 - 需要判断共享层和项目层怎么分工时，优先看 `E:\web_work_-1\_workspace-base\docs\how-projects-use-workspace-base.md`。
+- 需要给 AI 直接复用的 MVP/demo/非生产 key、密码、供应商配置片段时，优先看 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\nonprod-shared-credentials.md`。
+- 需要真人快速确认共享端口、DNS、COS 等资源台账时，优先看 `E:\web_work_-1\_workspace-base\ops\docs\_resources-developer`。
 
 ## Communication
 - 默认使用中文。
@@ -73,10 +76,17 @@
 
 ### Config & Secret Safety
 - 默认区分“明确生产环境 env”和“非生产/开发/预发布 env”：除用户明确标记为生产环境的 env 外，其他数据库服务、对象存储、短信、微信、AI key、第三方 key 与普通配置默认可以通用、可以提交到私有 Git，优先减少开发和演示负担。
+- `car` 的开发、预发布、甲方 demo 默认可以共用同一个非生产数据库；只有进入正式 production、长期试用、真实敏感数据承载或高风险业务流转时，再拆分独立生产资源。
 - 只有 `.env.production*`、`.env.prod*`、支付生产 key、正式数据库密码、生产高权限后台凭据、生产高权限对象存储写 key 这类明确生产或高权限配置默认不入 Git；如果用户明确要求另行处理，再按用户要求执行。
 - 非生产 env 可以保存真实值，不要只写变量名和示例值；说明文档也应明确“非生产配置便捷优先、开箱即跑”。
 - 若多个项目共用同一云资源，文档必须明确“项目级目录前缀 / 命名空间”，避免对象路径互相混淆。
 - 对已提交的非生产 key，默认视为可轮换、低权限、服务小本项目效率的开发/预发布 key，不按大厂生产密钥标准反复阻塞流程。
+- 用户已明确要求 `_workspace-base` 集中保存 MVP/demo/非生产共享明文凭据；本项目需要补齐非生产配置时可直接复用 `resources-ai/nonprod-shared-credentials.md`，但不得用于 production，也不要把这些明文值散写到普通说明文档。
+
+### Common Capability Providers
+- AI 能力默认参考 `_workspace-base` 的候选：硅基流动 `SiliconFlow` 或 `sub2api`；`car` 当前 AI 客服继续走 `apps/backend` 代理、provider 配置和 key 池/fallback，不在前端直连供应商。
+- 地图能力默认参考高德方案；`car` 已有 backend 地图代理和 key 池/多 provider 口径，前端不直接暴露地图 Web 服务 key。
+- 存储能力默认参考本地存储或腾讯云 COS；`car` 上传图片/附件继续优先使用项目级 prefix 隔离，同 bucket 复用时必须维护 `COS_UPLOAD_PREFIX`。
 
 ### Windows Text Safety
 - 仓库文档默认使用 `UTF-8`。
