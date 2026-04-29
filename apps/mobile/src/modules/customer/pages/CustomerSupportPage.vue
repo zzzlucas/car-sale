@@ -173,8 +173,6 @@ const WELCOME_MESSAGE: Message = {
   kind: "welcome",
   text: "您好，我是 AI 客服助手。您可以先用下方快捷问题了解流程、材料或预约进度；如果问题更复杂，我也会引导您联系一对一客服。",
 };
-const SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR = "--support-chat-viewport-height";
-const SUPPORT_CHAT_VIEWPORT_OFFSET_TOP_VAR = "--support-chat-viewport-offset-top";
 
 const router = useRouter();
 const draft = ref("");
@@ -209,33 +207,12 @@ function unlockSupportChatPageScroll() {
   document.documentElement.style.overflow = previousHtmlOverflow;
 }
 
-function updateSupportChatViewportHeight() {
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return;
-  }
-
-  const visualViewport = window.visualViewport;
-  const viewportHeight = visualViewport?.height || window.innerHeight;
-  const viewportOffsetTop = visualViewport ? visualViewport.offsetTop : 0;
-  document.documentElement.style.setProperty(SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR, `${Math.round(viewportHeight)}px`);
-  document.documentElement.style.setProperty(SUPPORT_CHAT_VIEWPORT_OFFSET_TOP_VAR, `${Math.round(viewportOffsetTop)}px`);
-}
-
 onMounted(() => {
   lockSupportChatPageScroll();
-  updateSupportChatViewportHeight();
-  window.visualViewport?.addEventListener("resize", updateSupportChatViewportHeight);
-  window.visualViewport?.addEventListener("scroll", updateSupportChatViewportHeight);
-  window.addEventListener("resize", updateSupportChatViewportHeight);
 });
 
 onBeforeUnmount(() => {
-  window.visualViewport?.removeEventListener("resize", updateSupportChatViewportHeight);
-  window.visualViewport?.removeEventListener("scroll", updateSupportChatViewportHeight);
-  window.removeEventListener("resize", updateSupportChatViewportHeight);
   unlockSupportChatPageScroll();
-  document.documentElement.style.removeProperty(SUPPORT_CHAT_VIEWPORT_HEIGHT_VAR);
-  document.documentElement.style.removeProperty(SUPPORT_CHAT_VIEWPORT_OFFSET_TOP_VAR);
 });
 
 const answeredTurns = computed(
@@ -459,9 +436,7 @@ async function sendMessage(presetQuestion?: string) {
 
 <style scoped>
 .support-chat-shell {
-  top: var(--support-chat-viewport-offset-top, 0px);
-  height: var(--support-chat-viewport-height, 100dvh);
-  max-height: var(--support-chat-viewport-height, 100dvh);
+  bottom: 0;
 }
 
 .support-chat-body {
