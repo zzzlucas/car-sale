@@ -4,7 +4,7 @@
       <div class="mobile-page-header__bar mx-auto flex h-14 w-full max-w-md items-center justify-between px-5">
         <MobileBackButton @click="goBack" />
         <h1 class="mobile-page-header__title text-lg font-semibold tracking-tight text-primary">报废进度</h1>
-        <div class="w-[4.75rem]" />
+        <div class="w-11" />
       </div>
     </header>
 

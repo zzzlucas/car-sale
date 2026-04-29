@@ -30,6 +30,14 @@ const STATUS_LABELS: Record<ScrapOrderStatus, string> = {
   cancelled: '已取消',
 };
 
+const TRANSIENT_DB_ERROR_CODES = new Set([
+  'ECONNRESET',
+  'ETIMEDOUT',
+  'EPIPE',
+  'PROTOCOL_CONNECTION_LOST',
+]);
+const ORDER_QUERY_TIMEOUT_MS = 5000;
+
 @Provide()
 export class AppOrderService extends BaseService {
   @InjectEntityModel(AppValuationOrderEntity)
@@ -72,14 +80,17 @@ export class AppOrderService extends BaseService {
   }
 
   async myOrders(): Promise<ScrapOrderSummary[]> {
-    const orders = await this.appValuationOrderEntity.find({
-      where: {
-        visitorKey: this.getVisitorKey(),
-      },
-      order: {
-        createTime: 'DESC',
-      } as any,
-    });
+    const visitorKey = this.getVisitorKey();
+    const orders = await this.withTransientDbRetry(() =>
+      this.appValuationOrderEntity.find({
+        where: {
+          visitorKey,
+        },
+        order: {
+          createTime: 'DESC',
+        } as any,
+      })
+    );
 
     return orders.map(order => this.toSummary(order));
   }
@@ -125,6 +136,52 @@ export class AppOrderService extends BaseService {
     const datePart = moment().format('YYYYMMDD');
     const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
     return `VR-${datePart}-${randomPart}`;
+  }
+
+  private async withTransientDbRetry<T>(task: () => Promise<T>) {
+    try {
+      return await this.withQueryTimeout(task());
+    } catch (error) {
+      if (!this.isTransientDbError(error)) {
+        throw error;
+      }
+      return await this.withQueryTimeout(task());
+    }
+  }
+
+  private async withQueryTimeout<T>(task: Promise<T>) {
+    let timeoutId: NodeJS.Timeout | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new CoolCommException('订单列表加载超时，请稍后重试'));
+      }, ORDER_QUERY_TIMEOUT_MS);
+    });
+
+    try {
+      return await Promise.race([task, timeout]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
+  }
+
+  private isTransientDbError(error: unknown) {
+    const code = this.getErrorCode(error);
+    return Boolean(code && TRANSIENT_DB_ERROR_CODES.has(code));
+  }
+
+  private getErrorCode(error: unknown): string | undefined {
+    if (!error || typeof error !== 'object') {
+      return undefined;
+    }
+
+    const current = error as { code?: unknown; driverError?: unknown };
+    if (typeof current.code === 'string') {
+      return current.code;
+    }
+
+    return this.getErrorCode(current.driverError);
   }
 
   private createSubmittedTimeline(time: string): ScrapOrderTimelineItem[] {

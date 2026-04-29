@@ -1,12 +1,11 @@
 <template>
   <button
     type="button"
-    class="mobile-back-button inline-flex h-10 min-w-[4.75rem] select-none items-center justify-center gap-0.5 rounded-full border border-outline-variant bg-white/90 pl-2 pr-3 text-label-md font-semibold text-primary shadow-subtle backdrop-blur transition active:scale-[0.98] active:bg-surface-container"
+    class="mobile-back-button inline-flex h-11 w-11 select-none items-center justify-center rounded-full text-on-surface transition-colors active:bg-surface-container-high"
     aria-label="返回上一页"
     @click="emit('click')"
   >
-    <span class="material-symbols-outlined text-[22px]">chevron_left</span>
-    <span>返回</span>
+    <span aria-hidden="true" class="mobile-back-button__chevron" />
   </button>
 </template>
 
@@ -15,3 +14,13 @@ const emit = defineEmits<{
   click: [];
 }>();
 </script>
+
+<style scoped>
+.mobile-back-button__chevron {
+  width: 12px;
+  height: 12px;
+  border-left: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  transform: translateX(2px) rotate(45deg);
+}
+</style>

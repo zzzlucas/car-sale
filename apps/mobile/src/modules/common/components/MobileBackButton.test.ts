@@ -11,12 +11,14 @@ const recordsSource = fs.readFileSync(path.join(customerPagesDir, "CustomerRecor
 const progressSource = fs.readFileSync(path.join(customerPagesDir, "CustomerProgressPage.vue"), "utf8");
 
 describe("MobileBackButton", () => {
-  it("uses a labeled compact affordance instead of a floating icon-only arrow", () => {
+  it("uses a quiet native-like icon affordance instead of a bordered pill", () => {
     expect(componentSource).toContain('aria-label="返回上一页"');
-    expect(componentSource).toContain("chevron_left");
-    expect(componentSource).toContain("返回");
-    expect(componentSource).toContain("min-w-[4.75rem]");
-    expect(componentSource).toContain("active:scale-[0.98]");
+    expect(componentSource).toContain("mobile-back-button__chevron");
+    expect(componentSource).toContain("h-11 w-11");
+    expect(componentSource).toContain("text-on-surface");
+    expect(componentSource).toContain("active:bg-surface-container-high");
+    expect(componentSource).not.toContain("border border-outline-variant");
+    expect(componentSource).not.toContain("返回</span>");
   });
 
   it("is reused by reservation records and progress detail headers", () => {
@@ -24,7 +26,7 @@ describe("MobileBackButton", () => {
     expect(progressSource).toContain('<MobileBackButton @click="goBack" />');
     expect(recordsSource).toContain('import MobileBackButton from "@/modules/common/components/MobileBackButton.vue"');
     expect(progressSource).toContain('import MobileBackButton from "@/modules/common/components/MobileBackButton.vue"');
-    expect(recordsSource).toContain('class="w-[4.75rem]"');
-    expect(progressSource).toContain('class="w-[4.75rem]"');
+    expect(recordsSource).toContain('class="w-11"');
+    expect(progressSource).toContain('class="w-11"');
   });
 });

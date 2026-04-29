@@ -33,6 +33,11 @@ export default {
         logging: false,
         // 字符集
         charset: 'utf8mb4',
+        connectTimeout: 5000,
+        extra: {
+          enableKeepAlive: true,
+          keepAliveInitialDelay: 0,
+        },
         // 是否开启缓存
         cache: true,
         // 实体路径

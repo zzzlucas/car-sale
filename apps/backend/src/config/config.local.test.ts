@@ -52,6 +52,27 @@ describe('backend local config env loading', () => {
     expect(password).toBe('from-process-env');
   });
 
+  it('uses bounded keepalive database connections for remote local MySQL', () => {
+    process.env.DB_PASSWORD = 'from-process-env';
+
+    let config: typeof import('./config.local').default;
+
+    jest.isolateModules(() => {
+      config = require('./config.local').default;
+    });
+
+    const dataSource = config!.typeorm.dataSource.default as {
+      connectTimeout?: number;
+      extra?: { enableKeepAlive?: boolean; keepAliveInitialDelay?: number };
+    };
+
+    expect(dataSource.connectTimeout).toBe(5000);
+    expect(dataSource.extra).toMatchObject({
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0,
+    });
+  });
+
   it('fails fast with a clear error when DB_PASSWORD is still missing', () => {
     delete process.env.DB_PASSWORD;
 

@@ -65,6 +65,11 @@ describe('backend production config env loading', () => {
       username: 'car_platform',
       password: 'from-prod-env',
       database: 'car_platform',
+      connectTimeout: 5000,
+      extra: {
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 0,
+      },
     });
   });
 

@@ -156,6 +156,61 @@ describe('AppOrderService', () => {
     });
   });
 
+  it('retries myOrders once after a transient database connection reset', async () => {
+    const { service, repository } = createService('visitor-b', [
+      {
+        id: 2,
+        orderNo: 'VR-1002-H5',
+        currentStatus: 'submitted',
+        brandModel: '本田 雅阁',
+        plateNumber: '粤B22222',
+        contactName: '王五',
+        contactPhone: '13800138002',
+        pickupAddress: '广州海珠',
+        wheelMaterial: 'aluminum',
+        plateRetention: true,
+        vehicleType: 'car',
+        vehiclePhotos: ['https://example.com/b.jpg'],
+        visitorKey: 'visitor-b',
+        createTime: '2026-04-23 10:30:00',
+        timeline: [{ status: 'submitted', label: '已提交', time: '2026-04-23 10:30:00' }],
+      },
+    ]);
+    const find = repository.find.bind(repository);
+    let attempts = 0;
+    repository.find = async (options?: any) => {
+      attempts += 1;
+      if (attempts === 1) {
+        const error = new Error('read ECONNRESET') as NodeJS.ErrnoException;
+        error.code = 'ECONNRESET';
+        throw error;
+      }
+      return find(options);
+    };
+
+    const orders = await service.myOrders();
+
+    expect(attempts).toBe(2);
+    expect(orders).toHaveLength(1);
+    expect(orders[0].orderNo).toBe('VR-1002-H5');
+  });
+
+  it('fails myOrders quickly when the database query hangs', async () => {
+    jest.useFakeTimers();
+    const { service, repository } = createService('visitor-b');
+    repository.find = async () => new Promise(() => undefined);
+
+    try {
+      const promise = service.myOrders();
+      const assertion = expect(promise).rejects.toThrow('订单列表加载超时，请稍后重试');
+      await jest.advanceTimersByTimeAsync(5000);
+
+      await assertion;
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('maps stored order snapshots to detail output', async () => {
     const { service } = createService('visitor-a', [
       {
