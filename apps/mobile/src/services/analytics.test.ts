@@ -210,4 +210,39 @@ describe("car mobile analytics", () => {
       },
     });
   });
+
+  it("keeps demo attribution for later events after the shared link entry", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+    const storage = createMemoryStorage();
+
+    await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: {
+        hostname: "localhost",
+        pathname: "/customer",
+        search: "?shareId=demo_zhangzong_0430&client=zhang",
+      },
+      randomId: () => "device-1",
+      storage,
+    });
+    await trackCarEvent(CAR_ANALYTICS_EVENTS.pageStay, { reason: "pagehide" }, {
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: { hostname: "localhost", pathname: "/customer/progress/order-1", search: "" },
+      randomId: () => "device-2",
+      storage,
+    });
+
+    const laterBody = JSON.parse(fetchImpl.mock.calls[1][1].body);
+
+    expect(laterBody.query).toMatchObject({
+      client: "zhang",
+      shareId: "demo_zhangzong_0430",
+    });
+    expect(laterBody.p.query).toMatchObject({
+      client: "zhang",
+      shareId: "demo_zhangzong_0430",
+    });
+  });
 });

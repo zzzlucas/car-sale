@@ -1,6 +1,7 @@
 const DEFAULT_ANALYTICS_ORIGIN = "https://find.lucasishere.top";
 const DEVICE_ID_STORAGE_KEY = "car_mobile_device_id";
 const DEVICE_FIRST_SEEN_STORAGE_KEY = "car_mobile_device_first_seen";
+const DEVICE_ATTRIBUTION_STORAGE_KEY = "car_mobile_visitor_attribution";
 const DEVICE_ID_PREFIX = "car-";
 const ANALYTICS_APP = "car-mobile";
 const ANALYTICS_PROJECT = "car";
@@ -236,6 +237,33 @@ function getCampaignQuery(search: string) {
   return query;
 }
 
+function getStoredAttribution(storage: AnalyticsStorage | null) {
+  const raw = storage?.getItem(DEVICE_ATTRIBUTION_STORAGE_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return {};
+    return Object.fromEntries(
+      Object.entries(parsed)
+        .map(([key, value]) => [key, String(value || "").trim()])
+        .filter(([key, value]) => CAMPAIGN_QUERY_KEYS.has(key) && Boolean(value)),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function mergeAndPersistAttribution(query: Record<string, string>, storage: AnalyticsStorage | null) {
+  const stored = getStoredAttribution(storage);
+  const next = { ...stored, ...query };
+
+  if (hasVisitorAttribution(query)) {
+    storage?.setItem(DEVICE_ATTRIBUTION_STORAGE_KEY, JSON.stringify(next));
+  }
+
+  return next;
+}
+
 function hasVisitorAttribution(query: Record<string, string>) {
   return Object.keys(query).some((key) => VISITOR_ATTRIBUTION_QUERY_KEYS.has(key));
 }
@@ -323,8 +351,9 @@ export async function trackCarEvent(
   const timestamp = options.now?.() ?? Date.now();
   const path = "/collect";
   const route = normalizeRoute(location.pathname);
-  const query = getCampaignQuery(location.search);
-  const clientProfile = getClientProfile(options);
+  const query = mergeAndPersistAttribution(getCampaignQuery(location.search), getStorage(options));
+  const shouldAttachClientProfile = hasVisitorAttribution(query) || options.markFirstVisit;
+  const clientProfile = shouldAttachClientProfile ? getClientProfile(options) : {};
   const envName = getAnalyticsEnvName(env);
   const site = location.hostname || "unknown";
   const enrichedPayload: Record<string, unknown> = {
