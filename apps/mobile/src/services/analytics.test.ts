@@ -61,25 +61,26 @@ describe("car mobile analytics", () => {
         "X-Timestamp": "1700000000000",
         "X-Signature": expect.any(String),
       }),
-      body: JSON.stringify({
+      body: expect.any(String),
+    }));
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toMatchObject({
+      app: "car-mobile",
+      env: "test",
+      project: "car",
+      query: { utm_source: "demo" },
+      route: "/customer/progress/:orderId",
+      site: "localhost",
+      t: CAR_ANALYTICS_EVENTS.pageView,
+      s: "/customer/progress/abc123?utm_source=demo&orderId=abc123",
+      p: {
         app: "car-mobile",
         env: "test",
         project: "car",
-        query: { utm_source: "demo" },
         route: "/customer/progress/:orderId",
         site: "localhost",
-        t: CAR_ANALYTICS_EVENTS.pageView,
-        s: "/customer/progress/abc123?utm_source=demo&orderId=abc123",
-        p: {
-          app: "car-mobile",
-          env: "test",
-          project: "car",
-          route: "/customer/progress/:orderId",
-          site: "localhost",
-          title: "首页",
-        },
-      }),
-    }));
+        title: "首页",
+      },
+    });
   });
 
   it("marks first visits and records one page-stay event", async () => {
@@ -155,5 +156,58 @@ describe("car mobile analytics", () => {
     expect(body.route).toBe("/customer/valuation");
     expect(body.query).toEqual({ utm_campaign: "spring" });
     expect(body.p).toMatchObject({ route: "/customer/valuation" });
+  });
+
+  it("captures demo share attribution and lightweight client profile", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+
+    await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: {
+        hostname: "localhost",
+        pathname: "/customer",
+        search: "?shareId=demo_zhangzong_0430&demo=car-preprod&client=zhang&token=secret",
+      },
+      navigatorRef: {
+        language: "zh-CN",
+        maxTouchPoints: 5,
+        platform: "iPhone",
+      },
+      randomId: () => "device-1",
+      screenRef: {
+        height: 844,
+        width: 390,
+      },
+      storage: createMemoryStorage(),
+      timezone: () => "Asia/Shanghai",
+      windowRef: {
+        devicePixelRatio: 3,
+      },
+    });
+
+    const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
+
+    expect(body.query).toEqual({
+      client: "zhang",
+      demo: "car-preprod",
+      shareId: "demo_zhangzong_0430",
+    });
+    expect(body.p).toMatchObject({
+      client: {
+        devicePixelRatio: 3,
+        language: "zh-CN",
+        maxTouchPoints: 5,
+        platform: "iPhone",
+        screenHeight: 844,
+        screenWidth: 390,
+        timezone: "Asia/Shanghai",
+      },
+      query: {
+        client: "zhang",
+        demo: "car-preprod",
+        shareId: "demo_zhangzong_0430",
+      },
+    });
   });
 });

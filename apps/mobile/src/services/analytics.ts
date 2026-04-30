@@ -4,7 +4,21 @@ const DEVICE_FIRST_SEEN_STORAGE_KEY = "car_mobile_device_first_seen";
 const DEVICE_ID_PREFIX = "car-";
 const ANALYTICS_APP = "car-mobile";
 const ANALYTICS_PROJECT = "car";
-const CAMPAIGN_QUERY_KEYS = new Set(["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "channel"]);
+const CAMPAIGN_QUERY_KEYS = new Set([
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "channel",
+  "shareId",
+  "share_id",
+  "demo",
+  "demoId",
+  "client",
+  "clientId",
+]);
+const VISITOR_ATTRIBUTION_QUERY_KEYS = new Set(["shareId", "share_id", "demo", "demoId", "client", "clientId"]);
 
 type AnalyticsEnv = Partial<Record<string, string | boolean | undefined>>;
 
@@ -14,7 +28,11 @@ type AnalyticsStorage = Pick<Storage, "getItem" | "setItem">;
 
 type AnalyticsDocument = Pick<Document, "title" | "visibilityState" | "addEventListener">;
 
-type AnalyticsWindow = Pick<Window, "addEventListener">;
+type AnalyticsNavigator = Partial<Pick<Navigator, "language" | "maxTouchPoints" | "platform">>;
+
+type AnalyticsScreen = Partial<Pick<Screen, "height" | "width">>;
+
+type AnalyticsWindow = Pick<Window, "addEventListener"> & Partial<Pick<Window, "devicePixelRatio">>;
 
 type TrackEvent = typeof trackCarEvent;
 
@@ -23,10 +41,14 @@ interface TrackCarEventOptions {
   fetchImpl?: typeof fetch;
   location?: AnalyticsLocation;
   markFirstVisit?: boolean;
+  navigatorRef?: AnalyticsNavigator | null;
   now?: () => number;
   randomId?: () => string;
+  screenRef?: AnalyticsScreen | null;
   source?: string;
   storage?: AnalyticsStorage | null;
+  timezone?: () => string;
+  windowRef?: AnalyticsWindow | null;
 }
 
 interface InitCarAnalyticsOptions extends TrackCarEventOptions {
@@ -214,6 +236,67 @@ function getCampaignQuery(search: string) {
   return query;
 }
 
+function hasVisitorAttribution(query: Record<string, string>) {
+  return Object.keys(query).some((key) => VISITOR_ATTRIBUTION_QUERY_KEYS.has(key));
+}
+
+function resolveNavigator(options: TrackCarEventOptions = {}) {
+  if ("navigatorRef" in options) {
+    return options.navigatorRef ?? null;
+  }
+
+  if (typeof navigator !== "undefined") {
+    return navigator;
+  }
+
+  return null;
+}
+
+function resolveScreen(options: TrackCarEventOptions = {}) {
+  if ("screenRef" in options) {
+    return options.screenRef ?? null;
+  }
+
+  if (typeof screen !== "undefined") {
+    return screen;
+  }
+
+  return null;
+}
+
+function resolveWindow(options: TrackCarEventOptions = {}) {
+  if ("windowRef" in options) {
+    return options.windowRef ?? null;
+  }
+
+  if (typeof window !== "undefined") {
+    return window;
+  }
+
+  return null;
+}
+
+function getClientProfile(options: TrackCarEventOptions = {}) {
+  const navigatorRef = resolveNavigator(options);
+  const screenRef = resolveScreen(options);
+  const windowRef = resolveWindow(options);
+  const profile: Record<string, string | number> = {};
+
+  if (screenRef && Number.isFinite(screenRef.width)) profile.screenWidth = Number(screenRef.width);
+  if (screenRef && Number.isFinite(screenRef.height)) profile.screenHeight = Number(screenRef.height);
+  if (windowRef && Number.isFinite(windowRef.devicePixelRatio)) profile.devicePixelRatio = Number(windowRef.devicePixelRatio);
+  if (navigatorRef?.language) profile.language = navigatorRef.language;
+  if (navigatorRef?.platform) profile.platform = navigatorRef.platform;
+  if (Number.isFinite(navigatorRef?.maxTouchPoints)) profile.maxTouchPoints = Number(navigatorRef?.maxTouchPoints);
+
+  try {
+    const timezone = options.timezone?.() ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timezone) profile.timezone = timezone;
+  } catch {}
+
+  return profile;
+}
+
 export async function trackCarEvent(
   eventType: number,
   payload: Record<string, unknown> = {},
@@ -241,6 +324,7 @@ export async function trackCarEvent(
   const path = "/collect";
   const route = normalizeRoute(location.pathname);
   const query = getCampaignQuery(location.search);
+  const clientProfile = getClientProfile(options);
   const envName = getAnalyticsEnvName(env);
   const site = location.hostname || "unknown";
   const enrichedPayload: Record<string, unknown> = {
@@ -251,6 +335,14 @@ export async function trackCarEvent(
     site,
     ...payload,
   };
+
+  if (hasVisitorAttribution(query)) {
+    enrichedPayload.query = query;
+  }
+
+  if (Object.keys(clientProfile).length > 0) {
+    enrichedPayload.client = clientProfile;
+  }
 
   if (options.markFirstVisit) {
     enrichedPayload.firstVisit = identity.isNew;
