@@ -56,6 +56,7 @@
                 v-if="message.showInlineProfessionalContact"
                 to="/customer/support/contact"
                 class="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-label-md font-semibold text-primary transition-colors active:bg-primary/10"
+                @click="trackSupportCta('support_inline_professional_contact')"
               >
                 <span class="material-symbols-outlined text-[16px]">headset_mic</span>
                 联系一对一客服
@@ -105,6 +106,7 @@
         <RouterLink
           to="/customer/support/contact"
           class="inline-flex shrink-0 items-center justify-center rounded-full bg-white px-4 py-2 text-label-md font-semibold text-primary"
+          @click="trackSupportCta('support_large_professional_contact')"
         >
           联系一对一客服
         </RouterLink>
@@ -116,6 +118,7 @@
         <RouterLink
           to="/customer/support/contact"
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors active:bg-surface-container"
+          @click="trackSupportCta('support_composer_professional_contact')"
         >
           <span class="material-symbols-outlined">headset_mic</span>
         </RouterLink>
@@ -155,6 +158,7 @@ import {
   writeSupportChatCache,
 } from "./supportChatStorage";
 import { renderSupportMarkdown } from "./supportMarkdown";
+import { trackCarCtaClick } from "@/services/analytics";
 
 type Message = {
   id: string;
@@ -385,6 +389,12 @@ async function sendMessage(presetQuestion?: string) {
     return;
   }
 
+  void trackCarCtaClick("support_chat_send", {
+    ctaGroup: "support",
+    messageLength: content.length,
+    preset: Boolean(presetQuestion),
+  });
+
   messages.value.push({
     id: `u-${Date.now()}`,
     role: "user",
@@ -431,6 +441,13 @@ async function sendMessage(presetQuestion?: string) {
   } finally {
     isSending.value = false;
   }
+}
+
+function trackSupportCta(cta: string) {
+  void trackCarCtaClick(cta, {
+    ctaGroup: "support",
+    targetRoute: "/customer/support/contact",
+  });
 }
 </script>
 

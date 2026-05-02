@@ -27,7 +27,7 @@ type AnalyticsLocation = Pick<Location, "hostname" | "pathname" | "search">;
 
 type AnalyticsStorage = Pick<Storage, "getItem" | "setItem">;
 
-type AnalyticsDocument = Pick<Document, "title" | "visibilityState" | "addEventListener">;
+type AnalyticsDocument = Pick<Document, "title" | "visibilityState" | "addEventListener"> & Partial<Pick<Document, "referrer">>;
 
 type AnalyticsNavigator = Partial<Pick<Navigator, "language" | "maxTouchPoints" | "platform">>;
 
@@ -84,6 +84,7 @@ export const CAR_ANALYTICS_EVENTS = {
   scrollDepth: 5112,
   valuationFormStart: 5113,
   quickExit: 5114,
+  ctaClick: 5115,
 } as const;
 
 const QUICK_EXIT_THRESHOLD_MS = 3_000;
@@ -232,6 +233,16 @@ function normalizeRoute(pathname: string) {
   return (pathname || "/")
     .replace(/\/customer\/progress\/[^/?#]+$/, "/customer/progress/:orderId")
     .replace(/\/operator\/tasks\/[^/?#]+$/, "/operator/tasks/:taskId");
+}
+
+function extractReferrerHost(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    return new URL(raw).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
 }
 
 function getCampaignQuery(search: string) {
@@ -453,6 +464,29 @@ export async function trackCarEvent(
   }
 }
 
+export function trackCarCtaClick(
+  cta: string,
+  payload: Record<string, unknown> = {},
+  options: TrackCarEventOptions = {},
+) {
+  const normalizedCta = String(cta || "").trim().slice(0, 80);
+  if (!normalizedCta) {
+    return Promise.resolve(false);
+  }
+
+  const eventType = normalizedCta.includes("support")
+    ? CAR_ANALYTICS_EVENTS.supportChatOpen
+    : (normalizedCta.includes("record") || normalizedCta.includes("records"))
+      ? CAR_ANALYTICS_EVENTS.recordsOpen
+      : CAR_ANALYTICS_EVENTS.ctaClick;
+
+  return trackCarEvent(eventType, {
+    ...payload,
+    cta: normalizedCta,
+    intentSignal: "cta_click",
+  }, options);
+}
+
 function attachPageStayTracker(options: InitCarAnalyticsOptions = {}) {
   const documentRef = options.documentRef ?? (typeof document !== "undefined" ? document : null);
   const windowRef = options.windowRef ?? (typeof window !== "undefined" ? window : null);
@@ -569,15 +603,19 @@ function attachEngagementTracker(options: InitCarAnalyticsOptions = {}) {
 
 export function initCarAnalytics(options: InitCarAnalyticsOptions = {}) {
   const documentRef = options.documentRef ?? (typeof document !== "undefined" ? document : null);
+  const entryAt = options.now?.() ?? Date.now();
   const sessionId = createSessionId(options);
   const sessionOptions = { ...options, sessionId } as InitCarAnalyticsOptions & { sessionId: string };
   attachPageStayTracker(sessionOptions);
   attachEngagementTracker(sessionOptions);
 
   return trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {
+    entryAt,
     entryRoute: normalizeRoute(getCurrentLocation(options).pathname),
+    referrerHost: extractReferrerHost(documentRef?.referrer),
     sessionId,
     title: documentRef?.title ?? "",
+    visibilityState: documentRef?.visibilityState ?? "unknown",
   }, {
     ...sessionOptions,
     markFirstVisit: true,

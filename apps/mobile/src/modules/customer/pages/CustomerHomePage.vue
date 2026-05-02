@@ -10,6 +10,7 @@
           <RouterLink
             to="/customer/support"
             class="inline-flex items-center gap-1 rounded-full bg-white/85 px-3 py-2 text-label-md text-on-surface shadow-subtle backdrop-blur-sm"
+            @click="trackHomeCta('home_header_support', '/customer/support')"
           >
             <span class="material-symbols-outlined text-[16px]">support_agent</span>
             联系客服
@@ -20,6 +21,7 @@
           to="/customer/valuation"
           aria-label="立即估价 / 预约回收"
           class="customer-home-hero group relative block rounded-[32px] outline-none transition duration-300 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary-fixed"
+          @click="trackHomeCta('home_hero_valuation', '/customer/valuation')"
         >
           <span class="customer-home-hero__depth-shadow" aria-hidden="true" />
           <span class="customer-home-hero__screen">
@@ -128,12 +130,14 @@
           <RouterLink
             to="/customer/valuation"
             class="flex h-12 items-center justify-center rounded-2xl bg-white text-label-md font-medium text-primary"
+            @click="trackHomeCta('home_bottom_valuation', '/customer/valuation')"
           >
             去估价
           </RouterLink>
           <RouterLink
             to="/customer/support"
             class="flex h-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-label-md font-medium text-on-primary"
+            @click="trackHomeCta('home_bottom_support', '/customer/support')"
           >
             联系客服
           </RouterLink>
@@ -158,6 +162,7 @@ import homeHeroCta from "@/assets/customer-home/banner-cta.png";
 import homeHeroShield from "@/assets/customer-home/banner-shield.png";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
 import { getFaqs } from "@/services/content";
+import { trackCarCtaClick } from "@/services/analytics";
 
 const advantages = [
   { icon: "verified_user", title: "正规资质回收", desc: "按规范拆解并出具所需证明，流程合法可追溯。" },
@@ -182,6 +187,13 @@ const faqItems = ref<FaqItem[]>([
 onMounted(async () => {
   faqItems.value = await getFaqs();
 });
+
+function trackHomeCta(cta: string, targetRoute: string) {
+  void trackCarCtaClick(cta, {
+    ctaGroup: "home",
+    targetRoute,
+  });
+}
 </script>
 
 <style scoped>

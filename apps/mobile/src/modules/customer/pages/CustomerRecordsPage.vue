@@ -60,6 +60,7 @@
         <RouterLink
           to="/customer/valuation"
           class="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-label-md text-on-primary"
+          @click="trackRecordsCta('records_empty_valuation', '/customer/valuation')"
         >
           去提交预约
         </RouterLink>
@@ -119,7 +120,11 @@
                 <span class="material-symbols-outlined text-[16px]">schedule</span>
                 <span class="text-body-md">{{ item.updatedAt || "最近更新" }}</span>
               </div>
-              <RouterLink :to="`/customer/progress/${item.id}`" class="text-label-md font-bold text-primary">
+              <RouterLink
+                :to="`/customer/progress/${item.id}`"
+                class="text-label-md font-bold text-primary"
+                @click="trackRecordsCta('records_progress_detail', '/customer/progress/:orderId')"
+              >
                 查看详情
               </RouterLink>
             </div>
@@ -139,6 +144,7 @@ import { RouterLink, useRouter } from "vue-router";
 import type { ScrapOrderSummary } from "@car/shared-types";
 import MobileBackButton from "@/modules/common/components/MobileBackButton.vue";
 import MobileBottomNav from "@/modules/common/components/MobileBottomNav.vue";
+import { trackCarCtaClick } from "@/services/analytics";
 import { getMyOrders } from "@/services/orders";
 
 const router = useRouter();
@@ -186,4 +192,11 @@ async function loadOrders() {
 }
 
 onMounted(loadOrders);
+
+function trackRecordsCta(cta: string, targetRoute: string) {
+  void trackCarCtaClick(cta, {
+    ctaGroup: "records",
+    targetRoute,
+  });
+}
 </script>

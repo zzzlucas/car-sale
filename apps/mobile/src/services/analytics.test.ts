@@ -4,6 +4,7 @@ import {
   bindCarAnalyticsToRouter,
   CAR_ANALYTICS_EVENTS,
   initCarAnalytics,
+  trackCarCtaClick,
   trackCarEvent,
 } from "./analytics";
 
@@ -90,6 +91,7 @@ describe("car mobile analytics", () => {
       listeners.set(event, [...(listeners.get(event) ?? []), listener]);
     };
     const documentRef = {
+      referrer: "https://wechat.example.com/share?id=secret",
       title: "报废车预约平台",
       visibilityState: "visible",
       addEventListener: vi.fn(addListener),
@@ -116,7 +118,16 @@ describe("car mobile analytics", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toMatchObject({
       t: CAR_ANALYTICS_EVENTS.pageView,
-      p: { app: "car-mobile", firstVisit: true, project: "car", sessionId: "car-session-device-1" },
+      p: {
+        app: "car-mobile",
+        entryAt: 1_700_000_000_000,
+        entryRoute: "/customer",
+        firstVisit: true,
+        project: "car",
+        referrerHost: "wechat.example.com",
+        sessionId: "car-session-device-1",
+        visibilityState: "visible",
+      },
     });
     expect(JSON.parse(fetchImpl.mock.calls[1][1].body)).toMatchObject({
       t: CAR_ANALYTICS_EVENTS.pageStay,
@@ -178,6 +189,45 @@ describe("car mobile analytics", () => {
     expect(trackEvent).toHaveBeenCalledWith(CAR_ANALYTICS_EVENTS.pageView, {
       title: "报废流程指南",
     }, expect.objectContaining({ source: "/customer/guide" }));
+  });
+
+  it("tracks CTA clicks with intent semantics", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+
+    await trackCarCtaClick("home_hero_valuation", {
+      ctaGroup: "home",
+      targetRoute: "/customer/valuation",
+    }, {
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: { hostname: "localhost", pathname: "/customer", search: "" },
+      randomId: () => "device-1",
+      storage: createMemoryStorage(),
+    });
+    await trackCarCtaClick("home_header_support", {}, {
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: { hostname: "localhost", pathname: "/customer", search: "" },
+      randomId: () => "device-2",
+      storage: createMemoryStorage(),
+    });
+
+    expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toMatchObject({
+      t: CAR_ANALYTICS_EVENTS.ctaClick,
+      p: {
+        cta: "home_hero_valuation",
+        ctaGroup: "home",
+        intentSignal: "cta_click",
+        targetRoute: "/customer/valuation",
+      },
+    });
+    expect(JSON.parse(fetchImpl.mock.calls[1][1].body)).toMatchObject({
+      t: CAR_ANALYTICS_EVENTS.supportChatOpen,
+      p: {
+        cta: "home_header_support",
+        intentSignal: "cta_click",
+      },
+    });
   });
 
   it("keeps campaign query separately from the normalized route", async () => {
