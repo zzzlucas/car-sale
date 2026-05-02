@@ -46,6 +46,7 @@ interface TrackCarEventOptions {
   now?: () => number;
   randomId?: () => string;
   screenRef?: AnalyticsScreen | null;
+  sessionId?: string;
   source?: string;
   storage?: AnalyticsStorage | null;
   timezone?: () => string;
@@ -79,7 +80,13 @@ export const CAR_ANALYTICS_EVENTS = {
   supportChatOpen: 5103,
   recordsOpen: 5104,
   pageStay: 5105,
+  firstInteraction: 5111,
+  scrollDepth: 5112,
+  valuationFormStart: 5113,
+  quickExit: 5114,
 } as const;
+
+const QUICK_EXIT_THRESHOLD_MS = 3_000;
 
 function getRuntimeEnv(options: TrackCarEventOptions = {}) {
   return options.env ?? import.meta.env ?? {};
@@ -153,6 +160,10 @@ function createRandomId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function createSessionId(options: TrackCarEventOptions = {}) {
+  return `${DEVICE_ID_PREFIX}session-${options.randomId?.() ?? createRandomId()}`;
+}
+
 function getDeviceIdentity(options: TrackCarEventOptions = {}): DeviceIdentity {
   const storage = getStorage(options);
   const stored = storage?.getItem(DEVICE_ID_STORAGE_KEY);
@@ -210,7 +221,7 @@ function resolveFetch(options: TrackCarEventOptions = {}) {
 }
 
 function getSourcePath(location: AnalyticsLocation) {
-  return `${location.pathname || "/"}${location.search || ""}`;
+  return sanitizeSourcePath(`${location.pathname || "/"}${location.search || ""}`);
 }
 
 function getAnalyticsEnvName(env: AnalyticsEnv) {
@@ -228,13 +239,33 @@ function getCampaignQuery(search: string) {
   const params = new URLSearchParams(search || "");
 
   CAMPAIGN_QUERY_KEYS.forEach((key) => {
-    const value = params.get(key);
+    const value = sanitizeQueryValue(params.get(key));
     if (value) {
       query[key] = value;
     }
   });
 
   return query;
+}
+
+function sanitizeQueryValue(value: string | null) {
+  return String(value || "").trim().slice(0, 120);
+}
+
+function sanitizeSourcePath(source: string) {
+  const [path = "/", rawSearch = ""] = String(source || "/").split("?", 2);
+  const params = new URLSearchParams(rawSearch.split("#", 1)[0] || "");
+  const safeParams = new URLSearchParams();
+
+  CAMPAIGN_QUERY_KEYS.forEach((key) => {
+    const value = sanitizeQueryValue(params.get(key));
+    if (value) {
+      safeParams.set(key, value);
+    }
+  });
+
+  const query = safeParams.toString();
+  return `${normalizeRoute(path.split("#", 1)[0] || "/")}${query ? `?${query}` : ""}`;
 }
 
 function getStoredAttribution(storage: AnalyticsStorage | null) {
@@ -325,6 +356,18 @@ function getClientProfile(options: TrackCarEventOptions = {}) {
   return profile;
 }
 
+function buildEngagementPayload(intentSignal: string, state: { firstInteractionAt: number | null; interactionCount: number; maxScrollDepth: number }, extra: Record<string, unknown> = {}) {
+  return {
+    ...extra,
+    engagement: {
+      firstInteractionAt: state.firstInteractionAt,
+      interactionCount: state.interactionCount,
+      maxScrollDepth: state.maxScrollDepth,
+    },
+    intentSignal,
+  };
+}
+
 export async function trackCarEvent(
   eventType: number,
   payload: Record<string, unknown> = {},
@@ -373,6 +416,10 @@ export async function trackCarEvent(
     enrichedPayload.client = clientProfile;
   }
 
+  if (options.sessionId) {
+    enrichedPayload.sessionId = options.sessionId;
+  }
+
   if (options.markFirstVisit) {
     enrichedPayload.firstVisit = identity.isNew;
   }
@@ -387,7 +434,7 @@ export async function trackCarEvent(
         route,
         site,
         t: eventType,
-        s: options.source || getSourcePath(location),
+        s: options.source ? sanitizeSourcePath(options.source) : getSourcePath(location),
         p: enrichedPayload,
       }),
       headers: {
@@ -440,14 +487,99 @@ function attachPageStayTracker(options: InitCarAnalyticsOptions = {}) {
   });
 }
 
+function attachEngagementTracker(options: InitCarAnalyticsOptions = {}) {
+  const windowRef = options.windowRef ?? (typeof window !== "undefined" ? window : null);
+
+  if (!windowRef) {
+    return;
+  }
+
+  const startedAt = options.sessionStartedAt ?? options.now?.() ?? Date.now();
+  const state = {
+    firstInteractionAt: null as number | null,
+    interactionCount: 0,
+    maxScrollDepth: 0,
+  };
+  const reportedScrollDepths = new Set<number>();
+  let sentQuickExit = false;
+
+  const sendFirstInteraction = (interactionType: string) => {
+    state.interactionCount += 1;
+    if (state.firstInteractionAt !== null) {
+      return;
+    }
+
+    const timestamp = options.now?.() ?? Date.now();
+    state.firstInteractionAt = timestamp;
+    void trackCarEvent(CAR_ANALYTICS_EVENTS.firstInteraction, buildEngagementPayload("first_interaction", state, {
+      interactionType,
+      latencyMs: Math.max(0, timestamp - startedAt),
+    }), options);
+  };
+
+  const sendScrollDepth = () => {
+    const documentElement = typeof document !== "undefined" ? document.documentElement : null;
+    const body = typeof document !== "undefined" ? document.body : null;
+    const scrollTop = Math.max(documentElement?.scrollTop || 0, body?.scrollTop || 0);
+    const scrollHeight = Math.max(documentElement?.scrollHeight || 0, body?.scrollHeight || 0);
+    const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+    const scrollableHeight = Math.max(1, scrollHeight - viewportHeight);
+    const depth = Math.min(100, Math.max(0, Math.round((scrollTop / scrollableHeight) * 100)));
+    const milestone = [90, 75, 50, 25].find(value => depth >= value);
+
+    if (!milestone || reportedScrollDepths.has(milestone)) {
+      return;
+    }
+
+    reportedScrollDepths.add(milestone);
+    state.maxScrollDepth = Math.max(state.maxScrollDepth, milestone);
+    void trackCarEvent(CAR_ANALYTICS_EVENTS.scrollDepth, buildEngagementPayload("scroll_depth", state, {
+      scrollDepth: milestone,
+    }), options);
+  };
+
+  const sendQuickExit = (reason: string) => {
+    if (sentQuickExit || state.interactionCount > 0 || state.maxScrollDepth > 0) {
+      return;
+    }
+
+    const durationMs = Math.max(0, (options.now?.() ?? Date.now()) - startedAt);
+    if (durationMs > QUICK_EXIT_THRESHOLD_MS) {
+      return;
+    }
+
+    sentQuickExit = true;
+    void trackCarEvent(CAR_ANALYTICS_EVENTS.quickExit, buildEngagementPayload("quick_exit", state, {
+      durationMs,
+      durationSeconds: Math.round(durationMs / 1000),
+      reason,
+    }), options);
+  };
+
+  ["click", "touchstart", "keydown"].forEach(eventName => {
+    windowRef.addEventListener(eventName, () => sendFirstInteraction(eventName));
+  });
+  windowRef.addEventListener("scroll", () => {
+    sendFirstInteraction("scroll");
+    sendScrollDepth();
+  });
+  windowRef.addEventListener("pagehide", () => sendQuickExit("pagehide"));
+  windowRef.addEventListener("beforeunload", () => sendQuickExit("beforeunload"));
+}
+
 export function initCarAnalytics(options: InitCarAnalyticsOptions = {}) {
   const documentRef = options.documentRef ?? (typeof document !== "undefined" ? document : null);
-  attachPageStayTracker(options);
+  const sessionId = createSessionId(options);
+  const sessionOptions = { ...options, sessionId } as InitCarAnalyticsOptions & { sessionId: string };
+  attachPageStayTracker(sessionOptions);
+  attachEngagementTracker(sessionOptions);
 
   return trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {
+    entryRoute: normalizeRoute(getCurrentLocation(options).pathname),
+    sessionId,
     title: documentRef?.title ?? "",
   }, {
-    ...options,
+    ...sessionOptions,
     markFirstVisit: true,
   });
 }

@@ -46,6 +46,7 @@
 
       <form
         class="rounded-2xl border border-surface-variant bg-white p-inset-card shadow-subtle"
+        @input="trackValuationFormStart"
         @submit.prevent="handleSubmit"
       >
         <div class="mb-stack-lg flex items-center gap-2">
@@ -717,6 +718,7 @@ const brandModelPopupOpen = ref(false);
 const brandModelSearchKeyword = ref("");
 const selectedBrandId = ref("");
 const plateKeyboardOpen = ref(false);
+const valuationFormStartTracked = ref(false);
 
 const steps = [
   { label: "车辆信息" },
@@ -883,6 +885,18 @@ function deletePlateKey() {
 
 function clearPlateNumber() {
   form.plateNumber = "";
+}
+
+function trackValuationFormStart() {
+  if (valuationFormStartTracked.value) {
+    return;
+  }
+
+  valuationFormStartTracked.value = true;
+  void trackCarEvent(CAR_ANALYTICS_EVENTS.valuationFormStart, {
+    intentSignal: "form_start",
+    vehicleType: form.vehicleType,
+  });
 }
 
 function handleWeightInput(event: Event) {
