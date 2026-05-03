@@ -84,21 +84,19 @@ describe("car mobile analytics", () => {
     });
   });
 
-  it("defaults production analytics to the shared find collector", async () => {
+  it("keeps production analytics silent when no collector is configured", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
 
     const sent = await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
       env: { MODE: "production" },
       fetchImpl,
-      location: { hostname: "name10.lucasishere.top", pathname: "/customer", search: "" },
+      location: { hostname: "car.example.com", pathname: "/customer", search: "" },
       randomId: () => "device-1",
       storage: createMemoryStorage(),
     });
 
-    expect(sent).toBe(true);
-    expect(fetchImpl).toHaveBeenCalledWith("https://find.lucasishere.top/collect", expect.objectContaining({
-      method: "POST",
-    }));
+    expect(sent).toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("marks first visits and records one page-stay event", async () => {
@@ -119,7 +117,7 @@ describe("car mobile analytics", () => {
 
     await initCarAnalytics({
       documentRef,
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer", search: "" },
       now: () => 1_700_000_000_000,
@@ -176,7 +174,7 @@ describe("car mobile analytics", () => {
         visibilityState: "visible",
         addEventListener: vi.fn(),
       },
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer", search: "" },
       now: () => 1_700_000_000_000,
@@ -213,7 +211,7 @@ describe("car mobile analytics", () => {
         visibilityState: "visible",
         addEventListener: vi.fn(),
       },
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer", search: "" },
       now: () => 1_700_000_000_000,
@@ -266,14 +264,14 @@ describe("car mobile analytics", () => {
       ctaGroup: "home",
       targetRoute: "/customer/valuation",
     }, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer", search: "" },
       randomId: () => "device-1",
       storage: createMemoryStorage(),
     });
     await trackCarCtaClick("home_header_support", {}, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer", search: "" },
       randomId: () => "device-2",
@@ -302,7 +300,7 @@ describe("car mobile analytics", () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
 
     await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer/valuation", search: "?utm_campaign=spring&token=secret" },
       randomId: () => "device-1",
@@ -321,7 +319,7 @@ describe("car mobile analytics", () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
 
     await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer", search: "" },
       randomId: () => "device-1",
@@ -338,7 +336,7 @@ describe("car mobile analytics", () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
 
     await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: {
         hostname: "localhost",
@@ -392,7 +390,7 @@ describe("car mobile analytics", () => {
     const storage = createMemoryStorage();
 
     await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: {
         hostname: "localhost",
@@ -403,7 +401,7 @@ describe("car mobile analytics", () => {
       storage,
     });
     await trackCarEvent(CAR_ANALYTICS_EVENTS.pageStay, { reason: "pagehide" }, {
-      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true", VITE_CAR_ANALYTICS_ORIGIN: "https://analytics.example.com" },
       fetchImpl,
       location: { hostname: "localhost", pathname: "/customer/progress/order-1", search: "" },
       randomId: () => "device-2",

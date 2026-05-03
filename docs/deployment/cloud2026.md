@@ -123,7 +123,7 @@ ssh -i <SSH_KEY_PATH> <PREPROD_SSH_HOST>
 - Database：`car_platform`
 - Username：`car_platform`
 
-密码不写入仓库文档，保留在本地开发环境变量或本地 `.env.local` 中。
+密码不写入仓库文档，保留在本地开发环境变量、`apps/backend/.env.local` 或 `_workspace-base` 非生产资源文档中。
 
 PowerShell 下本地启动后端的最小示例：
 
@@ -139,17 +139,19 @@ pnpm dev:backend
 - `apps/backend/.env`
 - `apps/backend/.env.local`
 
-推荐只在仓库根目录放一个 `.env.local`，至少写入：
+为了减少认知负担，本项目默认只维护 `apps/backend/.env.local` 作为后端本地运行配置，至少写入：
 
 ```dotenv
 DB_PASSWORD=<开发库密码>
 ```
 
+仓库根目录 `.env.local` 不再要求保留；预发布部署脚本需要的 `CAR_PREPROD_*` 真实值集中读取 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\car-preprod-env.md`。
+
 如果使用 IDE 运行配置，也仍然可以直接注入 `DB_PASSWORD`；显式注入的进程环境变量优先级高于 `.env` 文件。
 
 ## 对本项目代码的影响
 
-当前仓库里的 `apps/backend/src/config/config.local.ts` 默认使用 `127.0.0.1:3306`，远端开发库地址通过本机 `.env.local` 或进程环境变量注入。
+当前仓库里的 `apps/backend/src/config/config.local.ts` 默认使用 `127.0.0.1:3306`，远端开发库地址通过 `apps/backend/.env.local` 或进程环境变量注入。
 
 当前推荐的远端开发库覆盖值为：
 

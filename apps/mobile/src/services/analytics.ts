@@ -4,7 +4,7 @@ const DEVICE_ATTRIBUTION_STORAGE_KEY = "car_mobile_visitor_attribution";
 const DEVICE_ID_PREFIX = "car-";
 const ANALYTICS_APP = "car-mobile";
 const ANALYTICS_PROJECT = "car";
-const DEFAULT_ANALYTICS_ORIGIN = "https://find.lucasishere.top";
+const DEFAULT_ANALYTICS_ORIGIN = "";
 const CAMPAIGN_QUERY_KEYS = new Set([
   "utm_source",
   "utm_medium",
@@ -404,6 +404,11 @@ export async function trackCarEvent(
     return false;
   }
 
+  const analyticsOrigin = getAnalyticsOrigin(env);
+  if (!analyticsOrigin) {
+    return false;
+  }
+
   const identity = getDeviceIdentity(options);
   const timestamp = options.now?.() ?? Date.now();
   const path = "/collect";
@@ -439,7 +444,7 @@ export async function trackCarEvent(
   }
 
   try {
-    await fetchImpl(`${getAnalyticsOrigin(env)}${path}`, {
+    await fetchImpl(`${analyticsOrigin}${path}`, {
       body: JSON.stringify({
         app: ANALYTICS_APP,
         env: envName,

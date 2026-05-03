@@ -106,7 +106,7 @@ describe('backend local config env loading', () => {
         require('./config.local');
       });
     }).toThrow(
-      '缺少本地开发数据库密码 DB_PASSWORD，请在仓库根目录或 apps/backend 下创建 .env.local'
+      '缺少本地开发数据库密码 DB_PASSWORD，请在 apps/backend/.env.local 填写真实值'
     );
   });
 });

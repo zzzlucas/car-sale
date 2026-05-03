@@ -5,6 +5,7 @@ param(
     [string]$SshKey = $env:CAR_PREPROD_SSH_KEY,
     [string]$RemoteSiteDir = $env:CAR_PREPROD_REMOTE_SITE_DIR,
     [string]$PublicBaseUrl = $env:CAR_PREPROD_PUBLIC_BASE_URL,
+    [string]$AnalyticsOrigin = $env:CAR_PREPROD_ANALYTICS_ORIGIN,
     [string]$ApiBaseUrl = '/api',
     [switch]$SkipBuild
 )
@@ -73,9 +74,13 @@ $indexHtmlPath = Join-Path $distDir 'index.html'
 
 if (-not $SkipBuild) {
     $previousApiBaseUrl = $env:VITE_API_BASE_URL
+    $previousAnalyticsOrigin = $env:VITE_CAR_ANALYTICS_ORIGIN
     Push-Location $repoRoot
     try {
         $env:VITE_API_BASE_URL = $ApiBaseUrl
+        if (-not [string]::IsNullOrWhiteSpace($AnalyticsOrigin)) {
+            $env:VITE_CAR_ANALYTICS_ORIGIN = $AnalyticsOrigin
+        }
         Invoke-CheckedNativeCommand -Command { pnpm build:mobile } -ErrorMessage '移动端构建失败'
     }
     finally {
@@ -84,6 +89,12 @@ if (-not $SkipBuild) {
         }
         else {
             $env:VITE_API_BASE_URL = $previousApiBaseUrl
+        }
+        if ($null -eq $previousAnalyticsOrigin) {
+            Remove-Item Env:VITE_CAR_ANALYTICS_ORIGIN -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:VITE_CAR_ANALYTICS_ORIGIN = $previousAnalyticsOrigin
         }
         Pop-Location
     }

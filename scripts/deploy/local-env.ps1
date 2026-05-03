@@ -5,25 +5,30 @@ function Import-CarLocalEnv {
         [string]$RepoRoot
     )
 
-    $localEnvPath = Join-Path $RepoRoot '.env.local'
-    if (-not (Test-Path -LiteralPath $localEnvPath -PathType Leaf)) {
-        return
-    }
+    $workspaceBaseEnvPath = Join-Path (Split-Path -Parent $RepoRoot) '_workspace-base\ops\docs\resources-ai\car-preprod-env.md'
+    $legacyLocalEnvPath = Join-Path $RepoRoot '.env.local'
+    $sourcePaths = @($workspaceBaseEnvPath, $legacyLocalEnvPath)
 
-    foreach ($line in Get-Content -LiteralPath $localEnvPath) {
-        $trimmed = $line.Trim()
-        if ([string]::IsNullOrWhiteSpace($trimmed) -or $trimmed.StartsWith('#') -or -not $trimmed.Contains('=')) {
+    foreach ($sourcePath in $sourcePaths) {
+        if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
             continue
         }
 
-        $key, $value = $trimmed.Split('=', 2)
-        $key = $key.Trim()
-        if (-not $key.StartsWith('CAR_')) {
-            continue
-        }
+        foreach ($line in Get-Content -LiteralPath $sourcePath) {
+            $trimmed = $line.Trim()
+            $match = [regex]::Match($trimmed, '^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$')
+            if (-not $match.Success) {
+                continue
+            }
 
-        if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($key, 'Process'))) {
-            [Environment]::SetEnvironmentVariable($key, $value.Trim(), 'Process')
+            $key = $match.Groups[1].Value.Trim()
+            if (-not $key.StartsWith('CAR_')) {
+                continue
+            }
+
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($key, 'Process'))) {
+                [Environment]::SetEnvironmentVariable($key, $match.Groups[2].Value.Trim(), 'Process')
+            }
         }
     }
 }
@@ -47,5 +52,5 @@ function Resolve-CarSetting {
         return $envValue
     }
 
-    throw "$Message；请通过参数、$EnvName 或本地 .env.local 提供，真实值见 _workspace-base 运维文档。"
+    throw "$Message；请通过参数、$EnvName 或 _workspace-base 的 car-preprod-env.md 提供。"
 }

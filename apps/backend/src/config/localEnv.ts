@@ -115,7 +115,7 @@ export function requireBackendLocalEnv(
   }
 
   throw new Error(
-    `缺少本地开发数据库密码 ${key}，请在仓库根目录或 apps/backend 下创建 .env.local，并填写真实值`
+    `缺少本地开发数据库密码 ${key}，请在 apps/backend/.env.local 填写真实值，或通过进程环境变量提供`
   );
 }
 

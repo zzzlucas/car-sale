@@ -28,13 +28,13 @@ $env:DB_PASSWORD='<开发库密码>'
 pnpm dev:backend
 ```
 
-也可以在仓库根目录放一个未纳入版本控制的 `.env.local`，例如：
+也可以在 `apps/backend/.env.local` 放未纳入版本控制的后端本地配置，例如：
 
 ```dotenv
 DB_PASSWORD=<开发库密码>
 ```
 
-当前 `apps/backend` 本地配置会自动读取仓库根目录与 `apps/backend` 目录下的 `.env` / `.env.local`；如果同时设置了进程环境变量，则以进程环境变量为准。
+当前 `apps/backend` 本地配置仍兼容读取仓库根目录与 `apps/backend` 目录下的 `.env` / `.env.local`；但为了减少认知负担，本项目默认只维护 `apps/backend/.env.local` 作为后端本地运行配置。
 
 ### 客户侧手工冒烟
 - 打开 `/customer`，确认首页可见且“立即估价 / 预约回收”可点击
@@ -45,7 +45,7 @@ DB_PASSWORD=<开发库密码>
 
 ### 当前环境提醒
 - 当前开发环境默认假设：数据库使用 `cloud2026` 上的 `1Panel MySQL`
-- 本地启动 `apps/backend` 时，默认使用 `127.0.0.1:3306`；如需直连远端开发库，真实 host 从本机 `.env.local` 或 `_workspace-base` 运维文档注入
+- 本地启动 `apps/backend` 时，默认使用 `127.0.0.1:3306`；如需直连远端开发库，真实 host 从 `apps/backend/.env.local` 或 `_workspace-base` 运维文档注入
 - 当前开发库为 `car_platform`
 - SSH 仅用于远端运维与查看服务器状态，不是本地联调必需步骤
 - 本地若未提供开发密码或远端数据库不可达，当前只能完成 `typecheck/build`，无法验证后端真实启动
