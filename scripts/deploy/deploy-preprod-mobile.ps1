@@ -74,10 +74,12 @@ $indexHtmlPath = Join-Path $distDir 'index.html'
 
 if (-not $SkipBuild) {
     $previousApiBaseUrl = $env:VITE_API_BASE_URL
+    $previousAnalyticsEnv = $env:VITE_CAR_ANALYTICS_ENV
     $previousAnalyticsOrigin = $env:VITE_CAR_ANALYTICS_ORIGIN
     Push-Location $repoRoot
     try {
         $env:VITE_API_BASE_URL = $ApiBaseUrl
+        $env:VITE_CAR_ANALYTICS_ENV = 'preprod'
         if (-not [string]::IsNullOrWhiteSpace($AnalyticsOrigin)) {
             $env:VITE_CAR_ANALYTICS_ORIGIN = $AnalyticsOrigin
         }
@@ -89,6 +91,12 @@ if (-not $SkipBuild) {
         }
         else {
             $env:VITE_API_BASE_URL = $previousApiBaseUrl
+        }
+        if ($null -eq $previousAnalyticsEnv) {
+            Remove-Item Env:VITE_CAR_ANALYTICS_ENV -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:VITE_CAR_ANALYTICS_ENV = $previousAnalyticsEnv
         }
         if ($null -eq $previousAnalyticsOrigin) {
             Remove-Item Env:VITE_CAR_ANALYTICS_ORIGIN -ErrorAction SilentlyContinue
