@@ -7,9 +7,8 @@
 
 ## Active
 - [REQ-PRJ-20260503-19] | 公开 GitHub 快照不得包含真实 env | scope:project | priority:P0 | status:accepted | tags:env,secrets,github,public-review | updated:2026-05-03
+- [REQ-PRJ-20260503-20] | `car` 默认按 public-ready env 口径协作 | scope:project | priority:P0 | status:accepted | tags:env,secrets,github,public-review,workspace-base | updated:2026-05-03
 - [REQ-PRJ-20260429-03] | `car` 重新接入 `_workspace-base` 最新共享口径 | scope:project | priority:P0 | status:accepted | tags:agents,workspace-base,env,providers,database | updated:2026-04-29
-- [REQ-PRJ-20260429-02] | 非生产 env 默认通用并提交 Git | scope:project | priority:P0 | status:accepted | tags:env,secrets,preprod,developer-experience | updated:2026-04-29
-- [REQ-PRJ-20260429-01] | 预发布环境必须同步 AI 客服配置 | scope:project | priority:P1 | status:accepted | tags:env,preprod,ai-support,secrets | updated:2026-04-29
 - [REQ-PRJ-20260428-17] | 预发布根命令必须同时发布 backend 与 mobile H5 静态站点 | scope:project | priority:P1 | status:accepted | tags:deployment,preprod,mobile,backend,h5 | updated:2026-04-28
 - [REQ-PRJ-20260428-16] | 客户侧品牌型号选择先以内置车型目录 + 手填兜底落地 | scope:project | priority:P1 | status:accepted | tags:mobile,vehicle-catalog,valuation,frontend | updated:2026-04-28
 - [REQ-PRJ-20260426-15] | 客户侧 AI 客服正式接入必须走 backend 代理并先以流式闭环落地 | scope:project | priority:P1 | status:accepted | tags:ai,customer-support,backend,mobile,siliconflow,ai-provider-runtime,streaming,deployment | updated:2026-04-28
@@ -28,4 +27,5 @@
 - [REQ-PRJ-20260423-07] | `apps/admin-web` 先以轻量后台壳子接入现有 cool-admin 接口闭环 | scope:project | priority:P1 | status:accepted | tags:admin-web,frontend,backend,cool-admin,scope | updated:2026-04-23
 
 ## Archived
-- 暂无
+- [REQ-PRJ-20260429-02] | 非生产 env 默认通用并提交 Git | scope:project | priority:P0 | status:superseded by REQ-PRJ-20260503-20 | tags:env,secrets,preprod,developer-experience | updated:2026-05-03
+- [REQ-PRJ-20260429-01] | 预发布环境必须同步 AI 客服配置 | scope:project | priority:P1 | status:superseded by REQ-PRJ-20260503-20 | tags:env,preprod,ai-support,secrets | updated:2026-05-03

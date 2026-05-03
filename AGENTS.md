@@ -76,11 +76,11 @@
 - 涉及前后端联调时，先做一次最小探活，再进入页面或接口排查，减少无效折腾。
 
 ### Config & Secret Safety
-- 默认区分“明确生产环境 env”和“非生产/开发/预发布 env”：除用户明确标记为生产环境的 env 外，其他数据库服务、对象存储、短信、微信、AI key、第三方 key 与普通配置默认可以通用、可以提交到私有 Git，优先减少开发和演示负担。
+- 默认区分“公开外发口径”和“本机/私有协作口径”：`car` 当前按 public-ready 项目处理，项目 Git 只提交 env example 模板；真实非生产 env 放 `_workspace-base/env-for-workspace/`、远端服务器本地 env 或本机 ignored env。
 - 若仓库、分支、压缩包或链接会提交到公开 GitHub、外部活动、供应商或评审，公开外发口径优先：只提交 env example 模板，不提交任何真实 `.env`、`.env.local`、`.env.preprod` 或 `apps/**` 下真实 env；具体见 `docs/development/public-github-snapshot.md`。
 - `car` 的开发、预发布、甲方 demo 默认可以共用同一个非生产数据库；只有进入正式 production、长期试用、真实敏感数据承载或高风险业务流转时，再拆分独立生产资源。
-- 只有 `.env.production*`、`.env.prod*`、支付生产 key、正式数据库密码、生产高权限后台凭据、生产高权限对象存储写 key 这类明确生产或高权限配置默认不入 Git；如果用户明确要求另行处理，再按用户要求执行。
-- 非生产 env 可以保存真实值，不要只写变量名和示例值；说明文档也应明确“非生产配置便捷优先、开箱即跑”。
+- 真实 `.env`、`.env.local`、`.env.preprod`、`.env.production.local` 及 `apps/**` 下对应真实 env 默认不入项目 Git；如果用户明确要求另行处理，再按用户要求执行。
+- 非生产 env 可以保存真实值，但默认集中保存在 `_workspace-base/env-for-workspace/`、远端服务器本地 env 或本机 ignored env；说明文档应明确变量清单和权威来源。
 - 若多个项目共用同一云资源，文档必须明确“项目级目录前缀 / 命名空间”，避免对象路径互相混淆。
 - 对已提交的非生产 key，默认视为可轮换、低权限、服务小本项目效率的开发/预发布 key，不按大厂生产密钥标准反复阻塞流程。
 - 用户已明确要求 `_workspace-base` 集中保存 MVP/demo/非生产共享明文凭据；本项目需要补齐非生产配置时可直接复用 `env-for-workspace/shared/nonprod-shared-credentials.md`，但不得用于 production，也不要把这些明文值散写到普通说明文档。

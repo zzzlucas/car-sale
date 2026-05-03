@@ -17,6 +17,16 @@
   - 公开前以 `git ls-files "*.env*"` 做最小检查，结果应只剩 example 模板
 - 原因：本项目现在需要把 GitHub 链接提交给外部活动申请赠送 token。活动审核只需要看到项目代码和配置清单，不需要真实非生产凭据；把真实 env 从公开快照中剥离可以降低密钥、数据库和对象存储误暴露风险，同时不影响本地继续用真实 env 开发。
 
+### [REQ-PRJ-20260503-20] `car` 默认按 public-ready env 口径协作
+- 状态：`accepted`
+- 优先级：`P0`
+- 决策：
+  - `car` 当前默认按 public-ready 项目处理：项目 Git 只提交 env example 模板，不提交任何真实 `.env`、`.env.local`、`.env.preprod` 或 `apps/**` 下真实 env
+  - 真实非生产值集中留在 `_workspace-base/env-for-workspace/`、远端服务器本地 env 或本机 ignored env；部署脚本从 `_workspace-base/env-for-workspace/projects/car-preprod-env.md` 读取预发布部署变量
+  - 历史上“非生产 env 默认可提交私有 Git”的口径只保留为私有项目可选策略；对 `car` 已被本条和 [REQ-PRJ-20260503-19] 覆盖
+  - 后续 AI 代理不得再把 `apps/backend/.env.preprod`、`.env.local` 等真实 env 重新加入 Git；需要补变量时先更新 `_workspace-base/env-for-workspace/` 或本机 ignored env
+- 原因：`car` 已进入可能公开 GitHub 外发的阶段。继续保留真实非生产 env 入项目 Git 会增加公开快照和历史清理成本；集中留存在 `_workspace-base` 与 ignored env 既能保持本机部署可用，也降低误公开风险。
+
 ### [REQ-PRJ-20260429-18] 客户 H5 埋点先复用采集协议，但保持 `car` 独立命名空间
 - 状态：`accepted`
 - 优先级：`P1`
@@ -55,7 +65,7 @@
   - `apps/mobile` AI 客服页面只作为前端交互承载层，第三方 AI 统一走 `apps/backend` 代理，不允许前端直连供应商
   - 第一版真实 AI 接入采用 SSE 流式请求，已按“用户提问 -> backend 调 AI -> 增量返回答复 -> done 补齐最终响应 -> 必要时升级专业客服”的最小闭环落地
   - 前端与 backend 之间保留稳定的项目内接口契约，至少支持 `userMessage`、`conversationId`、`turnCount`、`delta`、`reply` 与升级专业客服信号
-  - 第三方平台 key、模型名、超时、重试和 fallback 策略统一收口在 backend 配置，并使用仓库内 `packages/ai-provider-runtime` 提供的 `@workspace-packages/ai-provider-runtime` 处理 key 路由与 fallback；非生产真实配置可以随 `apps/backend/.env.local`、`apps/backend/.env.preprod` 入 Git，优先保障开箱可跑和客户演示完整
+  - 第三方平台 key、模型名、超时、重试和 fallback 策略统一收口在 backend 配置，并使用仓库内 `packages/ai-provider-runtime` 提供的 `@workspace-packages/ai-provider-runtime` 处理 key 路由与 fallback；真实非生产配置按 [REQ-PRJ-20260503-20] 集中留存在 `_workspace-base/env-for-workspace/`、远端服务器本地 env 或本机 ignored env
   - 预发布部署使用 `git archive` 只发布 `car` 仓库内容，因此 AI provider runtime 必须内聚到本仓 `packages/*` 并随部署先构建，不再依赖仓库外 `../_workspace-packages` 的 `file:` 链接
   - AI 客服当前只负责流程说明、材料说明、预约记录/进度引导；涉及订单异常、价格争议、资料缺失或人工诉求时，应允许升级到专业客服
 - 原因：项目已经先做了前端客服页面，现在把真实 AI 调用收口到 backend 和共享 runtime，可以避免供应商 key 暴露到前端，也能让 `car` 轻量复用 `koa-rent` 沉淀出的 AI provider 基础设施，而不是复制完整业务任务中心。
@@ -160,7 +170,7 @@
 - 状态：`accepted`
 - 优先级：`P1`
 - 决策：
-  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket；非生产真实值按 [REQ-PRJ-20260429-02] 和 [REQ-PRJ-20260429-03] 可进入项目 env 或 `_workspace-base` 的 `env-for-workspace` 集中凭据清单，明确生产 COS key 仍单独收紧
+  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket；非生产真实值按 [REQ-PRJ-20260503-20] 集中留存在 `_workspace-base/env-for-workspace/`、远端服务器本地 env 或本机 ignored env，明确生产 COS key 仍单独收紧
   - 若与其他项目共用 bucket，必须使用 `car-platform-*` 这类独立前缀，例如 `car-platform-dev/`、`car-platform-preprod/`、`car-platform-prod/`
   - `COS_BUCKET` 允许写桶名称本体并配套 `COS_APP_ID`，也兼容直接写带 `-AppId` 后缀的完整 bucket 名称
   - 对象存储隔离重点是项目级 `COS_UPLOAD_PREFIX`，多项目共用 bucket 时必须避免对象路径互相混淆
@@ -196,10 +206,10 @@
 - 原因：工作区已经把共享运维和共享模板收口到 `_workspace-base`，如果项目根 `AGENTS.md` 不显式接入，AI 在 `car` 里仍然容易只围着本仓自转，不知道什么时候该去看共享基座。显式声明后更有利于后续部署、COS、云资源和协作规则复用，也能减少项目边界跑偏。
 
 ### [REQ-PRJ-20260425-09] 预发布环境使用本地 `.env.preprod` 作为显式来源
-- 状态：`accepted`
+- 状态：`superseded by REQ-PRJ-20260503-20`
 - 优先级：`P1`
 - 决策：
-  - `apps/backend/.env.preprod` 是预发布环境变量的本地真实来源文件，可以提交 Git，默认保存真实非生产配置
+  - 历史口径：`apps/backend/.env.preprod` 是预发布环境变量的本地真实来源文件，可以提交 Git，默认保存真实非生产配置
   - `apps/backend/.env.local`、`.env.preprod` 等未明确标记生产的 env 默认可复用同一套非生产数据库服务、AI key、地图 key、COS key 与普通配置
   - `apps/backend/.env.preprod.example` 继续入 Git，用于说明变量清单；但真实非生产值不必只藏在 example 之外
   - `pnpm env:pull:preprod:backend` 从远端预发布 `.env.production.local` 拉取到本地 `.env.preprod`
@@ -207,19 +217,19 @@
 - 原因：预发布不是正式生产环境，按当前项目“小本生意、时间优先、减少无谓开发负担”的口径，非生产配置便捷优先、开箱即跑；不要因为大厂式密钥洁癖反复增加本地、联调和客户演示成本。
 
 ### [REQ-PRJ-20260429-01] 预发布环境必须同步 AI 客服配置
-- 状态：`accepted`
+- 状态：`superseded by REQ-PRJ-20260503-20`
 - 优先级：`P1`
 - 决策：
   - `apps/backend/.env.preprod` 作为预发布真实配置来源时，必须包含 AI 客服所需的 `AI_SUPPORT_*` 变量
   - `pnpm env:update:preprod:backend` 除地图与 COS 外，也要同步 `AI_SUPPORT_PROVIDER`、`AI_SUPPORT_BASE_URL`、`AI_SUPPORT_API_KEYS`、`AI_SUPPORT_MODEL` 等 AI 客服变量到远端预发布后端
-  - 非生产真实 key 可以保存在 `apps/backend/.env.preprod` 并提交 Git；只有明确生产环境或高权限生产 key 才默认不入仓库
+  - 历史口径：非生产真实 key 可以保存在 `apps/backend/.env.preprod` 并提交 Git；当前已改为按 [REQ-PRJ-20260503-20] 集中留存真实非生产 env
 - 原因：按 `_workspace-base` 非正式环境“便捷优先、变量清单明确”的口径，预发布应优先给客户完整体验；之前项目级同步脚本只同步地图/COS，导致 AI key 已在本地 `.env.preprod` 配好但不会推到远端。
 
 ### [REQ-PRJ-20260429-02] 非生产 env 默认通用并提交 Git
-- 状态：`accepted`
+- 状态：`superseded by REQ-PRJ-20260503-20`
 - 优先级：`P0`
 - 决策：
-  - 除用户明确说明是生产环境 env 外，其他 `.env.local`、`.env.dev`、`.env.test`、`.env.preprod`、`.env.staging` 默认都属于非生产配置，可以保存真实值并提交到私有 Git
+  - 历史口径：除用户明确说明是生产环境 env 外，其他 `.env.local`、`.env.dev`、`.env.test`、`.env.preprod`、`.env.staging` 默认都属于非生产配置，可以保存真实值并提交到私有 Git
   - 非生产配置可以通用复用，包括但不限于数据库服务、AI key、地图 key、COS key、短信/微信测试配置和普通业务配置
   - `.gitignore` 只默认排除 `.env.production*`、`.env.prod*` 等明确生产命名 env；不要再笼统忽略全部 `.env.*`
   - 后续 AI 代理遇到非生产 env 缺失、未提交或不同步时，默认直接补齐并提交，不再把“隐藏 key”作为默认正确做法
