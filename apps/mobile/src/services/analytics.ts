@@ -4,6 +4,7 @@ const DEVICE_ATTRIBUTION_STORAGE_KEY = "car_mobile_visitor_attribution";
 const DEVICE_ID_PREFIX = "car-";
 const ANALYTICS_APP = "car-mobile";
 const ANALYTICS_PROJECT = "car";
+const DEFAULT_ANALYTICS_ORIGIN = "https://find.lucasishere.top";
 const CAMPAIGN_QUERY_KEYS = new Set([
   "utm_source",
   "utm_medium",
@@ -102,7 +103,8 @@ function normalizeOrigin(value: unknown) {
 function getAnalyticsOrigin(env: AnalyticsEnv) {
   return (
     normalizeOrigin(env.VITE_CAR_ANALYTICS_ORIGIN) ||
-    normalizeOrigin(env.VITE_READ_FIND_SERVICE_ORIGIN)
+    normalizeOrigin(env.VITE_READ_FIND_SERVICE_ORIGIN) ||
+    DEFAULT_ANALYTICS_ORIGIN
   );
 }
 

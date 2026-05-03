@@ -84,6 +84,23 @@ describe("car mobile analytics", () => {
     });
   });
 
+  it("defaults production analytics to the shared find collector", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+
+    const sent = await trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {}, {
+      env: { MODE: "production" },
+      fetchImpl,
+      location: { hostname: "name10.lucasishere.top", pathname: "/customer", search: "" },
+      randomId: () => "device-1",
+      storage: createMemoryStorage(),
+    });
+
+    expect(sent).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledWith("https://find.lucasishere.top/collect", expect.objectContaining({
+      method: "POST",
+    }));
+  });
+
   it("marks first visits and records one page-stay event", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
     const listeners = new Map<string, Array<() => void>>();
