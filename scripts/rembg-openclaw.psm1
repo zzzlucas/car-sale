@@ -23,8 +23,12 @@ function Resolve-RembgOutputPath {
 function Get-RembgApiRemoveUrl {
   [CmdletBinding()]
   param(
-    [string]$ApiBaseUrl = 'http://100.98.52.104:17000'
+    [string]$ApiBaseUrl = $env:CAR_REMBG_API_BASE_URL
   )
+
+  if ([string]::IsNullOrWhiteSpace($ApiBaseUrl)) {
+    throw '缺少 ApiBaseUrl，请通过 -ApiBaseUrl 或 CAR_REMBG_API_BASE_URL 提供；真实值见 _workspace-base 运维文档。'
+  }
 
   $trimmed = $ApiBaseUrl.TrimEnd('/')
 
@@ -258,7 +262,7 @@ function Invoke-OpenClawRembg {
 
     [string]$OutputPath,
 
-    [string]$ApiBaseUrl = 'http://100.98.52.104:17000',
+    [string]$ApiBaseUrl = $env:CAR_REMBG_API_BASE_URL,
 
     [ValidateSet('auto', 'none', 'pngquant', 'magick')]
     [string]$CompressionMode = 'auto',
@@ -269,6 +273,10 @@ function Invoke-OpenClawRembg {
 
     [switch]$KeepRawOutput
   )
+
+  if ([string]::IsNullOrWhiteSpace($ApiBaseUrl)) {
+    throw '缺少 ApiBaseUrl，请通过 -ApiBaseUrl 或 CAR_REMBG_API_BASE_URL 提供；真实值见 _workspace-base 运维文档。'
+  }
 
   $resolvedInputPath = [System.IO.Path]::GetFullPath($InputPath)
   if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {

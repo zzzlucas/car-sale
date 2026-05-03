@@ -122,10 +122,10 @@ describe('resolveTiandituWebServiceConfig', () => {
   it('supports a browser referer for browser-side tianditu keys', () => {
     const config = resolveTiandituWebServiceConfig({
       TIANDITU_WEB_SERVICE_KEYS: 'key-a',
-      TIANDITU_WEB_SERVICE_REFERER: 'https://name10.lucasishere.top/',
+      TIANDITU_WEB_SERVICE_REFERER: 'https://car-preprod.example.invalid/',
     } as NodeJS.ProcessEnv);
 
-    expect(config.referer).toBe('https://name10.lucasishere.top/');
+    expect(config.referer).toBe('https://car-preprod.example.invalid/');
   });
 
   it('supports server-side tianditu key access mode', () => {
@@ -154,17 +154,17 @@ describe('resolveAmapWebServiceConfig', () => {
     const config = resolveAmapWebServiceConfig({
       MAP_SERVICE_PROVIDER: 'amap-proxy',
       AMAP_WEB_SERVICE_KEYS: 'key-a',
-      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap-proxy.example.invalid/_AMapService',
     } as NodeJS.ProcessEnv);
 
-    expect(config.proxyBaseUrl).toBe('https://amap.bangban.cc/_AMapService');
+    expect(config.proxyBaseUrl).toBe('https://amap-proxy.example.invalid/_AMapService');
   });
 
   it('disables seller proxy details in official amap mode', () => {
     const config = resolveAmapWebServiceConfig({
       MAP_SERVICE_PROVIDER: 'amap-official',
       AMAP_WEB_SERVICE_KEYS: 'key-a',
-      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap-proxy.example.invalid/_AMapService',
     } as NodeJS.ProcessEnv);
 
     expect(config.proxyBaseUrl).toBe('');
@@ -404,8 +404,9 @@ describe('AppMapService', () => {
     service.env = {
       MAP_SERVICE_PROVIDER: 'amap-proxy',
       AMAP_WEB_SERVICE_KEYS: 'key-a',
-      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
-      AMAP_WEB_SERVICE_PROXY_APPNAME: 'https%3A%2F%2Famap.bangban.cc%2Fdt.html',
+      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap-proxy.example.invalid/_AMapService',
+      AMAP_WEB_SERVICE_PROXY_APPNAME: 'https%3A%2F%2Famap-proxy.example.invalid%2Fdt.html',
+      AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH: 'com.example.car',
     } as NodeJS.ProcessEnv;
 
     await service.requestAmap(
@@ -420,7 +421,7 @@ describe('AppMapService', () => {
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     const [url, options] = mockedAxios.get.mock.calls[0];
-    expect(url).toBe('https://amap.bangban.cc/_AMapService/v3/place/text');
+    expect(url).toBe('https://amap-proxy.example.invalid/_AMapService/v3/place/text');
     expect(options?.params).toMatchObject({
       platform: 'JS',
       s: 'rsv3',
@@ -429,7 +430,7 @@ describe('AppMapService', () => {
       offset: '5',
     });
     expect(options?.headers).toMatchObject({
-      'X-Requested-With': 'com.bangban.cc',
+      'X-Requested-With': 'com.example.car',
     });
   });
 
@@ -449,7 +450,7 @@ describe('AppMapService', () => {
     service.env = {
       MAP_SERVICE_PROVIDER: 'amap-official',
       AMAP_WEB_SERVICE_KEYS: 'amap-official-key',
-      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+      AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap-proxy.example.invalid/_AMapService',
     } as NodeJS.ProcessEnv;
 
     const result = await service.reverseGeocode(113.366739, 23.128003);
@@ -525,7 +526,7 @@ describe('AppMapService', () => {
       service.env = {
         MAP_SERVICE_PROVIDER: 'amap-proxy',
         AMAP_WEB_SERVICE_KEYS: 'stale-proxy-key',
-        AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap.bangban.cc/_AMapService',
+        AMAP_WEB_SERVICE_PROXY_BASE_URL: 'https://amap-proxy.example.invalid/_AMapService',
       } as NodeJS.ProcessEnv;
 
       await service.reverseGeocode(113.366739, 23.128003);
@@ -555,7 +556,7 @@ describe('AppMapService', () => {
     service.env = {
       MAP_SERVICE_PROVIDER: 'tianditu',
       TIANDITU_WEB_SERVICE_KEYS: 'tdt-key-a',
-      TIANDITU_WEB_SERVICE_REFERER: 'https://name10.lucasishere.top/',
+      TIANDITU_WEB_SERVICE_REFERER: 'https://car-preprod.example.invalid/',
     } as NodeJS.ProcessEnv;
 
     await service.reverseGeocode(113.366739, 23.128003);
@@ -564,7 +565,7 @@ describe('AppMapService', () => {
       'https://api.tianditu.gov.cn/geocoder',
       expect.objectContaining({
         headers: expect.objectContaining({
-          Referer: 'https://name10.lucasishere.top/',
+          Referer: 'https://car-preprod.example.invalid/',
           'User-Agent': 'Mozilla/5.0',
         }),
       })

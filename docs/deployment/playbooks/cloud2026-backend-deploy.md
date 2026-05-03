@@ -9,7 +9,7 @@
 ## 当前已确认的基线
 
 - 目标主机：`cloud2026` / `cloud-panel-2026`
-- SSH：`ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238`
+- SSH：`ssh -i <SSH_KEY_PATH> <PREPROD_SSH_HOST>`
 - 推荐远端工作区目录：`/srv/apps/car-platform/app`
 - 推荐备份目录：`/srv/apps/car-platform/backups`
 - 推荐远端环境文件：`/srv/apps/car-platform/app/apps/backend/.env.production.local`
@@ -83,7 +83,7 @@ pnpm build:backend
 6. 登录 `cloud2026`，确认目标目录存在或准备创建：
 
 ```powershell
-ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
+ssh -i <SSH_KEY_PATH> <PREPROD_SSH_HOST>
 sudo mkdir -p /srv/apps/car-platform/app
 sudo mkdir -p /srv/apps/car-platform/backups
 ```
@@ -98,7 +98,7 @@ sudo mkdir -p /srv/apps/car-platform/backups
 
 ### 0. 优先使用项目根脚本入口
 
-当前 `name10.lucasishere.top` 按 `preprod` 管理。日常不再优先手敲 SSH 命令，而是从项目根运行：
+当前 `<PREPROD_DOMAIN>` 按 `preprod` 管理。日常不再优先手敲 SSH 命令，而是从项目根运行：
 
 ```powershell
 pnpm deploy:check:preprod
@@ -113,6 +113,8 @@ pnpm deploy:preprod:backend
 - `env:pull:preprod:backend`：从远端预发布 `.env.production.local` 拉取到本地 `apps/backend/.env.preprod`，只在本机保存真实值
 - `env:update:preprod:backend`：从本地 `apps/backend/.env.preprod` 同步地图 provider 变量到远端，并自动备份、重启、探活
 - `deploy:preprod:backend`：远端拉代码、安装依赖、构建后端、重启 PM2 并探活
+
+这些脚本不再在仓库内硬编码真实 SSH Host、SSH Key 路径和公网域名。运行时按以下顺序取值：命令参数 > 进程环境变量 > 本机忽略的 `.env.local` 中的 `CAR_PREPROD_*`。真实值继续从 `E:\web_work_-1\_workspace-base\ops` 获取。
 
 手工命令只作为脚本异常时的排障参考。
 

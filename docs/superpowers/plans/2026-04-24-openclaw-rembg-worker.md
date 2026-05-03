@@ -26,7 +26,7 @@ Run:
 ssh openclaw "hostname && whoami && uname -a"
 ```
 
-Result: 已确认别名可用，宿主为 `openclaw-srv`，用户 `lucas`，系统为 Ubuntu 24.04。
+Result: 已确认别名可用，宿主为 `<OPENCLAW_HOST_ALIAS>`，用户 `lucas`，系统为 Ubuntu 24.04。
 
 - [x] **Step 2: 检查磁盘与 CPU-only 运行前提**
 
@@ -46,7 +46,7 @@ Run:
 ssh openclaw "tailscale ip -4 || true"
 ```
 
-Result: 当前可通过 `100.98.52.104` 访问，不需要追加 FRP / DDNS / 公网直连。
+Result: 当前可通过 `<OPENCLAW_TAILSCALE_HOST>` 访问，不需要追加 FRP / DDNS / 公网直连。
 
 ### Task 2: 安装用户级 `rembg` 运行时
 
@@ -138,7 +138,7 @@ Result: 服务监听在当前 Tailscale IP 的 `17000` 端口。
 Run:
 
 ```powershell
-curl.exe -s --max-time 600 -F "file=@E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.png" "http://100.98.52.104:17000/api/remove" -o "E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png"
+curl.exe -s --max-time 600 -F "file=@.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.png" "http://<OPENCLAW_TAILSCALE_HOST>:17000/api/remove" -o ".temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png"
 ```
 
 Result: 样图成功返回透明 PNG 结果。
@@ -148,7 +148,7 @@ Result: 样图成功返回透明 PNG 结果。
 Run:
 
 ```powershell
-Add-Type -AssemblyName System.Drawing; $img=[System.Drawing.Image]::FromFile('E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png'); [PSCustomObject]@{Width=$img.Width;Height=$img.Height;PixelFormat=$img.PixelFormat.ToString();SizeKB=[math]::Round((Get-Item 'E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png').Length/1KB,1)}; $img.Dispose()
+Add-Type -AssemblyName System.Drawing; $img=[System.Drawing.Image]::FromFile('.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png'); [PSCustomObject]@{Width=$img.Width;Height=$img.Height;PixelFormat=$img.PixelFormat.ToString();SizeKB=[math]::Round((Get-Item '.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png').Length/1KB,1)}; $img.Dispose()
 ```
 
 Result: 当前验证样图输出为 `1122x1402`、`836.1 KB`、`Format32bppArgb`。
@@ -169,8 +169,8 @@ Document:
 - 运行宿主：openclaw
 - 访问方式：Tailscale
 - 工作目录：/mnt/ssd_data/car-tools/rembg
-- 服务入口：http://100.98.52.104:17000/api
-- 样图验证输出：E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png
+- 服务入口：http://<OPENCLAW_TAILSCALE_HOST>:17000/api
+- 样图验证输出：.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png
 ```
 
 - [x] **Step 2: 在需求记录与索引中登记长期约定**

@@ -5,7 +5,7 @@ param(
 
   [string]$OutputPath,
 
-  [string]$ApiBaseUrl = 'http://100.98.52.104:17000',
+  [string]$ApiBaseUrl = $env:CAR_REMBG_API_BASE_URL,
 
   [ValidateSet('auto', 'none', 'pngquant', 'magick')]
   [string]$CompressionMode = 'auto',
@@ -19,6 +19,10 @@ param(
 
 $modulePath = Join-Path $PSScriptRoot 'rembg-openclaw.psm1'
 Import-Module $modulePath -Force
+. (Join-Path $PSScriptRoot 'deploy/local-env.ps1')
+Import-CarLocalEnv -RepoRoot (Resolve-Path (Join-Path $PSScriptRoot '..'))
+
+$ApiBaseUrl = Resolve-CarSetting -CurrentValue $ApiBaseUrl -EnvName 'CAR_REMBG_API_BASE_URL' -Message '缺少 ApiBaseUrl'
 
 Invoke-OpenClawRembg `
   -InputPath $InputPath `

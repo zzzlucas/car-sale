@@ -1,15 +1,22 @@
-﻿#Requires -Version 5.1
+#Requires -Version 5.1
 [CmdletBinding()]
 param(
-    [string]$SshHost = 'ubuntu@124.222.31.238',
-    [string]$SshKey = 'C:/Users/Lucas/.ssh/id_ed25519',
-    [string]$RemoteAppDir = '/srv/apps/car-platform/app',
+    [string]$SshHost = $env:CAR_PREPROD_SSH_HOST,
+    [string]$SshKey = $env:CAR_PREPROD_SSH_KEY,
+    [string]$RemoteAppDir = $(if ($env:CAR_PREPROD_REMOTE_APP_DIR) { $env:CAR_PREPROD_REMOTE_APP_DIR } else { '/srv/apps/car-platform/app' }),
     [string]$Ref = 'HEAD',
     [switch]$Install
 )
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
+
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot '../..')
+. (Join-Path $PSScriptRoot 'local-env.ps1')
+Import-CarLocalEnv -RepoRoot $repoRoot
+
+$SshHost = Resolve-CarSetting -CurrentValue $SshHost -EnvName 'CAR_PREPROD_SSH_HOST' -Message '缺少 SshHost'
+$SshKey = Resolve-CarSetting -CurrentValue $SshKey -EnvName 'CAR_PREPROD_SSH_KEY' -Message '缺少 SshKey'
 
 function Invoke-RemoteScript {
     param([Parameter(Mandatory = $true)][string]$Script)

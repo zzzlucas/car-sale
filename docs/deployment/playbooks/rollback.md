@@ -42,7 +42,7 @@
 ### 列出后端备份
 
 ```powershell
-ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238 "ls -lt /srv/apps/car-platform/backups | head"
+ssh -i <SSH_KEY_PATH> <PREPROD_SSH_HOST> "ls -lt /srv/apps/car-platform/backups | head"
 ```
 
 ### 本地确认 H5 当前构建产物

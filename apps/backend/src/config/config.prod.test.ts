@@ -39,7 +39,7 @@ describe('backend production config env loading', () => {
   });
 
   it('reads database connection from explicit production env vars', () => {
-    process.env.DB_HOST = '124.222.31.238';
+    process.env.DB_HOST = '203.0.113.10';
     process.env.DB_PORT = '3306';
     process.env.DB_USERNAME = 'car_platform';
     process.env.DB_PASSWORD = 'from-prod-env';
@@ -60,7 +60,7 @@ describe('backend production config env loading', () => {
     };
 
     expect(dataSource).toMatchObject({
-      host: '124.222.31.238',
+      host: '203.0.113.10',
       port: 3306,
       username: 'car_platform',
       password: 'from-prod-env',
@@ -94,7 +94,7 @@ describe('backend production config env loading', () => {
   });
 
   it('fails fast when production DB_PASSWORD is missing', () => {
-    process.env.DB_HOST = '124.222.31.238';
+    process.env.DB_HOST = '203.0.113.10';
     process.env.DB_PORT = '3306';
     process.env.DB_USERNAME = 'car_platform';
     delete process.env.DB_PASSWORD;

@@ -21,8 +21,8 @@ export default {
     dataSource: {
       default: {
         type: 'mysql',
-        // 开发环境默认直连 cloud2026 的 1Panel MySQL，密码建议通过环境变量注入
-        host: process.env.DB_HOST || '124.222.31.238',
+        // 本地默认使用 localhost；远端开发库地址通过 .env.local 或进程环境变量注入
+        host: process.env.DB_HOST || '127.0.0.1',
         port: Number(process.env.DB_PORT || 3306),
         username: process.env.DB_USERNAME || 'car_platform',
         password: dbPassword,

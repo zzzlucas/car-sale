@@ -1,4 +1,3 @@
-const DEFAULT_ANALYTICS_ORIGIN = "https://find.lucasishere.top";
 const DEVICE_ID_STORAGE_KEY = "car_mobile_device_id";
 const DEVICE_FIRST_SEEN_STORAGE_KEY = "car_mobile_device_first_seen";
 const DEVICE_ATTRIBUTION_STORAGE_KEY = "car_mobile_visitor_attribution";
@@ -103,8 +102,7 @@ function normalizeOrigin(value: unknown) {
 function getAnalyticsOrigin(env: AnalyticsEnv) {
   return (
     normalizeOrigin(env.VITE_CAR_ANALYTICS_ORIGIN) ||
-    normalizeOrigin(env.VITE_READ_FIND_SERVICE_ORIGIN) ||
-    DEFAULT_ANALYTICS_ORIGIN
+    normalizeOrigin(env.VITE_READ_FIND_SERVICE_ORIGIN)
   );
 }
 

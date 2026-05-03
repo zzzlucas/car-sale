@@ -24,8 +24,8 @@ $expectedOutput = 'C:\work\sample.rembg.png'
 $actualOutput = Resolve-RembgOutputPath -InputPath 'C:\work\sample.png'
 Assert-Equal -Actual $actualOutput -Expected $expectedOutput -Message 'Default output path should stay beside the source file and append .rembg.png'
 
-$apiUrl = Get-RembgApiRemoveUrl -ApiBaseUrl 'http://100.98.52.104:17000'
-Assert-Equal -Actual $apiUrl -Expected 'http://100.98.52.104:17000/api/remove' -Message 'Base URL should expand to /api/remove automatically'
+$apiUrl = Get-RembgApiRemoveUrl -ApiBaseUrl 'http://rembg.example.invalid:17000'
+Assert-Equal -Actual $apiUrl -Expected 'http://rembg.example.invalid:17000/api/remove' -Message 'Base URL should expand to /api/remove automatically'
 
 $modeAuto = Resolve-RembgCompressionMode -RequestedMode 'auto' -AvailableCompressionTools @{
   pngquant = $false

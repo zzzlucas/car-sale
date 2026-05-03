@@ -1,26 +1,26 @@
-# `cloud2026` 预发布部署记录（`name10.lucasishere.top`）
+# `cloud2026` 预发布部署记录（`<PREPROD_DOMAIN>`）
 
 ## 目标
 
 - 时间：`2026-04-24`
 - 环境：`cloud2026` / `cloud-panel-2026`
-- 域名：`https://name10.lucasishere.top`
+- 域名：`<PREPROD_PUBLIC_BASE_URL>`
 - 本轮目标：把当前 `car` 工作区发布到同域预发布入口
 
 ## 本轮实际落点
 
-- 前端根站点：`https://name10.lucasishere.top/`
+- 前端根站点：`<PREPROD_PUBLIC_BASE_URL>/`
   - 当前入口资源：`/assets/index-C3dlUkJj.js`
-- 后台前端：`https://name10.lucasishere.top/admin/`
+- 后台前端：`<PREPROD_PUBLIC_BASE_URL>/admin/`
   - 当前入口资源：`/admin/assets/index-DCExsjn1.js`
-- 后端 API：`https://name10.lucasishere.top/api/`
+- 后端 API：`<PREPROD_PUBLIC_BASE_URL>/api/`
   - 反代到：`127.0.0.1:8120`
 - `pm2` 服务名：`car-platform-backend`
 
 ## 本轮远端动作
 
 - 代码工作区：`/srv/apps/car-platform/app`
-- 静态站点目录：`/srv/nginx/name10.lucasishere.top`
+- 静态站点目录：`<PREPROD_REMOTE_SITE_DIR>`
 - 远端依赖：重建了工作区 `node_modules`
 - 后端重启方式：`pnpm --filter @car/backend pm2:restart`
 - H5 构建参数：`VITE_API_BASE_URL=/api`
@@ -37,7 +37,7 @@
 
 - `pm2 ls` 显示 `car-platform-backend` 为 `online`
 - `curl http://127.0.0.1:8120/app/content/support` 返回 `200`
-- `curl https://name10.lucasishere.top/api/app/content/support` 返回 `200`
+- `curl <PREPROD_PUBLIC_BASE_URL>/api/app/content/support` 返回 `200`
 - 根站点和 `/admin/` 页面都已切到本轮产物入口
 
 ## 已确认问题
@@ -50,6 +50,6 @@
 - 如需回滚静态站点，优先恢复 `site-20260424-001107.tgz`
 - 如需回滚工作区源码，优先恢复 `source-20260424-001107.tgz`
 - 回滚后至少重新验证：
-  - `https://name10.lucasishere.top/`
-  - `https://name10.lucasishere.top/admin/`
-  - `https://name10.lucasishere.top/api/app/content/support`
+  - `<PREPROD_PUBLIC_BASE_URL>/`
+  - `<PREPROD_PUBLIC_BASE_URL>/admin/`
+  - `<PREPROD_PUBLIC_BASE_URL>/api/app/content/support`

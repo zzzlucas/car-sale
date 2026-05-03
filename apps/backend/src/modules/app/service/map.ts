@@ -11,10 +11,10 @@ const TIANDITU_SERVER_PROXY_PATH = '/apiserver/ajaxproxy';
 const DEFAULT_TIMEOUT_MS = 2500;
 const DEFAULT_OFFSET = 5;
 const DEFAULT_TIANDITU_REFERER = 'http://localhost:6173/';
-const DEFAULT_PROXY_APPNAME = 'https%3A%2F%2Famap.bangban.cc%2Fdt.html';
+const DEFAULT_PROXY_APPNAME = '';
 const DEFAULT_PROXY_CALLBACK = 'jsonp_test';
-const DEFAULT_PROXY_REFERER = 'https://amap.bangban.cc/dt.html';
-const DEFAULT_PROXY_X_REQUESTED_WITH = 'com.bangban.cc';
+const DEFAULT_PROXY_REFERER = '';
+const DEFAULT_PROXY_X_REQUESTED_WITH = '';
 
 const KEY_POOL_ERROR_CODES = new Set([
   '10001',

@@ -6,7 +6,7 @@
 
 ## 背景
 
-当前高德中转站链路返回 `INVALID_USER_DOMAIN / 10006`，说明 `key + amap.bangban.cc/_AMapService + JS 来源上下文` 组合不可用。为了降低对单一卖家中转站的依赖，后端地图服务需要支持另一个 provider。
+当前高德中转站链路返回 `INVALID_USER_DOMAIN / 10006`，说明 `key + <AMAP_PROXY_HOST>/_AMapService + JS 来源上下文` 组合不可用。为了降低对单一卖家中转站的依赖，后端地图服务需要支持另一个 provider。
 
 ## 配置
 

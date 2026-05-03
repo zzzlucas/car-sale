@@ -7,14 +7,14 @@
 - 资源主名：`cloud-panel-2026`
 - 兼容叫法：`cloud2026`、`cloud-238`
 - SSH 用户：`ubuntu`
-- 公网 IP：`124.222.31.238`
+- 公网 IP：真实值见 `E:\web_work_-1\_workspace-base\ops`
 - 系统：`Ubuntu 24.04.4 LTS`
 - Docker：`29.4.0`
 - 1Panel：`v2.1.8`
 - SSH 方式：
 
 ```powershell
-ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
+ssh -i <SSH_KEY_PATH> <PREPROD_SSH_HOST>
 ```
 
 这里保留 SSH 信息只是为了远端运维与只读核验；本项目日常开发联调不依赖 SSH 隧道。
@@ -102,7 +102,7 @@ ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
 
 当前项目已经按“直连公网 `3306`”的开发方式验证通过，本地后端可直接使用：
 
-- Host：`124.222.31.238`
+- Host：`<PREPROD_SERVER_HOST>`
 - Port：`3306`
 - Database：`car_platform`
 - Username：`car_platform`
@@ -111,14 +111,14 @@ ssh -i C:/Users/Lucas/.ssh/id_ed25519 ubuntu@124.222.31.238
 
 - 已在 `1Panel MySQL` 中创建 `car_platform` 数据库
 - 已创建专用开发用户 `car_platform`
-- 已验证本机可直接连 `124.222.31.238:3306`
+- 已验证本机可直接连 `<PREPROD_SERVER_HOST>:3306`
 - 已验证 `apps/backend` 可在该数据库上启动并返回接口
 
 ## 本地开发如何连接远端 MySQL
 
-本地开发默认直接连：
+本地开发如果要复用远端开发库，可按内部运维文档中的主机信息直连：
 
-- Host：`124.222.31.238`
+- Host：`<PREPROD_SERVER_HOST>`
 - Port：`3306`
 - Database：`car_platform`
 - Username：`car_platform`
@@ -149,11 +149,11 @@ DB_PASSWORD=<开发库密码>
 
 ## 对本项目代码的影响
 
-当前仓库里的 `apps/backend/src/config/config.local.ts` 已调整为默认走直连 `cloud2026:3306` 配置。
+当前仓库里的 `apps/backend/src/config/config.local.ts` 默认使用 `127.0.0.1:3306`，远端开发库地址通过本机 `.env.local` 或进程环境变量注入。
 
-当前默认值为：
+当前推荐的远端开发库覆盖值为：
 
-- host：`124.222.31.238`
+- host：真实值见 `E:\web_work_-1\_workspace-base\ops`
 - port：`3306`
 - username：`car_platform`
 - database：`car_platform`

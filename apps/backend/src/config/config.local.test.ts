@@ -4,7 +4,19 @@ import * as path from 'path';
 describe('backend local config env loading', () => {
   const repoRoot = path.resolve(__dirname, '../../../../');
   const rootEnvLocalPath = path.join(repoRoot, '.env.local');
+  const appEnvLocalPath = path.join(repoRoot, 'apps/backend/.env.local');
   const originalDbPassword = process.env.DB_PASSWORD;
+  let originalRootEnvLocal: string | null = null;
+  let originalAppEnvLocal: string | null = null;
+
+  beforeEach(() => {
+    originalRootEnvLocal = fs.existsSync(rootEnvLocalPath)
+      ? fs.readFileSync(rootEnvLocalPath, 'utf8')
+      : null;
+    originalAppEnvLocal = fs.existsSync(appEnvLocalPath)
+      ? fs.readFileSync(appEnvLocalPath, 'utf8')
+      : null;
+  });
 
   afterEach(() => {
     jest.resetModules();
@@ -15,14 +27,23 @@ describe('backend local config env loading', () => {
       process.env.DB_PASSWORD = originalDbPassword;
     }
 
-    if (fs.existsSync(rootEnvLocalPath)) {
-      fs.rmSync(rootEnvLocalPath);
+    if (originalRootEnvLocal === null) {
+      fs.rmSync(rootEnvLocalPath, { force: true });
+    } else {
+      fs.writeFileSync(rootEnvLocalPath, originalRootEnvLocal);
+    }
+
+    if (originalAppEnvLocal === null) {
+      fs.rmSync(appEnvLocalPath, { force: true });
+    } else {
+      fs.writeFileSync(appEnvLocalPath, originalAppEnvLocal);
     }
   });
 
   it('loads DB_PASSWORD from the repo .env.local when process env is absent', () => {
     delete process.env.DB_PASSWORD;
     fs.writeFileSync(rootEnvLocalPath, 'DB_PASSWORD=from-root-env-local\n');
+    fs.rmSync(appEnvLocalPath, { force: true });
 
     let config: typeof import('./config.local').default;
 
@@ -39,6 +60,7 @@ describe('backend local config env loading', () => {
   it('keeps the explicit process env password when one is already provided', () => {
     process.env.DB_PASSWORD = 'from-process-env';
     fs.writeFileSync(rootEnvLocalPath, 'DB_PASSWORD=from-root-env-local\n');
+    fs.rmSync(appEnvLocalPath, { force: true });
 
     let config: typeof import('./config.local').default;
 
@@ -52,8 +74,9 @@ describe('backend local config env loading', () => {
     expect(password).toBe('from-process-env');
   });
 
-  it('uses bounded keepalive database connections for remote local MySQL', () => {
+  it('uses bounded keepalive database connections for local MySQL', () => {
     process.env.DB_PASSWORD = 'from-process-env';
+    fs.rmSync(appEnvLocalPath, { force: true });
 
     let config: typeof import('./config.local').default;
 
@@ -75,6 +98,8 @@ describe('backend local config env loading', () => {
 
   it('fails fast with a clear error when DB_PASSWORD is still missing', () => {
     delete process.env.DB_PASSWORD;
+    fs.rmSync(rootEnvLocalPath, { force: true });
+    fs.rmSync(appEnvLocalPath, { force: true });
 
     expect(() => {
       jest.isolateModules(() => {

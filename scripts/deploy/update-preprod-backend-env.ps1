@@ -1,9 +1,9 @@
-﻿#Requires -Version 5.1
+#Requires -Version 5.1
 [CmdletBinding()]
 param(
-    [string]$SshHost = 'ubuntu@124.222.31.238',
-    [string]$SshKey = 'C:/Users/Lucas/.ssh/id_ed25519',
-    [string]$RemoteAppDir = '/srv/apps/car-platform/app',
+    [string]$SshHost = $env:CAR_PREPROD_SSH_HOST,
+    [string]$SshKey = $env:CAR_PREPROD_SSH_KEY,
+    [string]$RemoteAppDir = $(if ($env:CAR_PREPROD_REMOTE_APP_DIR) { $env:CAR_PREPROD_REMOTE_APP_DIR } else { '/srv/apps/car-platform/app' }),
     [string]$LocalEnvPath = 'apps/backend/.env.preprod',
     [switch]$SkipAmapKeys,
     [switch]$NoRestart
@@ -11,6 +11,13 @@ param(
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
+
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot '../..')
+. (Join-Path $PSScriptRoot 'local-env.ps1')
+Import-CarLocalEnv -RepoRoot $repoRoot
+
+$SshHost = Resolve-CarSetting -CurrentValue $SshHost -EnvName 'CAR_PREPROD_SSH_HOST' -Message '缺少 SshHost'
+$SshKey = Resolve-CarSetting -CurrentValue $SshKey -EnvName 'CAR_PREPROD_SSH_KEY' -Message '缺少 SshKey'
 
 function Read-EnvFile {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -72,7 +79,7 @@ if (-not [string]::IsNullOrWhiteSpace($tiandituKeys) -and $tiandituKeys -notlike
 $tiandituDefaults = [ordered]@{
     TIANDITU_WEB_SERVICE_TIMEOUT_MS = '2500'
     TIANDITU_WEB_SERVICE_ACCESS = 'browser'
-    TIANDITU_WEB_SERVICE_REFERER = 'https://name10.lucasishere.top/'
+    TIANDITU_WEB_SERVICE_REFERER = $(if ($env:CAR_PREPROD_PUBLIC_BASE_URL) { $env:CAR_PREPROD_PUBLIC_BASE_URL } else { '' })
 }
 
 foreach ($entry in $tiandituDefaults.GetEnumerator()) {
@@ -95,11 +102,11 @@ if (($mapProvider -eq 'amap' -or $mapProvider -eq 'amap-proxy' -or $mapProvider 
 
 $proxyDefaults = [ordered]@{
     AMAP_WEB_SERVICE_TIMEOUT_MS = '2500'
-    AMAP_WEB_SERVICE_PROXY_BASE_URL = 'https://amap.bangban.cc/_AMapService'
-    AMAP_WEB_SERVICE_PROXY_APPNAME = 'https%3A%2F%2Famap.bangban.cc%2Fdt.html'
+    AMAP_WEB_SERVICE_PROXY_BASE_URL = ''
+    AMAP_WEB_SERVICE_PROXY_APPNAME = ''
     AMAP_WEB_SERVICE_PROXY_CALLBACK = 'jsonp_test'
-    AMAP_WEB_SERVICE_PROXY_REFERER = 'https://amap.bangban.cc/dt.html'
-    AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH = 'com.bangban.cc'
+    AMAP_WEB_SERVICE_PROXY_REFERER = ''
+    AMAP_WEB_SERVICE_PROXY_X_REQUESTED_WITH = ''
 }
 
 foreach ($entry in $proxyDefaults.GetEnumerator()) {

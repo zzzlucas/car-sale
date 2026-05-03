@@ -53,7 +53,7 @@ rg -n "127.0.0.1:8001" .\apps\mobile\dist
 
 - 预发布根站点发布入口使用 `pnpm deploy:preprod:mobile`
 - 项目整体预发布入口使用 `pnpm deploy:preprod`，会先发布 backend，再发布 `apps/mobile` H5 静态产物
-- `apps/mobile/dist` 仍是唯一上线产物，脚本会以 `VITE_API_BASE_URL=/api` 构建后同步到 `/srv/nginx/name10.lucasishere.top`
+- `apps/mobile/dist` 仍是唯一上线产物，脚本会以 `VITE_API_BASE_URL=/api` 构建后同步到 `<PREPROD_REMOTE_SITE_DIR>`
 - 本轮如果只是先交付测试包或给云端静态站上传，至少也要记录：
   - 发布到哪
   - 用的 API 地址是什么

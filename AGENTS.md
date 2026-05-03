@@ -8,7 +8,7 @@
 - Current shared packages: `packages/shared-types`, `packages/ai-provider-runtime`
 - Planned shared packages: `packages/api-sdk`, `packages/shared-utils`
 - Current stage: 首期工程已启动，当前真实落地以 `apps/mobile + apps/backend + packages/shared-types` 为准；`admin-web` 和更多共享层仍属于后续扩展
-- Design references: `E:\web_work_-1\car\.temp\stitch_`
+- Design references: `.temp\stitch_`
 - Docs entry: `docs/README.md`
 - Package manager target: `pnpm`
 

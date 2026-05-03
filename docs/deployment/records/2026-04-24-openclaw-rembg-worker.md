@@ -3,14 +3,14 @@
 ## 目标
 
 - 时间：`2026-04-24`
-- 宿主：`openclaw` / `openclaw-srv`
+- 宿主：`openclaw` / `<OPENCLAW_HOST_ALIAS>`
 - 访问方式：`Tailscale` 虚拟局域网
 - 本轮目标：把 `car` 项目的图片抠图能力落到 `openclaw`，形成一个仅内网可访问的 CPU-only `rembg` 常驻工作器
 
 ## 本轮实际落点
 
-- 服务文档入口：`http://100.98.52.104:17000/api`
-- 实际处理接口：`http://100.98.52.104:17000/api/remove`
+- 服务文档入口：`http://<OPENCLAW_TAILSCALE_HOST>:17000/api`
+- 实际处理接口：`http://<OPENCLAW_TAILSCALE_HOST>:17000/api/remove`
 - 工作目录：`/mnt/ssd_data/car-tools/rembg`
 - 输入目录：`/mnt/ssd_data/car-tools/rembg/input`
 - 输出目录：`/mnt/ssd_data/car-tools/rembg/output`
@@ -46,12 +46,12 @@
 
 - 服务状态：
   - `status-rembg.sh` 返回 `running pid=4134873`
-  - `ss -ltnp '( sport = :17000 )'` 显示 `100.98.52.104:17000` 正在监听
+  - `ss -ltnp '( sport = :17000 )'` 显示 `<OPENCLAW_TAILSCALE_HOST>:17000` 正在监听
 - API 入口：
-  - `curl http://100.98.52.104:17000/api` 返回 `200`
+  - `curl http://<OPENCLAW_TAILSCALE_HOST>:17000/api` 返回 `200`
 - 样图端到端验证：
-  - 输入文件：`E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.png`
-  - 输出文件：`E:\web_work_-1\car\.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png`
+  - 输入文件：`.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.png`
+  - 输出文件：`.temp\gpt-image-2\c1c9458d-817a-438b-af91-e50c11897dfa.verify.rembg.png`
   - 输出尺寸：`1122 x 1402`
   - 输出像素格式：`Format32bppArgb`
   - 输出体积：`836.1 KB`
