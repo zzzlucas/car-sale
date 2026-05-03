@@ -19,6 +19,7 @@
 - 想看暂不立刻推进的小需求、优化想法和技术债候选：`backlog.md`
 - 想看开发约定：`development/workflow.md`
 - 想看接口口径：`development/api-conventions.md`
+- 想把仓库挂到公开 GitHub 做外部评审或 token 申请：`development/public-github-snapshot.md`
 - 想看 `cloud2026` 与远端 MySQL 约定：`deployment/cloud2026.md`
 - 想看腾讯云 COS 接入约定：`deployment/tencent-cos.md`
 - 想看项目级部署与回滚手册：`deployment/playbooks/README.md`

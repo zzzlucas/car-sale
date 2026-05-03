@@ -6,6 +6,17 @@
 
 ## 当前活跃需求
 
+### [REQ-PRJ-20260503-19] 公开 GitHub 快照不得包含真实 env
+- 状态：`accepted`
+- 优先级：`P0`
+- 决策：
+  - 当仓库、分支、压缩包或项目链接会提交给外部活动、供应商、评审或公开 GitHub 时，必须切换到公开快照口径：只保留代码、文档和 env example 模板，不包含任何真实 `.env` 文件
+  - `.env`、`.env.local`、`.env.preprod`、`.env.production.local` 及 `apps/**` 下对应真实 env 默认不进入公开 GitHub；`.env.example`、`apps/**/.env.example`、`apps/**/.env.*.example` 继续保留
+  - 私有开发协作中的非生产便捷口径仍可作为本地或私有仓库策略；但公开外发场景优先级更高，非生产 key、数据库密码、地图 key、COS key 和 AI provider key 都按敏感信息处理
+  - 若真实 env 曾进入 Git 历史，公开时优先使用无历史快照、orphan 分支或新公开仓库，不直接公开原历史
+  - 公开前以 `git ls-files "*.env*"` 做最小检查，结果应只剩 example 模板
+- 原因：本项目现在需要把 GitHub 链接提交给外部活动申请赠送 token。活动审核只需要看到项目代码和配置清单，不需要真实非生产凭据；把真实 env 从公开快照中剥离可以降低密钥、数据库和对象存储误暴露风险，同时不影响本地继续用真实 env 开发。
+
 ### [REQ-PRJ-20260429-18] 客户 H5 埋点先复用采集协议，但保持 `car` 独立命名空间
 - 状态：`accepted`
 - 优先级：`P1`

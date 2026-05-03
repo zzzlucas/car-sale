@@ -6,6 +6,7 @@
 `- [REQ-ID] | title | scope:project | priority:P0/P1/P2 | status:* | tags:a,b,c | updated:YYYY-MM-DD`
 
 ## Active
+- [REQ-PRJ-20260503-19] | 公开 GitHub 快照不得包含真实 env | scope:project | priority:P0 | status:accepted | tags:env,secrets,github,public-review | updated:2026-05-03
 - [REQ-PRJ-20260429-03] | `car` 重新接入 `_workspace-base` 最新共享口径 | scope:project | priority:P0 | status:accepted | tags:agents,workspace-base,env,providers,database | updated:2026-04-29
 - [REQ-PRJ-20260429-02] | 非生产 env 默认通用并提交 Git | scope:project | priority:P0 | status:accepted | tags:env,secrets,preprod,developer-experience | updated:2026-04-29
 - [REQ-PRJ-20260429-01] | 预发布环境必须同步 AI 客服配置 | scope:project | priority:P1 | status:accepted | tags:env,preprod,ai-support,secrets | updated:2026-04-29
