@@ -160,7 +160,7 @@
 - 状态：`accepted`
 - 优先级：`P1`
 - 决策：
-  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket；非生产真实值按 [REQ-PRJ-20260429-02] 和 [REQ-PRJ-20260429-03] 可进入项目 env 或 `_workspace-base` 的 `resources-ai` 集中凭据清单，明确生产 COS key 仍单独收紧
+  - `car` 项目可复用现有腾讯云账号或同一个 COS bucket；非生产真实值按 [REQ-PRJ-20260429-02] 和 [REQ-PRJ-20260429-03] 可进入项目 env 或 `_workspace-base` 的 `env-for-workspace` 集中凭据清单，明确生产 COS key 仍单独收紧
   - 若与其他项目共用 bucket，必须使用 `car-platform-*` 这类独立前缀，例如 `car-platform-dev/`、`car-platform-preprod/`、`car-platform-prod/`
   - `COS_BUCKET` 允许写桶名称本体并配套 `COS_APP_ID`，也兼容直接写带 `-AppId` 后缀的完整 bucket 名称
   - 对象存储隔离重点是项目级 `COS_UPLOAD_PREFIX`，多项目共用 bucket 时必须避免对象路径互相混淆
@@ -230,7 +230,7 @@
 - 优先级：`P0`
 - 决策：
   - `car` 根 `AGENTS.md` 显式参考 `E:\web_work_-1\_workspace-base\AGENTS.md`、`agents/AGENTS-baseline.md` 和 `docs/how-projects-use-workspace-base.md`
-  - 需要 AI 可直接复用的 MVP/demo/非生产 key、密码和供应商配置片段时，优先参考 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\nonprod-shared-credentials.md`
+  - 需要 AI 可直接复用的 MVP/demo/非生产 key、密码和供应商配置片段时，优先参考 `E:\web_work_-1\_workspace-base\env-for-workspace\shared\nonprod-shared-credentials.md`
   - 需要真人快速确认共享端口、DNS、COS 等资源台账时，优先参考 `E:\web_work_-1\_workspace-base\ops\docs\_resources-developer`
   - `car` 的开发、预发布、甲方 demo 默认可以共用同一个非生产数据库；只有进入正式 production、长期试用、真实敏感数据承载或高风险业务流转时，再拆分独立生产资源
   - 常用能力供应商继续按共享基座候选收口：AI 优先 `SiliconFlow` 或 `sub2api`，地图优先高德 backend 代理，存储优先本地或腾讯云 COS

@@ -145,7 +145,7 @@ pnpm dev:backend
 DB_PASSWORD=<开发库密码>
 ```
 
-仓库根目录 `.env.local` 不再要求保留；预发布部署脚本需要的 `CAR_PREPROD_*` 真实值集中读取 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\car-preprod-env.md`。
+仓库根目录 `.env.local` 不再要求保留；预发布部署脚本需要的 `CAR_PREPROD_*` 真实值集中读取 `E:\web_work_-1\_workspace-base\env-for-workspace\projects\car-preprod-env.md`。
 
 如果使用 IDE 运行配置，也仍然可以直接注入 `DB_PASSWORD`；显式注入的进程环境变量优先级高于 `.env` 文件。
 

@@ -114,7 +114,7 @@ pnpm deploy:preprod:backend
 - `env:update:preprod:backend`：从本地 `apps/backend/.env.preprod` 同步地图 provider 变量到远端，并自动备份、重启、探活
 - `deploy:preprod:backend`：远端拉代码、安装依赖、构建后端、重启 PM2 并探活
 
-这些脚本不再在仓库内硬编码真实 SSH Host、SSH Key 路径和公网域名。运行时按以下顺序取值：命令参数 > 进程环境变量 > `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\car-preprod-env.md`。仓库根目录不再要求保留 `.env.local`。
+这些脚本不再在仓库内硬编码真实 SSH Host、SSH Key 路径和公网域名。运行时按以下顺序取值：命令参数 > 进程环境变量 > `E:\web_work_-1\_workspace-base\env-for-workspace\projects\car-preprod-env.md`。仓库根目录不再要求保留 `.env.local`。
 
 手工命令只作为脚本异常时的排障参考。
 

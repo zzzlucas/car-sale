@@ -5,7 +5,7 @@ function Import-CarLocalEnv {
         [string]$RepoRoot
     )
 
-    $workspaceBaseEnvPath = Join-Path (Split-Path -Parent $RepoRoot) '_workspace-base\ops\docs\resources-ai\car-preprod-env.md'
+    $workspaceBaseEnvPath = Join-Path (Split-Path -Parent $RepoRoot) '_workspace-base\env-for-workspace\projects\car-preprod-env.md'
     $legacyLocalEnvPath = Join-Path $RepoRoot '.env.local'
     $sourcePaths = @($workspaceBaseEnvPath, $legacyLocalEnvPath)
 
@@ -52,5 +52,5 @@ function Resolve-CarSetting {
         return $envValue
     }
 
-    throw "$Message；请通过参数、$EnvName 或 _workspace-base 的 car-preprod-env.md 提供。"
+    throw "$Message；请通过参数、$EnvName 或 _workspace-base\env-for-workspace\projects\car-preprod-env.md 提供。"
 }
