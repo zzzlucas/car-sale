@@ -11,7 +11,7 @@
 - 优先级：`P0`
 - 决策：
   - 当仓库、分支、压缩包或项目链接会提交给外部活动、供应商、评审或公开 GitHub 时，必须切换到公开快照口径：只保留代码、文档和 env example 模板，不包含任何真实 `.env` 文件
-  - `.env`、`.env.local`、`.env.preprod`、`.env.production.local` 及 `apps/**` 下对应真实 env 默认不进入公开 GitHub；`.env.example`、`apps/**/.env.example`、`apps/**/.env.*.example` 继续保留
+  - `.env`、`.env.local`、`.env.preprod`、`.env.production.local` 及 `apps/**` 下对应真实 env 默认不进入公开 GitHub；当前默认只保留 `apps/**/.env.example`、`apps/**/.env.*.example`，不再维护仓库根目录 `.env.example`
   - 私有开发协作中的非生产便捷口径仍可作为本地或私有仓库策略；但公开外发场景优先级更高，非生产 key、数据库密码、地图 key、COS key 和 AI provider key 都按敏感信息处理
   - 若真实 env 曾进入 Git 历史，公开时优先使用无历史快照、orphan 分支或新公开仓库，不直接公开原历史
   - 公开前以 `git ls-files "*.env*"` 做最小检查，结果应只剩 example 模板

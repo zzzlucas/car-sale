@@ -27,7 +27,6 @@
 
 公开仓库可以保留以下模板：
 
-- `.env.example`
 - `apps/**/.env.example`
 - `apps/**/.env.*.example`
 - 文档里的变量名、用途说明和占位值
