@@ -505,9 +505,15 @@ function attachPageStayTracker(options: InitCarAnalyticsOptions = {}) {
 
     sent = true;
     const durationMs = Math.max(0, (options.now?.() ?? Date.now()) - startedAt);
+    const durationSeconds = Math.round(durationMs / 1000);
     void trackCarEvent(CAR_ANALYTICS_EVENTS.pageStay, {
       durationMs,
-      durationSeconds: Math.round(durationMs / 1000),
+      durationSeconds,
+      visibleDurationMs: durationMs,
+      visibleDurationSeconds: durationSeconds,
+      durationBasis: "foreground_visible",
+      stayEndReason: reason,
+      isFinalLikely: reason === "pagehide" || reason === "beforeunload",
       reason,
     }, options);
   };

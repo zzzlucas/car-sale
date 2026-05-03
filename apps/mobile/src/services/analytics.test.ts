@@ -131,7 +131,18 @@ describe("car mobile analytics", () => {
     });
     expect(JSON.parse(fetchImpl.mock.calls[1][1].body)).toMatchObject({
       t: CAR_ANALYTICS_EVENTS.pageStay,
-      p: { app: "car-mobile", reason: "pagehide", project: "car" },
+      p: {
+        app: "car-mobile",
+        durationBasis: "foreground_visible",
+        durationMs: 10_000,
+        durationSeconds: 10,
+        isFinalLikely: true,
+        project: "car",
+        reason: "pagehide",
+        stayEndReason: "pagehide",
+        visibleDurationMs: 10_000,
+        visibleDurationSeconds: 10,
+      },
     });
   });
 
