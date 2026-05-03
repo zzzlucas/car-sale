@@ -19,6 +19,7 @@
 - 需要共享服务器事实、共享脚本、共享网络边界或跨项目运维规则时，优先看 `E:\web_work_-1\_workspace-base\ops\README.md`。
 - 需要判断共享层和项目层怎么分工时，优先看 `E:\web_work_-1\_workspace-base\docs\how-projects-use-workspace-base.md`。
 - 需要给 AI 直接复用的 MVP/demo/非生产 key、密码、供应商配置片段时，优先看 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\nonprod-shared-credentials.md`。
+- 需要 `car` 预发布部署脚本使用的 `CAR_PREPROD_*`、`CAR_REMBG_API_BASE_URL` 等本机 ignored env 真实值时，优先看 `E:\web_work_-1\_workspace-base\ops\docs\resources-ai\car-preprod-env.md`。
 - 需要真人快速确认共享端口、DNS、COS 等资源台账时，优先看 `E:\web_work_-1\_workspace-base\ops\docs\_resources-developer`。
 
 ## Communication
