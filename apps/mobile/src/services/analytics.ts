@@ -85,6 +85,9 @@ export const CAR_ANALYTICS_EVENTS = {
   valuationFormStart: 5113,
   quickExit: 5114,
   ctaClick: 5115,
+  sourceViewAttempt: 5116,
+  savePageAttempt: 5117,
+  devtoolsShortcut: 5118,
 } as const;
 
 const QUICK_EXIT_THRESHOLD_MS = 3_000;
@@ -607,6 +610,65 @@ function attachEngagementTracker(options: InitCarAnalyticsOptions = {}) {
   windowRef.addEventListener("beforeunload", () => sendQuickExit("beforeunload"));
 }
 
+function attachCopyRiskTracker(options: InitCarAnalyticsOptions = {}) {
+  const windowRef = options.windowRef ?? (typeof window !== "undefined" ? window : null);
+
+  if (!windowRef) {
+    return;
+  }
+
+  const reportedSignals = new Set<string>();
+  const sendCopyRiskSignal = (eventType: number, copyRiskSignal: string, payload: Record<string, unknown>) => {
+    if (reportedSignals.has(copyRiskSignal)) {
+      return;
+    }
+
+    reportedSignals.add(copyRiskSignal);
+    void trackCarEvent(eventType, {
+      ...payload,
+      copyRiskSignal,
+      intentSignal: "copy_research",
+    }, options);
+  };
+
+  windowRef.addEventListener("keydown", (event: KeyboardEvent) => {
+    const key = String(event.key || "").toLowerCase();
+    const shortcut = [
+      event.ctrlKey ? "Ctrl" : "",
+      event.metaKey ? "Meta" : "",
+      event.shiftKey ? "Shift" : "",
+      event.altKey ? "Alt" : "",
+      event.key || "",
+    ].filter(Boolean).join("+");
+
+    if ((event.ctrlKey || event.metaKey) && key === "u") {
+      sendCopyRiskSignal(CAR_ANALYTICS_EVENTS.sourceViewAttempt, "source_view_shortcut", {
+        shortcut,
+        copyRiskReason: "source_view_shortcut",
+      });
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && key === "s") {
+      sendCopyRiskSignal(CAR_ANALYTICS_EVENTS.savePageAttempt, "save_page_shortcut", {
+        shortcut,
+        copyRiskReason: "save_page_shortcut",
+      });
+      return;
+    }
+
+    if (
+      key === "f12" ||
+      ((event.ctrlKey || event.metaKey) && event.shiftKey && ["i", "j", "c"].includes(key))
+    ) {
+      sendCopyRiskSignal(CAR_ANALYTICS_EVENTS.devtoolsShortcut, "devtools_shortcut", {
+        shortcut,
+        copyRiskReason: "devtools_shortcut",
+      });
+    }
+  });
+}
+
 export function initCarAnalytics(options: InitCarAnalyticsOptions = {}) {
   const documentRef = options.documentRef ?? (typeof document !== "undefined" ? document : null);
   const entryAt = options.now?.() ?? Date.now();
@@ -614,6 +676,7 @@ export function initCarAnalytics(options: InitCarAnalyticsOptions = {}) {
   const sessionOptions = { ...options, sessionId } as InitCarAnalyticsOptions & { sessionId: string };
   attachPageStayTracker(sessionOptions);
   attachEngagementTracker(sessionOptions);
+  attachCopyRiskTracker(sessionOptions);
 
   return trackCarEvent(CAR_ANALYTICS_EVENTS.pageView, {
     entryAt,

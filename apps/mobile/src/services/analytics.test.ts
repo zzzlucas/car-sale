@@ -183,6 +183,46 @@ describe("car mobile analytics", () => {
     expect(fetchImpl.mock.calls.map(call => JSON.parse(call[1].body).t)).not.toContain(CAR_ANALYTICS_EVENTS.quickExit);
   });
 
+  it("records technical copy-risk shortcut signals once per session", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+    const listeners = new Map<string, Array<(event?: Partial<KeyboardEvent>) => void>>();
+    const addListener = (event: string, listener: (event?: Partial<KeyboardEvent>) => void) => {
+      listeners.set(event, [...(listeners.get(event) ?? []), listener]);
+    };
+
+    await initCarAnalytics({
+      documentRef: {
+        title: "报废车预约平台",
+        visibilityState: "visible",
+        addEventListener: vi.fn(),
+      },
+      env: { VITE_CAR_ANALYTICS_ENABLE_LOCAL: "true" },
+      fetchImpl,
+      location: { hostname: "localhost", pathname: "/customer", search: "" },
+      now: () => 1_700_000_000_000,
+      randomId: () => "device-1",
+      storage: createMemoryStorage(),
+      windowRef: { addEventListener: vi.fn(addListener) },
+    });
+
+    listeners.get("keydown")?.forEach(listener => listener({ ctrlKey: true, key: "u" }));
+    listeners.get("keydown")?.forEach(listener => listener({ ctrlKey: true, key: "u" }));
+    listeners.get("keydown")?.forEach(listener => listener({ key: "F12" }));
+
+    const eventBodies = fetchImpl.mock.calls.map(call => JSON.parse(call[1].body));
+    expect(eventBodies.map(body => body.t)).toEqual([
+      CAR_ANALYTICS_EVENTS.pageView,
+      CAR_ANALYTICS_EVENTS.firstInteraction,
+      CAR_ANALYTICS_EVENTS.sourceViewAttempt,
+      CAR_ANALYTICS_EVENTS.devtoolsShortcut,
+    ]);
+    expect(eventBodies[2].p).toMatchObject({
+      copyRiskReason: "source_view_shortcut",
+      copyRiskSignal: "source_view_shortcut",
+      intentSignal: "copy_research",
+    });
+  });
+
   it("tracks route changes after the initial router navigation", () => {
     const trackEvent = vi.fn();
     let afterEachCallback: ((to: { fullPath?: string; path: string; meta?: { title?: string } }) => void) | null = null;
