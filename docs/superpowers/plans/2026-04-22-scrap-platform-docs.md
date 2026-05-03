@@ -22,7 +22,7 @@ Write `AGENTS.md` with sections for project context, communication, execution au
 
 - [ ] **Step 2: Verify the file exists and contains the expected headings**
 
-Run: `Get-Content -Raw 'e:\web_work_-1\car\AGENTS.md'`
+Run: `Get-Content -Raw '<REPO_ROOT>\AGENTS.md'`
 Expected: Markdown file with headings including `## Project Context`, `## Communication`, and `## Validation Baseline`
 
 ### Task 2: Create Documentation Navigation and Architecture Files
@@ -35,7 +35,7 @@ Expected: Markdown file with headings including `## Project Context`, `## Commun
 
 - [ ] **Step 1: Create architecture directories**
 
-Run: `New-Item -ItemType Directory -Force 'e:\web_work_-1\car\docs\architecture' | Out-Null`
+Run: `New-Item -ItemType Directory -Force '<REPO_ROOT>\docs\architecture' | Out-Null`
 Expected: Directory is created without error.
 
 - [ ] **Step 2: Create the docs navigation file**
@@ -86,7 +86,7 @@ Write `docs/architecture/frontend-strategy.md` explaining:
 
 - [ ] **Step 6: Verify navigation and architecture docs**
 
-Run: `Get-ChildItem -Recurse 'e:\web_work_-1\car\docs\architecture' | Select-Object FullName`
+Run: `Get-ChildItem -Recurse '<REPO_ROOT>\docs\architecture' | Select-Object FullName`
 Expected: `overview.md`, `monorepo-layout.md`, and `frontend-strategy.md` are listed.
 
 ### Task 3: Create Product and Requirements Docs
@@ -99,7 +99,7 @@ Expected: `overview.md`, `monorepo-layout.md`, and `frontend-strategy.md` are li
 
 - [ ] **Step 1: Create product and requirements directories**
 
-Run: `New-Item -ItemType Directory -Force 'e:\web_work_-1\car\docs\product','e:\web_work_-1\car\docs\requirements' | Out-Null`
+Run: `New-Item -ItemType Directory -Force '<REPO_ROOT>\docs\product','<REPO_ROOT>\docs\requirements' | Out-Null`
 Expected: Both directories are created without error.
 
 - [ ] **Step 2: Create customer journey doc**
@@ -127,7 +127,7 @@ Write `docs/requirements/project.md` with the active project requirements, inclu
 
 - [ ] **Step 6: Verify product and requirements docs**
 
-Run: `Get-ChildItem -Recurse 'e:\web_work_-1\car\docs\product','e:\web_work_-1\car\docs\requirements' | Select-Object FullName`
+Run: `Get-ChildItem -Recurse '<REPO_ROOT>\docs\product','<REPO_ROOT>\docs\requirements' | Select-Object FullName`
 Expected: Four markdown files are listed under those directories.
 
 ### Task 4: Create Development, Testing, and Deployment Docs
@@ -140,7 +140,7 @@ Expected: Four markdown files are listed under those directories.
 
 - [ ] **Step 1: Create development, testing, and deployment directories**
 
-Run: `New-Item -ItemType Directory -Force 'e:\web_work_-1\car\docs\development','e:\web_work_-1\car\docs\testing','e:\web_work_-1\car\docs\deployment' | Out-Null`
+Run: `New-Item -ItemType Directory -Force '<REPO_ROOT>\docs\development','<REPO_ROOT>\docs\testing','<REPO_ROOT>\docs\deployment' | Out-Null`
 Expected: All three directories are created without error.
 
 - [ ] **Step 2: Create development workflow doc**
@@ -175,7 +175,7 @@ Write `docs/deployment/README.md` stating deployment docs will later capture env
 
 - [ ] **Step 6: Verify the new docs exist**
 
-Run: `Get-ChildItem -Recurse 'e:\web_work_-1\car\docs\development','e:\web_work_-1\car\docs\testing','e:\web_work_-1\car\docs\deployment' | Select-Object FullName`
+Run: `Get-ChildItem -Recurse '<REPO_ROOT>\docs\development','<REPO_ROOT>\docs\testing','<REPO_ROOT>\docs\deployment' | Select-Object FullName`
 Expected: `workflow.md`, `api-conventions.md`, `README.md`, and `README.md` are listed in the expected folders.
 
 ### Task 5: Cross-Check Links and Terminology
@@ -227,10 +227,10 @@ cancelled
 
 - [ ] **Step 3: Verify with a repo-wide markdown listing**
 
-Run: `Get-ChildItem -Recurse 'e:\web_work_-1\car\docs' -Filter *.md | Select-Object FullName`
+Run: `Get-ChildItem -Recurse '<REPO_ROOT>\docs' -Filter *.md | Select-Object FullName`
 Expected: All planned markdown files are listed, including the spec and plan files.
 
 - [ ] **Step 4: Verify key terms are discoverable**
 
-Run: `rg -n \"customer-h5|admin-web|admin-h5|scheduled_pickup|uni-app\" 'e:\web_work_-1\car\AGENTS.md' 'e:\web_work_-1\car\docs'`
+Run: `rg -n \"customer-h5|admin-web|admin-h5|scheduled_pickup|uni-app\" '<REPO_ROOT>\AGENTS.md' '<REPO_ROOT>\docs'`
 Expected: Matches appear across the new docs, proving terminology is wired through the documentation set.

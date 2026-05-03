@@ -13,6 +13,7 @@
     "build:ai-provider-runtime": "pnpm --filter @workspace-packages/ai-provider-runtime build",
     "typecheck:ai-provider-runtime": "pnpm --filter @workspace-packages/ai-provider-runtime typecheck",
     "typecheck:shared-types": "pnpm --filter @car/shared-types typecheck",
+    "public:check": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/public-check.ps1",
     "deploy:check:preprod": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/check-preprod.ps1",
     "env:pull:preprod:backend": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/pull-preprod-backend-env.ps1",
     "env:update:preprod:backend": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/update-preprod-backend-env.ps1",

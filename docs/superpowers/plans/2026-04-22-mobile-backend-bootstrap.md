@@ -42,7 +42,7 @@
 Run:
 
 ```powershell
-New-Item -ItemType Directory -Force 'e:\web_work_-1\car\apps','e:\web_work_-1\car\packages' | Out-Null
+New-Item -ItemType Directory -Force '<REPO_ROOT>\apps','<REPO_ROOT>\packages' | Out-Null
 ```
 
 Expected: `apps` and `packages` directories exist.
@@ -101,7 +101,7 @@ packages:
 Run:
 
 ```powershell
-Get-ChildItem 'e:\web_work_-1\car' | Select-Object Name
+Get-ChildItem '<REPO_ROOT>' | Select-Object Name
 ```
 
 Expected: `package.json`, `pnpm-workspace.yaml`, and `tsconfig.base.json` are listed.
@@ -120,7 +120,7 @@ Expected: `package.json`, `pnpm-workspace.yaml`, and `tsconfig.base.json` are li
 Run:
 
 ```powershell
-New-Item -ItemType Directory -Force 'e:\web_work_-1\car\packages\shared-types\src' | Out-Null
+New-Item -ItemType Directory -Force '<REPO_ROOT>\packages\shared-types\src' | Out-Null
 ```
 
 Expected: `packages/shared-types/src` exists.
@@ -253,7 +253,7 @@ export * from "./content";
 Run:
 
 ```powershell
-pnpm --dir 'e:\web_work_-1\car' --filter @car/shared-types typecheck
+pnpm --dir '<REPO_ROOT>' --filter @car/shared-types typecheck
 ```
 
 Expected: exit code `0`.
@@ -286,14 +286,14 @@ Run:
 
 ```powershell
 New-Item -ItemType Directory -Force `
-  'e:\web_work_-1\car\apps\mobile\src\app\router',`
-  'e:\web_work_-1\car\apps\mobile\src\app\layouts',`
-  'e:\web_work_-1\car\apps\mobile\src\modules\customer\pages',`
-  'e:\web_work_-1\car\apps\mobile\src\modules\operator\pages',`
-  'e:\web_work_-1\car\apps\mobile\src\modules\common',`
-  'e:\web_work_-1\car\apps\mobile\src\services',`
-  'e:\web_work_-1\car\apps\mobile\src\stores',`
-  'e:\web_work_-1\car\apps\mobile\src\styles' | Out-Null
+  '<REPO_ROOT>\apps\mobile\src\app\router',`
+  '<REPO_ROOT>\apps\mobile\src\app\layouts',`
+  '<REPO_ROOT>\apps\mobile\src\modules\customer\pages',`
+  '<REPO_ROOT>\apps\mobile\src\modules\operator\pages',`
+  '<REPO_ROOT>\apps\mobile\src\modules\common',`
+  '<REPO_ROOT>\apps\mobile\src\services',`
+  '<REPO_ROOT>\apps\mobile\src\stores',`
+  '<REPO_ROOT>\apps\mobile\src\styles' | Out-Null
 ```
 
 Expected: all `apps/mobile/src/...` directories exist.
@@ -467,9 +467,9 @@ The service layer must support mock fallback data when the backend is unavailabl
 Run:
 
 ```powershell
-pnpm --dir 'e:\web_work_-1\car' install
-pnpm --dir 'e:\web_work_-1\car' --filter @car/mobile typecheck
-pnpm --dir 'e:\web_work_-1\car' --filter @car/mobile build
+pnpm --dir '<REPO_ROOT>' install
+pnpm --dir '<REPO_ROOT>' --filter @car/mobile typecheck
+pnpm --dir '<REPO_ROOT>' --filter @car/mobile build
 ```
 
 Expected: typecheck and build both succeed.
@@ -488,8 +488,8 @@ Expected: typecheck and build both succeed.
 Run:
 
 ```powershell
-git clone https://github.com/cool-team-official/cool-admin-midway.git 'e:\web_work_-1\car\apps\backend'
-Remove-Item -Recurse -Force 'e:\web_work_-1\car\apps\backend\.git'
+git clone https://github.com/cool-team-official/cool-admin-midway.git '<REPO_ROOT>\apps\backend'
+Remove-Item -Recurse -Force '<REPO_ROOT>\apps\backend\.git'
 ```
 
 Expected: `apps/backend` contains the cool-admin-midway scaffold without nested git metadata.
@@ -562,9 +562,9 @@ The minimum implementation may return seeded sample rows without full production
 Run:
 
 ```powershell
-pnpm --dir 'e:\web_work_-1\car' install
-pnpm --dir 'e:\web_work_-1\car' --filter @car/backend typecheck
-pnpm --dir 'e:\web_work_-1\car' --filter @car/backend build
+pnpm --dir '<REPO_ROOT>' install
+pnpm --dir '<REPO_ROOT>' --filter @car/backend typecheck
+pnpm --dir '<REPO_ROOT>' --filter @car/backend build
 ```
 
 Expected: backend typecheck and build succeed.
@@ -605,8 +605,8 @@ Support page -> getSupport()
 Run:
 
 ```powershell
-pnpm --dir 'e:\web_work_-1\car' --filter @car/mobile typecheck
-pnpm --dir 'e:\web_work_-1\car' --filter @car/mobile build
+pnpm --dir '<REPO_ROOT>' --filter @car/mobile typecheck
+pnpm --dir '<REPO_ROOT>' --filter @car/mobile build
 ```
 
 Expected: exit code `0` for both commands.
@@ -633,7 +633,7 @@ and a short manual smoke checklist for the first customer flow.
 Run:
 
 ```powershell
-Get-ChildItem -Recurse 'e:\web_work_-1\car\apps','e:\web_work_-1\car\packages' | Select-Object FullName
+Get-ChildItem -Recurse '<REPO_ROOT>\apps','<REPO_ROOT>\packages' | Select-Object FullName
 ```
 
 Expected: `apps/mobile`, `apps/backend`, and `packages/shared-types` all exist with source files.
@@ -643,7 +643,7 @@ Expected: `apps/mobile`, `apps/backend`, and `packages/shared-types` all exist w
 Run:
 
 ```powershell
-rg -n "scheduled_pickup|/app/valuation-orders|/auth/mobile/login|/operator" 'e:\web_work_-1\car\apps' 'e:\web_work_-1\car\packages'
+rg -n "scheduled_pickup|/app/valuation-orders|/auth/mobile/login|/operator" '<REPO_ROOT>\apps' '<REPO_ROOT>\packages'
 ```
 
 Expected: the order status and core route strings appear in both frontend and backend source.
