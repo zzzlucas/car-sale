@@ -13,11 +13,11 @@
     "build:ai-provider-runtime": "pnpm --filter @workspace-packages/ai-provider-runtime build",
     "typecheck:ai-provider-runtime": "pnpm --filter @workspace-packages/ai-provider-runtime typecheck",
     "typecheck:shared-types": "pnpm --filter @car/shared-types typecheck",
-    "deploy:check:preprod": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/check-preprod.ps1",
-    "env:pull:preprod:backend": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/pull-preprod-backend-env.ps1",
-    "env:update:preprod:backend": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/update-preprod-backend-env.ps1",
-    "deploy:preprod:backend": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/deploy-preprod-backend.ps1",
-    "deploy:preprod:mobile": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy/deploy-preprod-mobile.ps1",
+    "deploy:check:preprod": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/check-preprod.ps1",
+    "env:pull:preprod:backend": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/pull-preprod-backend-env.ps1",
+    "env:update:preprod:backend": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/update-preprod-backend-env.ps1",
+    "deploy:preprod:backend": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/deploy-preprod-backend.ps1",
+    "deploy:preprod:mobile": "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy/deploy-preprod-mobile.ps1",
     "deploy:preprod": "pnpm deploy:preprod:backend && pnpm deploy:preprod:mobile"
   }
 }
