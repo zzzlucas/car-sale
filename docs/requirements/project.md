@@ -239,7 +239,7 @@
 - 状态：`accepted`
 - 优先级：`P0`
 - 决策：
-  - `car` 根 `AGENTS.md` 显式参考 `E:\web_work_-1\_workspace-base\AGENTS.md`、`agents/AGENTS-baseline.md` 和 `docs/how-projects-use-workspace-base.md`
+  - `car` 根 `AGENTS.md` 显式参考 `E:\web_work_-1\_workspace-base\AGENTS.md`、`agents/AGENTS-baseline.md` 和 `_docs/how-projects-use-workspace-base.md`
   - 需要 AI 可直接复用的 MVP/demo/非生产 key、密码和供应商配置片段时，优先参考 `E:\web_work_-1\_workspace-base\env-for-workspace\shared\nonprod-shared-credentials.md`
   - 需要真人快速确认共享端口、DNS、COS 等资源台账时，优先参考 `E:\web_work_-1\_workspace-base\ops\docs\_resources-developer`
   - `car` 的开发、预发布、甲方 demo 默认可以共用同一个非生产数据库；只有进入正式 production、长期试用、真实敏感数据承载或高风险业务流转时，再拆分独立生产资源

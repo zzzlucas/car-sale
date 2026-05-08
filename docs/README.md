@@ -8,7 +8,7 @@
 
 ## 推荐阅读顺序
 - 想先看项目协作边界：`../AGENTS.md`
-- 想看工作区共享基座怎么与项目协作：`E:\web_work_-1\_workspace-base\docs\how-projects-use-workspace-base.md`
+- 想看工作区共享基座怎么与项目协作：`E:\web_work_-1\_workspace-base\_docs\how-projects-use-workspace-base.md`
 - 想看共享运维事实和共享脚本入口：`E:\web_work_-1\_workspace-base\ops\README.md`
 - 想看整体结构：`architecture/overview.md`
 - 想看目录骨架：`architecture/monorepo-layout.md`

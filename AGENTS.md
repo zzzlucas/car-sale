@@ -17,10 +17,11 @@
 - 公共共享基座总规则来源：`E:\web_work_-1\_workspace-base\AGENTS.md`；本项目根 `AGENTS.md` 只写 `car` 的项目差异和例外，不复制共享基座全文。
 - 本文件只维护 `car` 的项目专属差异、当前阶段边界和对公共基线的必要补充，不再把自己当成一份脱离工作区共享层的独立通用模板。
 - 需要共享服务器事实、共享脚本、共享网络边界或跨项目运维规则时，优先看 `E:\web_work_-1\_workspace-base\ops\README.md`。
-- 需要判断共享层和项目层怎么分工时，优先看 `E:\web_work_-1\_workspace-base\docs\how-projects-use-workspace-base.md`。
+- 需要判断共享层和项目层怎么分工时，优先看 `E:\web_work_-1\_workspace-base\_docs\how-projects-use-workspace-base.md`。
 - 需要给 AI 直接复用的 MVP/demo/非生产 key、密码、供应商配置片段时，优先看 `E:\web_work_-1\_workspace-base\env-for-workspace\shared\nonprod-shared-credentials.md`。
 - 需要 `car` 预发布部署脚本使用的 `CAR_PREPROD_*`、`CAR_REMBG_API_BASE_URL` 等真实值时，优先看 `E:\web_work_-1\_workspace-base\env-for-workspace\projects\car-preprod-env.md`；仓库根目录不再要求保留 `.env.local`。
 - 需要真人快速确认共享端口、DNS、COS 等资源台账时，优先看 `E:\web_work_-1\_workspace-base\ops\docs\_resources-developer`。
+- 用户输入“收工交接”或“/handoff”时，按公共基线的 `Session Handoff Trigger` 执行；本项目专属升级确认规则优先。
 
 ## Communication
 - 默认使用中文。
